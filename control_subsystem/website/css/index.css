@@ -1,0 +1,46 @@
+#no_room{
+	margin-top:10%;
+	text-align: center;
+}
+
+#delete_room_container{
+	text-align: center;
+}
+
+#sensor_container{
+	display:none;
+}
+
+#delete_room_container, #alert{
+	display:none;
+}
+
+
+
+#action_sub_menu li{
+	display: inline;
+	margin-right: 10px;
+}
+
+
+@media (min-width: 768px) {
+    .navbar .navbar-nav {
+        display: inline-block;
+        float: none;
+        vertical-align: top;
+    }
+
+    .navbar .navbar-collapse {
+        text-align: center;
+    }
+	
+	#menu_items li{
+        margin-right:80px;
+    }
+	
+	#action_sub_menu li{
+	display: block;
+	}
+
+}
+
