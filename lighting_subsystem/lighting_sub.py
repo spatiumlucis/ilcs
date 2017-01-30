@@ -114,7 +114,7 @@ def PIR_cmd():
         light_intensity = lighting_pir_svr_sock_connection.recv(1024)
         if int(light_intensity) == 0:
             # * turn lights off
-            GPIO.output(pinRelay, GPIO.HIGH)
+            GPIO.output(pinRelay, GPIO.LOW)
             red.stop()
             green.stop()
             blue.stop()
@@ -123,6 +123,7 @@ def PIR_cmd():
 
         else:
             #sepatate into red, green, blue values
+            GPIO.output(pinRelay, GPIO.HIGH)
             brightness_values = light_intensity.split('|')
             red.ChangeDutyCycle(float(brightness_values[0]))
             green.ChangeDutyCycle(float(brightness_values[1]))
@@ -135,6 +136,9 @@ def PIR_cmd():
         lighting_pir_svr_sock_connection.close()
 
 def light_cmd():
+    global red
+    global green
+    global blue
     # *establish server socket for Control subsystem to connect to for LI send
     lighting_lightCmd_svr_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)  # * Create a socket object
     lighting_lightCmd_svr_sock_host = ''  # * Get local machine name
@@ -154,10 +158,19 @@ def light_cmd():
         if int(light_intensity) == 0:
             # * turn lights off
             GPIO.output(pinRelay, GPIO.LOW)
+            red.stop()
+            green.stop()
+            blue.stop()
+            GPIO.cleanup()
         else:
+            # GPIO.output(pinRelay, GPIO.HIGH)
+            # dutyCycle = (float(light_intensity) / 100) * 1024
+            # wiringpi.pwmWrite(pinPWM, int(dutyCycle))
             GPIO.output(pinRelay, GPIO.HIGH)
-            dutyCycle = (float(light_intensity) / 100) * 1024
-            wiringpi.pwmWrite(pinPWM, int(dutyCycle))
+            brightness_values = light_intensity.split('|')
+            red.ChangeDutyCycle(float(brightness_values[0]))
+            green.ChangeDutyCycle(float(brightness_values[1]))
+            blue.ChangeDutyCycle(float(brightness_values[2]))
         time.sleep(1)
 
         lighting_lightCmd_svr_sock_connection.close()
