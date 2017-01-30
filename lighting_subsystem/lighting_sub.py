@@ -123,9 +123,10 @@ def PIR_cmd():
 
         else:
             #sepatate into red, green, blue values
-            red.ChangeDutyCycle()
-            green.ChangeDutyCycle()
-            blue.ChangeDutyCycle()
+            brightness_values = light_intensity.split('|')
+            red.ChangeDutyCycle(float(brightness_values[0]))
+            green.ChangeDutyCycle(float(brightness_values[1]))
+            blue.ChangeDutyCycle(float(brightness_values[2]))
             #GPIO.output(pinRelay, GPIO.HIGH)
             #dutyCycle = (float(light_intensity) / 100) * 1024
             #wiringpi.pwmWrite(pinPWM, int(dutyCycle))
