@@ -24,10 +24,17 @@ COLOR_THRESHOLD = 0
 
 LIGHT_THRESHOLD = 0
 
-WAKE_UP_TIME = 0;
+WAKE_UP_TIME = 0
+
+MASTER_CIRCADIAN_TABLE = []
+
+USER_CIRCADIAN_TABLE = []
+
+CURRENT_MINUTE = 0
 
 sleep_mutex = Lock()
 
+time_mutex = Lock()
 
 def get_ip():
     # source:
@@ -52,6 +59,8 @@ def boot_up():
     global COLOR_THRESHOLD
     global LIGHT_THRESHOLD
     global WAKE_UP_TIME
+
+    init_circadian_table()
 
     local_ip = get_ip()
     sql = """SELECT * FROM sensor_ip WHERE ip = %s"""
@@ -141,8 +150,89 @@ def boot_up():
         LIGHT_THRESHOLD = temp[0][3]
 
         # print "old settings: ", WAKE_UP_TIME, " ", COLOR_THRESHOLD, " ", LIGHT_THRESHOLD," ",lighting_ip,"\n"
+    calc_user_circadian_table()
     begin_threading()
 
+def init_circadian_table:
+    global MASTER_CIRCADIAN_TABLE
+    colors = []
+
+    t = 0
+
+    while t < 1440:
+        print "t", t
+        if t >= 300 and t <= 420:
+            # red_values.append((135/120)*t - 337.5)
+            colors.append((((135.0 / 120) * t - 337.5) / 255) * 100)
+
+            colors.append((((206.0 / 120) * t - 515) / 255) * 100)
+
+            colors.append((((250.0 / 120) * t - 625) / 255) * 100)
+
+            MASTER_CIRCADIAN_TABLE.append(colors)
+            colors = []
+
+        elif t >= 420 and t <= 720:
+            colors.append((((120.0 / 300) * t - 33) / 255) * 100)
+
+            colors.append((((49.0 / 300) * t + 137.4) / 255) * 100)
+
+            colors.append((((5.0 / 300) * t + 243) / 255) * 100)
+
+            MASTER_CIRCADIAN_TABLE.append(colors)
+            colors = []
+        elif t >= 720 and t <= 1140:
+            colors.append((((-2.0 / 420) * t + 258.429) / 255) * 100)
+
+            colors.append((((-161.0 / 420) * t + 531) / 255) * 100)
+
+            colors.append((((-172.0 / 420) * t + 549.857) / 255) * 100)
+
+            MASTER_CIRCADIAN_TABLE.append(colors)
+            colors = []
+        elif t >= 1140 and t <= 1380:
+            colors.append((((-253.0 / 240) * t + 1454.75) / 255) * 100)
+
+            colors.append((((-94.0 / 240) * t + 540.5) / 255) * 100)
+
+            colors.append((((-83.0 / 240) * t + 477.25) / 255) * 100)
+
+            MASTER_CIRCADIAN_TABLE.append(colors)
+            colors = []
+        else:
+            colors.append(0)
+
+            colors.append(0)
+
+            colors.append(0)
+
+            MASTER_CIRCADIAN_TABLE.append(colors)
+            colors = []
+
+        t += 1
+
+def calc_user_circadian_table:
+    global WAKE_UP_TIME
+    global MASTER_CIRCADIAN_TABLE
+    global USER_CIRCADIAN_TABLE
+
+    #Clear current values from USER_CIRCADIAN_TABLE
+    USER_CIRCADIAN_TABLE = []
+
+    wake_diff = WAKE_UP_TIME - 420 #wake - 7 AM
+    count = 0
+    if wake_diff < 0:
+        #user wakes earlier
+        while count < 1440:
+            USER_CIRCADIAN_TABLE[count + wake_diff] = MASTER_CIRCADIAN_TABLE[count]
+    elif wake_diff > 0:
+        #user wakes later
+        if (count + wake_diff) > 1439:
+            USER_CIRCADIAN_TABLE[(count + wake_diff) % 1440] = MASTER_CIRCADIAN_TABLE[count]
+        else:
+            USER_CIRCADIAN_TABLE[count+wake_diff] = MASTER_CIRCADIAN_TABLE[count]
+    else:
+        USER_CIRCADIAN_TABLE = MASTER_CIRCADIAN_TABLE
 
 def begin_threading():
     # Create two threads as follows
@@ -150,11 +240,11 @@ def begin_threading():
         thread.start_new_thread(PIR_sensor, ())
         thread.start_new_thread(RGB_sensor, ())
         thread.start_new_thread(USR_sensor, ())
+        thread.start_new_thread(send_circadian_values, ())
 
     except:
         print "Error: unable to start thread"
     wait_for_cmd()
-
 
 def PIR_sensor():
     print "Entered read_PIR!\n"
@@ -162,6 +252,10 @@ def PIR_sensor():
     global SLEEP_MODE_STATUS
     global cursor
     global lighting_ip
+    global USER_CIRCADIAN_TABLE
+    global CURRENT_MINUTE
+
+
     local_ip = get_ip()
     # * set up client connection to Lighting Subsystem
     sensor_to_lighting_cli_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # * Create a socket object
@@ -185,7 +279,7 @@ def PIR_sensor():
                     (sensor_to_lighting_cli_sock_host, sensor_to_lighting_cli_sock_port))
             except:
                 print "\nCould not connect to lighting subsystem\n"
-            sensor_to_lighting_cli_sock.send("0")
+            sensor_to_lighting_cli_sock.send("0|0|0|")
 
             print "\nEntering sleep mode\n"
             # * set into sleep mode
@@ -207,9 +301,9 @@ def PIR_sensor():
 
             sensor_to_lighting_cli_sock.close()
 
-        if GPIO.input(pir):  # Check whether pir is HIGH
+        if GPIO.input(pir) and SLEEP_MODE_STATUS == 1:  # Check whether pir is HIGH
             print "\nMotion Detected!\n"
-            # * turn lights back on with the previous light intensity value
+            # * turn lights back on with the current values
             try:
                 sensor_to_lighting_cli_sock.connect(
                     (sensor_to_lighting_cli_sock_host, sensor_to_lighting_cli_sock_port))
@@ -217,7 +311,20 @@ def PIR_sensor():
                 print "\nCould not connect to lighting subsystem\n"
 
             ########code to check Circadian table#######################
-            #####send to lights#####sensor_to_lighting_cli_sock.send(VALUE)
+            circadian_cmd = ""
+            time_hour_in_min = (time.localtime()[3]) * 60
+            time_min_in_min = (time.localtime()[4])
+
+            total_time = time_hour_in_min + time_min_in_min
+
+            circadian_cmd += str(USER_CIRCADIAN_TABLE[total_time][0])
+            circadian_cmd += "|"
+            circadian_cmd += str(USER_CIRCADIAN_TABLE[total_time][1])
+            circadian_cmd += "|"
+            circadian_cmd += str(USER_CIRCADIAN_TABLE[total_time][2])
+            circadian_cmd += "|"
+
+            sensor_to_lighting_cli_sock.send(circadian_cmd)
 
             timer = 0
             time.sleep(2)  # D1- Delay to avoid multiple detection
@@ -237,6 +344,12 @@ def PIR_sensor():
                     db.rollback()
             finally:
                 sleep_mutex.release()
+
+            time_mutex.acquire()
+            try:
+                CURRENT_MINUTE = total_time
+            finally:
+                time_mutex.release()
 
             sensor_to_lighting_cli_sock.close()
 
@@ -264,6 +377,51 @@ def USR_sensor():
     global COLOR_THRESHOLD
     global LIGHT_THRESHOLD
     global WAKE_UP_TIME
+
+def send_circadian_values:
+    global USER_CIRCADIAN_TABLE
+    global SLEEP_MODE_STATUS
+    global CURRENT_MINUTE
+    #create client socket connection
+    circadian_cli_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # * Create a socket object
+    circadian_cli_sock_host = lighting_ip  # * Get lighting IP
+    circadian_cli_sock_port = 12347  # * Reserve a port for your service.
+
+    count = 0
+    circadian_cmd = ""
+    while True:
+
+        if SLEEP_MODE_STATUS == 0:
+            time_hour_in_min = (time.localtime()[3]) * 60
+            time_min_in_min = (time.localtime()[4])
+
+            time_mutex.acquire()
+            try:
+                CURRENT_MINUTE = time_hour_in_min + time_min_in_min
+
+            finally:
+                time_mutex.release()
+
+            circadian_cmd += str(USER_CIRCADIAN_TABLE[CURRENT_MINUTE][0])
+            circadian_cmd += "|"
+            circadian_cmd += str(USER_CIRCADIAN_TABLE[CURRENT_MINUTE][1])
+            circadian_cmd += "|"
+            circadian_cmd += str(USER_CIRCADIAN_TABLE[CURRENT_MINUTE][2])
+            circadian_cmd += "|"
+            # send on socket
+            circadian_cli_sock.connect((circadian_cli_sock_host, circadian_cli_sock_port))
+            circadian_cli_sock.send(circadian_cmd)
+            # close socket
+            circadian_cli_sock.close()
+
+            # wait for a minute
+            while count < 60:
+                time.sleep(1)
+                count += 1
+
+            count = 0
+            circadian_cmd = ""
+
 
 
 def wait_for_cmd():
