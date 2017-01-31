@@ -113,17 +113,20 @@ def PIR_cmd():
 
         light_intensity = lighting_pir_svr_sock_connection.recv(1024)
         brightness_values = light_intensity.split('|')
-        if int(brightness_values[0]) == 0 and int(brightness_values[1]) == 0 and int(brightness_values[2]) == 0:
+        print "GOT on pir_cmd thread: ", brightness_values
+        if float(brightness_values[0]) == 0 and float(brightness_values[1]) == 0 and float(brightness_values[2]) == 0:
             # * turn lights off
+            print "entering sleep mode..."
             GPIO.output(pinRelay, GPIO.LOW)
             red.stop()
             green.stop()
             blue.stop()
-            GPIO.cleanup()
+            #GPIO.cleanup()
             #GPIO.output(pinRelay, GPIO.LOW)
 
         else:
             #sepatate into red, green, blue values
+            print "exiting sleep mode"
             GPIO.output(pinRelay, GPIO.HIGH)
             red.ChangeDutyCycle(float(brightness_values[0]) / 2)
             green.ChangeDutyCycle(float(brightness_values[1]) / 2)
@@ -156,8 +159,10 @@ def light_cmd():
 
         light_intensity = lighting_lightCmd_svr_sock_connection.recv(1024)
         brightness_values = light_intensity.split('|')
-        if int(brightness_values[0]) == 0 and int(brightness_values[1]) == 0 and int(brightness_values[2]) == 0:
+        print "GOT on light_cmd thread: ", brightness_values
+        if float(brightness_values[0]) == 0 and float(brightness_values[1]) == 0 and float(brightness_values[2]) == 0:
             # * turn lights off
+            print "turning lights off"
             GPIO.output(pinRelay, GPIO.LOW)
             red.stop()
             green.stop()
