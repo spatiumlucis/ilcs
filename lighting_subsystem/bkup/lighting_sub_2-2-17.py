@@ -38,13 +38,12 @@ red.start(0)
 green.start(0)
 blue.start(0)
 
-#GPIO.output(pinRelay, GPIO.LOW)
+GPIO.output(pinRelay, GPIO.HIGH)
 
 pause_time = 0.02
 
 
 # Open database connection
-print "connecting to database..."
 db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
 # prepare a cursor object using cursor() method
 cursor = db.cursor()
@@ -97,7 +96,6 @@ def PIR_cmd():
     global red
     global green
     global blue
-    global pinRelay
     # *establish server socket for Control subsystem to connect to for LI send
     lighting_pir_svr_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)  # * Create a socket object
     lighting_pir_svr_sock_host = ''  # * Get local machine name
@@ -120,9 +118,9 @@ def PIR_cmd():
             # * turn lights off
             print "entering sleep mode..."
             GPIO.output(pinRelay, GPIO.LOW)
-            #red.stop()
-            #green.stop()
-            #blue.stop()
+            red.stop()
+            green.stop()
+            blue.stop()
             #GPIO.cleanup()
             #GPIO.output(pinRelay, GPIO.LOW)
 
@@ -144,7 +142,6 @@ def light_cmd():
     global red
     global green
     global blue
-    global pinRelay
     # *establish server socket for Control subsystem to connect to for LI send
     lighting_lightCmd_svr_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)  # * Create a socket object
     lighting_lightCmd_svr_sock_host = ''  # * Get local machine name
@@ -167,10 +164,10 @@ def light_cmd():
             # * turn lights off
             print "turning lights off"
             GPIO.output(pinRelay, GPIO.LOW)
-            #red.stop()
-            #green.stop()
-            #blue.stop()
-            #GPIO.cleanup()
+            red.stop()
+            green.stop()
+            blue.stop()
+            GPIO.cleanup()
         else:
             # GPIO.output(pinRelay, GPIO.HIGH)
             # dutyCycle = (float(light_intensity) / 100) * 1024

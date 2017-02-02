@@ -8,9 +8,6 @@ import RPi.GPIO as GPIO  # Import GPIO library
 import MySQLdb  # Required for MySQL stuff
 import smbus
 
-
-#print "time", time.localtime()[3]*60,":",time.localtime()[4]
-
 # Open database connection
 print "Establishing Database connection.....\n"
 db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
@@ -44,10 +41,6 @@ time_mutex = Lock()
 
 save_mutex = Lock()
 
-db_mutex = Lock()
-
-cursor_mutex = Lock()
-
 local_ip = ""
 def get_ip():
     # source:
@@ -74,7 +67,6 @@ def boot_up():
     global WAKE_UP_TIME
     global SLEEP_MODE_STATUS
     global local_ip
-    global db
     init_circadian_table()
     print "Circadian table created..."
     local_ip = get_ip()
@@ -249,7 +241,6 @@ def calc_user_circadian_table():
         # user wakes earlier
         while count < 1440:
             USER_CIRCADIAN_TABLE[count + wake_diff] = MASTER_CIRCADIAN_TABLE[count]
-            count +=1
     elif wake_diff > 0:
         # user wakes later
         while count < 1440:
@@ -284,8 +275,7 @@ def PIR_sensor():
     global USER_CIRCADIAN_TABLE
     global CURRENT_MINUTE
     global SAVED_MINUTE
-    global db
-    
+
     local_ip = get_ip()
     # * set up client connection to Lighting Subsystem
     # sensor_to_lighting_cli_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # * Create a socket object
@@ -294,8 +284,7 @@ def PIR_sensor():
 
     # * Set up PIR
     GPIO.setmode(GPIO.BOARD)  # Set GPIO pin numbering
-    #pir = 40  # Associate pin 40 to pir
-    pir = 12
+    pir = 40  # Associate pin 40 to pir
     GPIO.setup(pir, GPIO.IN)  # Set pin as GPIO in
     print "\nWaiting for sensor to settle\n"
     time.sleep(2)  # Waiting 2 seconds for the sensor to initiate
@@ -310,10 +299,10 @@ def PIR_sensor():
             sensor_to_lighting_cli_sock_host = lighting_ip.strip()  # * Get lighting IP
             sensor_to_lighting_cli_sock_port = 12346  # * Reserve a port for your service.
             save_mutex.acquire()
-##            try:
-##                SAVED_MINUTE = CURRENT_MINUTE
-##            finally:
-##                save_mutex.release()
+            try:
+                SAVED_MINUTE = CURRENT_MINUTE
+            finally:
+                save_mutex.release()
             try:
                 sensor_to_lighting_cli_sock.connect(
                     (sensor_to_lighting_cli_sock_host, sensor_to_lighting_cli_sock_port))
@@ -350,18 +339,15 @@ def PIR_sensor():
                 print "\nMotion Detected!\n"
                 # * turn lights back on with the current values
                 try:
-                    print "connecting for wake value"
                     sensor_to_lighting_cli_sock.connect(
                         (sensor_to_lighting_cli_sock_host, sensor_to_lighting_cli_sock_port))
-                    print "connected"
                 except:
                     print "\nCould not connect to lighting subsystem\n"
 
                 ########code to check Circadian table#######################
                 time_mutex.acquire()
                 try:
-                    #CURRENT_MINUTE = SAVED_MINUTE
-                    CURRENT_MINUTE = time.localtime()[3]*60 + time.localtime()[4]
+                    CURRENT_MINUTE = SAVED_MINUTE
                 finally:
                     time_mutex.release()
                 circadian_cmd = ""
@@ -382,43 +368,14 @@ def PIR_sensor():
                 try:
                     SLEEP_MODE_STATUS = 0
                     sql = """UPDATE sensor_status SET sleep_mode_status = 0 WHERE ip = %s"""
-##                    try:
-##                        # Execute the SQL command
-##                        cursor.execute(sql, (local_ip))
-##                        # Commit your changes in the database
-##                        db.commit()
-##                    except:
-##                        # Rollback in case there is any error
-##                        db.rollback()
                     try:
                         # Execute the SQL command
                         cursor.execute(sql, (local_ip))
                         # Commit your changes in the database
                         db.commit()
-                    except (AttributeError, MySQLdb.OperationalError):
-                        print "Caught ya bitch"
-                        print "trying to reconnect..."
-                        db_mutex.acquire()
-                        try:
-                            print "Establishing Database connection.....\n"
-                            db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
-                            print "Database connection established.\n" 
-                        finally:
-                            db_mutex.release()
-
-                        cursor_mutex.acquire()
-                        try:
-                            # prepare a cursor object using cursor() method
-                            cursor = db.cursor()
-                        finally:
-                            cursor_mutex.release()
-                        try:
-                            # Execute the SQL command
-                            cursor.execute(sql, (local_ip))
-                            # Commit your changes in the database
-                            db.commit()
-                        except:
-                            db.rollback()
+                    except:
+                        # Rollback in case there is any error
+                        db.rollback()
                 finally:
                     sleep_mutex.release()
 
@@ -441,17 +398,13 @@ def RGB_sensor():
     global lighting_ip
     global COLOR_THRESHOLD
     global LIGHT_THRESHOLD
-    global SLEEP_MODE_STATUS
     global WAKE_UP_TIME
     global local_ip
-    global db
-    
+
     bus = smbus.SMBus(1)
-    #bus = smbus.SMBus(0)
     # I2C address 0x29
     # Register address must be OR'ed wit 0x80
     bus.write_byte(0x29, 0x80 | 0x12)
-    #time.sleep(0.2)
     ver = bus.read_byte(0x29)
     # version # should be 0x44
 
@@ -464,11 +417,8 @@ def RGB_sensor():
     if ver == 0x44:
         print "Device found\n"
         bus.write_byte(0x29, 0x80 | 0x00)  # 0x00 = ENABLE register
-        #time.sleep(0.2)
         bus.write_byte(0x29, 0x01 | 0x02)  # 0x01 = Power on, 0x02 RGB sensors enabled
-        #time.sleep(0.2)
         bus.write_byte(0x29, 0x80 | 0x14)  # Reading results start register 14, LSB then MSB
-        #time.sleep(0.2)
         while True:
             if SLEEP_MODE_STATUS == 0:
                 data = bus.read_i2c_block_data(0x29, 0)
@@ -477,42 +427,35 @@ def RGB_sensor():
                 green = data[5] << 8 | data[4]
                 blue = data[7] << 8 | data[6]
                 lux = int((-0.32466 * red) + (1.57837 * green) + (-0.73191 * blue))
-                crgbl = "C: %s, R: %s, G: %s, B: %s, Lux: %s" % (clear, red, green, blue, lux)
-                print crgbl
-                sql = """UPDATE sensor_status SET red = %s, green = %s, blue = %s WHERE ip = %s"""
+                #crgbl = "C: %s, R: %s, G: %s, B: %s, Lux: %s" % (clear, red, green, blue, lux)
+
+                sql = """UPDATE sensor_status SET red = %s WHERE ip = %s"""
                 try:
                     # Execute the SQL command
-                    cursor.execute(sql, (red, green, blue, local_ip))
+                    cursor.execute(sql, (red, local_ip))
                     # Commit your changes in the database
                     db.commit()
-                except (AttributeError, MySQLdb.OperationalError):
-                    print "Caught ya bitch"
-                    print "trying to reconnect..."
-                    db_mutex.acquire()
-                    try:
-                        print "Establishing Database connection.....\n"
-                        db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
-                        print "Database connection established.\n" 
-                    finally:
-                        db_mutex.release()
-
-                    cursor_mutex.acquire()
-                    try:
-                        # prepare a cursor object using cursor() method
-                        cursor = db.cursor()
-                    finally:
-                        cursor_mutex.release()
-                    try:
-                        # Execute the SQL command
-                        cursor.execute(sql, (red, green, blue, local_ip))
-                        # Commit your changes in the database
-                        db.commit()
-                    except:
-                        db.rollback()
                 except:
                     # Rollback in case there is any error
                     db.rollback()
-
+                sql = """UPDATE sensor_status SET green = %s WHERE ip = %s"""
+                try:
+                    # Execute the SQL command
+                    cursor.execute(sql, (green, local_ip))
+                    # Commit your changes in the database
+                    db.commit()
+                except:
+                    # Rollback in case there is any error
+                    db.rollback()
+                sql = """UPDATE sensor_status SET blue = %s WHERE ip = %s"""
+                try:
+                    # Execute the SQL command
+                    cursor.execute(sql, (blue, local_ip))
+                    # Commit your changes in the database
+                    db.commit()
+                except:
+                    # Rollback in case there is any error
+                    db.rollback()
 
                 # print crgbl
                 # if red >= 10 and red < (hardRed * .95):
@@ -570,13 +513,12 @@ def send_circadian_values():
 
     time_mutex.acquire()
     try:
-        CURRENT_MINUTE = time.localtime()[3]*60 + time.localtime()[4]
+        CURRENT_MINUTE = 0
 
     finally:
         time_mutex.release()
 
     while CURRENT_MINUTE < 1440:
-        print "CURRENT_MINUTE: ", CURRENT_MINUTE
         if SLEEP_MODE_STATUS == 0:
             circadian_cmd += str(USER_CIRCADIAN_TABLE[CURRENT_MINUTE][0])
             circadian_cmd += "|"
