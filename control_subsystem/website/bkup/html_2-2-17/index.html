@@ -17,7 +17,7 @@
 		
 	</head>
 	
-	<body onload="setInterval(readSensorsValues,1000);">
+	<body>
 	
 		<nav class = "navbar navbar-inverse">
 			<div class = "container-fluid">
@@ -39,21 +39,16 @@
 						<li><a href = "#"> Help </a>
 					</ul>
 					
-					<ul class = "nav navbar-nav navbar-right" id = "user_login_btn">
+					<ul class = "nav navbar-nav navbar-right">
 						<li><a href ="#" data-toggle = "modal" data-target = "#login_form_container" data-keyboard = "true"><span class ="glyphicon glyphicon-log-in"></span> Login</a></li>
-					</ul>
-					
-					<ul class = "nav navbar-nav navbar-right" id = "user_logout_btn">
-						<button class= "btn btn-info navbar-btn" >Logout</button>
-					</ul>
-					
+					<ul>
 				</div>
 			</div>
 		</nav>
 		
 		
 		
-		<div class = "container">
+		<div class = "container-fluid">
 			<div id = "sensor_container" class = "row">
 				<div id = "sensor_selection" class = "col-md-4 col-md-offset-4">
 					<select name = "room_select" id = "room_select" class="form-control">
@@ -178,19 +173,11 @@
 		</div>
 		
 		
-		<div id = "alert" class = "container-fluid alert alert-success alert-dismissable">
+		<div id = "alert" class = "container-fluid alert alert-success"> 
 			<h6></h6>
 		</div>
-
-		<button id = "alarm_switch" class = "alarm_off"></button>
-		<div id = "alert_danger" class = "container-fluid alert alert-danger alert-dismissable" style = "display: none";">
-			<a href="#" class="close" data-dismiss="alert" aria-label="close" id = "alarm_turn_off">&times;Close</a>
-            <audio id = "alert_sound" loop=true class = "off">
-            	<source src="media/alertsound.mp3" type= "audio/mpeg">
-                <p>Browser does not support audio </p>
-            </audio>
-			<h6></h6>
-		</div>		
+		
+		
 	</body>
 
 

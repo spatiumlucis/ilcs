@@ -40,10 +40,10 @@
 
 	$con->close();
 
-	//$socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-	//$result = socket_connect($socket, $roomIp, $sensor_port);
+//	$socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+//	$result = socket_connect($socket, $roomIp, $sensor_port);
 
-	//socket_write($socket, $code, strlen($code));
-	//socket_close($socket);
+//	socket_write($socket, $code, strlen($code));
+//	socket_close($socket);
 
 ?>

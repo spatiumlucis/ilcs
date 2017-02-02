@@ -9,80 +9,12 @@ var ADD_ROOM_PAGE = "php/add_room.php";
 var DELETE_ROOM_PAGE =  "php/delete_room.php";
 var EDIT_ROOM_PAGE = "php/edit_room.php";
 var AVAILABLE_IP  = "php/available_ip.php";
-var AUTH_USER= "php/auth_user.php";
-var ROOM_UPDATE = "php/room_update.php";
 
 
 var SENSOR_PORT = "12349";
-var alarm_on = 0;
-
-
-
-
-
-function readSensorsValues(){
-	$.get(ROOM_UPDATE,
-	  function(data, stat){
-		  data = data.split('|');
-		  data = data[0].split(',');
-		  $('#takeout').text(data);
-		  if(parseInt(data[9]) == 1)
-				$('#sleep_alert').css({'display':'block'});
-		  else
-				$('#sleep_alert').css({'display':'none'});
-	  });	
-}
-
-
-
-function loginSuccess(user){
-	$('#login_form_container').modal('hide');
-	$('#menu_items').css({'display': 'inline-block'});
-	$('.sub_menu').css({'display': 'inline'});
-	$('#user_logout_btn').css({'display': 'block'});
-	$('#user_login_btn').css({'display': 'none'});
-	
-
-}
-
-function logout(){
-	$('#menu_items').css({'display': 'none'});
-	$('.sub_menu').css({'display': 'none'});
-	$('#user_login_btn').css({'display': 'block'});
-	$('#user_logout_btn').css({'display': 'none'});
-}
-
-
-
-function login(user, pass, serverPage){
-	$.post(serverPage,
-	{
-		username : user,
-		password : pass
-	},
-		function(data, status){
-			if(data == 'pass'){
-				loginSuccess(user);
-			}
-	});
-
-}
-
-
-function soundAlarm(){
-	var target = $('#alert_sound');
-	target[0].play();
-}
-
-
-//Not needed...audio stops when dismissable link in clicked
-function silentAlarm(){
-	var target = $('#alert_sound');
-	target[0].pause();
-	target[0].currentTime = 0;
-}
 
 //This code runs before body document loads
+
 $.get(AVAILABLE_IP,
 	  function(data, stat){
 		  var temp =  data;
@@ -156,7 +88,6 @@ function sendData(roomName, roomIp, wakeTime, lightThreshold, colorThreshold, se
 		color_threshold : colorThreshold
 	},
 		function(data, status){
-			alert(roomIp);
 			alert("Done with PHP1");
 			alert(data);
 			alert(status);
@@ -305,17 +236,6 @@ function CreateRoom(roomName, roomIp, wakeTime, lightThreshold, colorThreshold){
 									<p class = "aroom_wake_time"> Room Wake Time: ' + wakeTime + '</p>\
 									<p class = "aroom_light_threshold"> Room Light Threshold: ' + lightThreshold + '</p>\
 									<p class = "aroom_color_threshold"> Room Color Threshold: ' + colorThreshold + '</p>\
-									<p id="takeout"></p>\
-								</div>\
-								<div class = "row">\
-									<div id = "sleep_alert" class = "container-fluid alert alert-info alert-dismissable">\
-										<h6>Room is in sleep mode</h6>\
-									</div>\
-								</div>\
-								<div class = "row">\
-									<div id = "degrade_alert" class = "container-fluid alert alert-danger alert-dismissable">\
-										<h6></h6>\
-									</div>\
 								</div>\
 							</div>\
 						</div>';
@@ -370,11 +290,9 @@ function DeleteRoom(){
 	message.fadeOut(3000);
 	$('#delete_room_container').modal('hide');
 	
-	
 }
 
 function CreateSaveRoom(action){
-	alert(roomIp);
 	var roomName = $('#room_name').val().trim();
 	var roomIp = UNPAIRED_IP;
 	var wakeTime = $('#room_wake_time').val().trim();
@@ -436,13 +354,11 @@ $(document).ready(function(){
 
 	$("nav a").click(function(evt){
 		evt.preventDefault()  //prevents navigational links from following the default 
-		//$('#alarm_switch').click();
 	});
 	
 	$('#menu_add_room').click(function(evt){
 			evt.preventDefault();
 			setDialogValues(true);
-		
 			$('#room_form_main_container').modal('show');
 	});
 	
@@ -451,7 +367,7 @@ $(document).ready(function(){
 		var temp = $('#add_room_btn').text().trim();
 		if (temp == ADD_ROOM)
 			CreateSaveRoom(ADD_ACTION);		
-			
+		
 		else{ //important this is for saving user changes. It is a continuation of the room_edit_btn event
 			CreateSaveRoom(SAVE_ACTION);
 			$('#add_room_btn:contains(Save Changes)').text('Add Room');
@@ -481,43 +397,6 @@ $(document).ready(function(){
 		$('#room_form_main_container').modal('show');
 		
 	}));
-
-	$('#turn_off_alarm').click(function(){
-			var target = $('#alarm_switch');
-			target.removeClass( "alarm_on");
-			target.addClass( "alarm_off");
-			alarm_on = 0;
-	});
-
-	$('#alarm_switch').click(function(){
-		var action = $(this).attr("class");
-		if(action ==  "alarm_on"){
-			$(this).removeClass( "alarm_on");
-			$(this).addClass( "alarm_off");
-			alarm_on = 0;
-			silentAlarm();
-		}
-
-		else{
-			$(this).removeClass( "alarm_off");
-			$(this).addClass( "alarm_on");
-			alarm_on = 1;
-			soundAlarm();
-		}
-	});
-
-	$('#login_btn').click(function(){
-		var username = $('#username').val();
-		var password = $('#password').val();
-
-
-		login(username, password, AUTH_USER);
-	});
-
-
-	$('#user_logout_btn').click(function(){
-		logout();
-	});
 	
 
 	
