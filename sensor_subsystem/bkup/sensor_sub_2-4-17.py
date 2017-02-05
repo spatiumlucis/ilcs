@@ -1,14 +1,18 @@
 # PIR code from: modmypi.com/blog/raspberry-pi-gpio-sensing-motion-detection
 # Socket code: tutorialspoint.com/python/python_networking.html
+#import thread
 import time
 import socket
 import threading
 import RPi.GPIO as GPIO  # Import GPIO library
 import MySQLdb  # Required for MySQL stuff
 import smbus
-import sys
+
 
 #print "time", time.localtime()[3]*60,":",time.localtime()[4]
+
+# Open database connection
+
 
 lighting_ip = ""
 
@@ -34,11 +38,14 @@ sleep_mutex = threading.Lock()
 
 time_mutex = threading.Lock()
 
-change_par_mutex = threading.Lock()
+save_mutex = threading.Lock()
+
+db_mutex = threading.Lock()
+
+cursor_mutex = threading.Lock()
 
 local_ip = ""
 
-THREADS = []
 
 def get_ip():
     # source:
@@ -57,7 +64,6 @@ def get_ip():
 
 def boot_up():
     print "Booting up...."
-    #global cursor
     global is_sensor_sub_paired
     global lighting_ip
     global COLOR_THRESHOLD
@@ -65,13 +71,13 @@ def boot_up():
     global WAKE_UP_TIME
     global SLEEP_MODE_STATUS
     global local_ip
-    #global db
-    # Open database connection
-    print "Establishing Database connection.....\n"
+
+    print "Establishing Database connection in boot up.....\n"
     db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
-    print "Database connection established.\n"
+    print "Database connection established in boot up.\n"
     # prepare a cursor object using cursor() method
     cursor = db.cursor()
+
     init_circadian_table()
     print "Circadian table created..."
     local_ip = get_ip()
@@ -260,46 +266,38 @@ def calc_user_circadian_table():
 
 
 def begin_threading():
-    global SLEEP_MODE_STATUS
-    global THREADS
     # Create two threads as follows
-    pir_DB_Event = threading.Event()
-    rgb_DB_Event = threading.Event()
-    usr_DB_Event = threading.Event()
-    sleep_mode_Event = threading.Event()
-    change_par_Event = threading.Event()
-    cmd_DB_Event = threading.Event()
-    if SLEEP_MODE_STATUS == 1:
-        sleep_mode_Event.set()
-
     try:
-        pir_thread = threading.Thread(name='pir_thread', target=PIR_sensor, args=(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event))
+        #thread.start_new_thread(PIR_sensor, ())
+        #thread.start_new_thread(RGB_sensor, ())
+        #thread.start_new_thread(USR_sensor, ())
+        #thread.start_new_thread(send_circadian_values, ())
+        pir_thread = threading.Thread(name='pir_thread', target=PIR_sensor, args=())
         pir_thread.start()
     except:
         print "Error: unable to start pir thread"
+
     try:
-        rgb_thread = threading.Thread(name='rgb_thread', target=RGB_sensor, args=(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event))
+        rgb_thread = threading.Thread(name='rgb_thread', target=RGB_sensor, args=())
         rgb_thread.start()
     except:
         print "Error: unable to start rgb thread"
+
     try:
-        usr_thread = threading.Thread(name='usr_thread', target=USR_sensor, args=(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event))
+        usr_thread = threading.Thread(name='usr_thread', target=USR_sensor, args=())
         usr_thread.start()
     except:
         print "Error: unable to start usr thread"
+
     try:
-        circadian_thread = threading.Thread(name='circadian_thread', target=send_circadian_values, args=(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event))
+        circadian_thread = threading.Thread(name='send_circadian_thread', target=send_circadian_values, args=())
         circadian_thread.start()
     except:
         print "Error: unable to start circadian thread"
-    THREADS.append(pir_thread)
-    THREADS.append(rgb_thread)
-    THREADS.append(usr_thread)
-    THREADS.append(circadian_thread)
-    wait_for_cmd(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event)
+    wait_for_cmd()
 
 
-def PIR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event):
+def PIR_sensor():
     print "Entered read_PIR!\n"
     # global CURRENT_LIGHT_INTENSITY
     global SLEEP_MODE_STATUS
@@ -309,20 +307,17 @@ def PIR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
     global CURRENT_MINUTE
     global SAVED_MINUTE
     #global db
-
-    # Open database connection
-    print "Establishing Database connection.....\n"
+    print "Establishing Database connection in PIR thread.....\n"
     db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
-    print "Database connection established.\n"
+    print "Database connection established in PIR thread.\n"
     # prepare a cursor object using cursor() method
-    pir_DB_Event.set()
-    rgb_DB_Event.wait()
-    usr_DB_Event.wait()
-    cmd_DB_Event.wait()
     cursor = db.cursor()
-    #exit()
     local_ip = get_ip()
-    
+    # * set up client connection to Lighting Subsystem
+    # sensor_to_lighting_cli_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # * Create a socket object
+    # sensor_to_lighting_cli_sock_host = lighting_ip.strip()  # * Get lighting IP
+    # sensor_to_lighting_cli_sock_port = 12346  # * Reserve a port for your service.
+
     # * Set up PIR
     GPIO.setmode(GPIO.BOARD)  # Set GPIO pin numbering
     #pir = 40  # Associate pin 40 to pir
@@ -335,25 +330,24 @@ def PIR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
 
     timer = 0  # * create timer
     while True:
-        try:
-            if timer == 60:
-                sensor_to_lighting_cli_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # * Create a socket object
-                sensor_to_lighting_cli_sock_host = lighting_ip.strip()  # * Get lighting IP
-                sensor_to_lighting_cli_sock_port = 12346  # * Reserve a port for your service.
-                try:
-                    sensor_to_lighting_cli_sock.connect(
-                        (sensor_to_lighting_cli_sock_host, sensor_to_lighting_cli_sock_port))
-                except:
-                    print "\nCould not connect to lighting subsystem\n"
-                sensor_to_lighting_cli_sock.send("0|0|0|")
 
-                print "\nEntering sleep mode\n"
-                # * set into sleep mode
-                sleep_mutex.acquire()
-                try:
-                    sleep_mode_Event.set()
-                finally:
-                    sleep_mutex.release()
+        if timer == 60:
+            sensor_to_lighting_cli_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # * Create a socket object
+            sensor_to_lighting_cli_sock_host = lighting_ip.strip()  # * Get lighting IP
+            sensor_to_lighting_cli_sock_port = 12346  # * Reserve a port for your service.
+
+            try:
+                sensor_to_lighting_cli_sock.connect(
+                    (sensor_to_lighting_cli_sock_host, sensor_to_lighting_cli_sock_port))
+            except:
+                print "\nCould not connect to lighting subsystem\n"
+            sensor_to_lighting_cli_sock.send("0|0|0|")
+
+            print "\nEntering sleep mode\n"
+            # * set into sleep mode
+            sleep_mutex.acquire()
+            try:
+                SLEEP_MODE_STATUS = 1
                 # Prepare SQL query to UPDATE required records
                 sql = """UPDATE sensor_status SET sleep_mode_status = 1 WHERE ip = %s"""
                 try:
@@ -364,74 +358,85 @@ def PIR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                 except:
                     # Rollback in case there is any error
                     db.rollback()
+            finally:
+                sleep_mutex.release()
 
-                sensor_to_lighting_cli_sock.close()
+            sensor_to_lighting_cli_sock.close()
 
-            if GPIO.input(pir):  # Check whether pir is HIGH
-                sleep_mutex.acquire()
-                try:
-                    sleep_mode = sleep_mode_Event.isSet()
-                finally:
-                    sleep_mutex.release()
-                if sleep_mode:
+        if GPIO.input(pir):  # Check whether pir is HIGH
+
+            sleep_mutex.acquire()
+
+            try:
+                if SLEEP_MODE_STATUS == 1:
+                    sensor_to_lighting_cli_sock = socket.socket(socket.AF_INET,
+                                                                socket.SOCK_STREAM)  # * Create a socket object
+                    sensor_to_lighting_cli_sock_host = lighting_ip.strip()  # * Get lighting IP
+                    sensor_to_lighting_cli_sock_port = 12346  # * Reserve a port for your service.
+                    print "\nMotion Detected!\n"
+                    # * turn lights back on with the current values
+                    try:
+                        print "connecting for wake value"
+                        sensor_to_lighting_cli_sock.connect(
+                            (sensor_to_lighting_cli_sock_host, sensor_to_lighting_cli_sock_port))
+                        print "connected"
+                    except:
+                        print "\nCould not connect to lighting subsystem\n"
+
+                    ########code to check Circadian table#######################
+                    time_mutex.acquire()
+                    try:
+                        # CURRENT_MINUTE = SAVED_MINUTE
+                        CURRENT_MINUTE = time.localtime()[3] * 60 + time.localtime()[4]
+                        circadian_cmd = ""
+
+                        circadian_cmd += str(USER_CIRCADIAN_TABLE[CURRENT_MINUTE][0])
+                        circadian_cmd += "|"
+                        circadian_cmd += str(USER_CIRCADIAN_TABLE[CURRENT_MINUTE][1])
+                        circadian_cmd += "|"
+                        circadian_cmd += str(USER_CIRCADIAN_TABLE[CURRENT_MINUTE][2])
+                        circadian_cmd += "|"
+
+                        sensor_to_lighting_cli_sock.send(circadian_cmd)
+                    finally:
+                        time_mutex.release()
+
+
                     # time.sleep(2)  # D1- Delay to avoid multiple detection
 
                     # * change SLEEP_MODE_STATUS to AWAKE
-                    sleep_mutex.acquire()
-                    try:
-                        sleep_mode_Event.clear()
-                    finally:
-                        sleep_mutex.release()
 
+                    SLEEP_MODE_STATUS = 0
                     sql = """UPDATE sensor_status SET sleep_mode_status = 0 WHERE ip = %s"""
                     try:
                         # Execute the SQL command
                         cursor.execute(sql, (local_ip))
                         # Commit your changes in the database
                         db.commit()
-                    except (AttributeError, MySQLdb.OperationalError):
-                        print "trying to reconnect..."
-                        #db_mutex.acquire()
-                        #try:
-                        print "Establishing Database connection.....\n"
-                        db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
-                        print "Database connection established.\n"
-                        #finally:
-                            #db_mutex.release()
-
-                        #cursor_mutex.acquire()
-                        #try:
-                            # prepare a cursor object using cursor() method
-                        cursor = db.cursor()
-                        #finally:
-                            #cursor_mutex.release()
-                        try:
-                            # Execute the SQL command
-                            cursor.execute(sql, (local_ip))
-                            # Commit your changes in the database
-                            db.commit()
-                        except:
-                            db.rollback()
                     except:
+                        # Rollback in case there is any error
                         db.rollback()
 
 
+
                     sensor_to_lighting_cli_sock.close()
-                timer = 0
-
-            else:
-                if timer <= 60:
-                    timer += 1
-                    print "sleep timer: ", timer
-                    time.sleep(1)
-
-                    # sensor_to_lighting_cli_sock.close()
-        except(KeyboardInterrupt):
-            return
-        
+            finally:
+                sleep_mutex.release()
 
 
-def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event):
+
+            timer = 0
+
+        else:
+            if timer <= 60:
+                timer += 1
+                print "\n", timer, " SLEEP: ", SLEEP_MODE_STATUS
+                time.sleep(1)
+
+                # sensor_to_lighting_cli_sock.close()
+
+
+def RGB_sensor():
     print "Entered read_RGB!\n"
     #global cursor
     global is_sensor_sub_paired
@@ -442,18 +447,13 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
     global WAKE_UP_TIME
     global local_ip
     #global db
-    # Open database connection
-    print "Establishing Database connection.....\n"
-    db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
-    print "Database connection established.\n"
 
-    rgb_DB_Event.set()
-    pir_DB_Event.wait()
-    usr_DB_Event.wait()
-    cmd_DB_Event.wait()
-    #exit()
+    print "Establishing Database connection in RGB thread.....\n"
+    db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
+    print "Database connection established in RGB thread.\n"
     # prepare a cursor object using cursor() method
     cursor = db.cursor()
+    
     bus = smbus.SMBus(1)
     #bus = smbus.SMBus(0)
     # I2C address 0x29
@@ -478,20 +478,12 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
         bus.write_byte(0x29, 0x80 | 0x14)  # Reading results start register 14, LSB then MSB
         #time.sleep(0.2)
         while True:
+
+            sleep_mutex.acquire()
             try:
-                sleep_mutex.acquire()
-                try:
-                    sleep_mode = sleep_mode_Event.isSet()
-                finally:
-                    sleep_mutex.release()
-                change_par_mutex.acquire()
-                try:
-                    change_par = change_par_Event.isSet()
-                finally:
-                    change_par_mutex.release()
-                if sleep_mode == False and change_par == False:
+                if SLEEP_MODE_STATUS == 0:
                     data = bus.read_i2c_block_data(0x29, 0)
-                    clear = data[1] << 8 | data[0]
+                    clear = clear = data[1] << 8 | data[0]
                     red = data[3] << 8 | data[2]
                     green = data[5] << 8 | data[4]
                     blue = data[7] << 8 | data[6]
@@ -504,42 +496,49 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                         cursor.execute(sql, (red, green, blue, local_ip))
                         # Commit your changes in the database
                         db.commit()
-                    except (AttributeError, MySQLdb.OperationalError):
-                        print "trying to reconnect..."
-                        #db_mutex.acquire()
-                        #try:
-                        print "Establishing Database connection.....\n"
-                        db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
-                        print "Database connection established.\n" 
-                        #finally:
-                            #db_mutex.release()
-
-                        #cursor_mutex.acquire()
-                        #try:
-                        # prepare a cursor object using cursor() method
-                        cursor = db.cursor()
-                        #finally:
-                            #cursor_mutex.release()
-                        try:
-                            # Execute the SQL command
-                            cursor.execute(sql, (red, green, blue, local_ip))
-                            # Commit your changes in the database
-                            db.commit()
-                        except:
-                            db.rollback()
                     except:
                         # Rollback in case there is any error
                         db.rollback()
+            finally:
+                sleep_mutex.release()
 
-                    time.sleep(2)
-            except(KeyboardInterrupt):
-                return
-            
+
+
+                # print crgbl
+                # if red >= 10 and red < (hardRed * .95):
+                #     redFlag = True
+                #     print "Red Degradation"
+                # else:
+                #     redFlag = False
+                # if green >= 10 and green < (hardGreen * .95):
+                #     greenFlag = True
+                #     print "Green Degradation"
+                # else:
+                #     greenFlag = False
+                # if blue >= 10 and blue < (hardBlue * .95):
+                #     blueFlag = True
+                #     print "Blue Degradation"
+                # else:
+                #     blueFlag = False
+                # if clear >= 10 and clear < (hardClear * .95):
+                #     clearFlag = True
+                #     print "Clear Degradation"
+                # else:
+                #     clearFlag = False
+                # if lux >= 10 and lux < (hardLux * .95):
+                #     luxFlag = True
+                #     print "Intensity Degradation\n"
+                # if lux < 10:
+                #     luxFlag = False
+                #     print "Lights OFF\n"
+                # else:
+                #     luxFlag = False
+                time.sleep(2)
     else:
         print "Device not found\n"
 
 
-def USR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event):
+def USR_sensor():
     print "Entered read_USR!\n"
     #global cursor
     global is_sensor_sub_paired
@@ -547,150 +546,84 @@ def USR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
     global COLOR_THRESHOLD
     global LIGHT_THRESHOLD
     global WAKE_UP_TIME
-    # Open database connection
-    print "Establishing Database connection.....\n"
-    db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
-    print "Database connection established.\n"
-    usr_DB_Event.set()
-    pir_DB_Event.wait()
-    rgb_DB_Event.wait()
-    cmd_DB_Event.wait()
-    #exit()
-    # prepare a cursor object using cursor() method
-    cursor = db.cursor()
-    GPIO.setmode(GPIO.BOARD)                              #Set GPIO pin numbering 
 
-    TRIG = 36                                           #Associate pin 36 to TRIG
-    ECHO = 38                                           #Associate pin 38 to ECHO
 
-    print "Distance measurement in progress"
-
-    GPIO.setup(TRIG,GPIO.OUT)                           #Set pin as GPIO out
-    GPIO.setup(ECHO,GPIO.IN)                            #Set pin as GPIO in
-
-    while True:
-        try:
-            GPIO.output(TRIG, False)                          #Set TRIG as LOW
-            print "Waitng For Sensor To Settle"
-            time.sleep(2)                                     #Delay of 2 seconds
-
-            GPIO.output(TRIG, True)                           #Set TRIG as HIGH
-            time.sleep(0.00001)                               #Delay of 0.00001 seconds
-            GPIO.output(TRIG, False)                          #Set TRIG as LOW
-
-            while GPIO.input(ECHO)==0:                        #Check whether the ECHO is LOW
-                pulse_start = time.time()                       #Saves the last known time of LOW pulse
-
-            while GPIO.input(ECHO)==1:                        #Check whether the ECHO is HIGH
-                pulse_end = time.time()                         #Saves the last known time of HIGH pulse 
-
-            pulse_duration = pulse_end - pulse_start          #Get pulse duration to a variable
-
-            distance = pulse_duration * 17150                 #Multiply pulse duration by 17150 to get distance
-            distance = round(distance, 2)                     #Round to two decimal points
-            distInFt = distance/30.48                         #Cm to ft conversion
-            distInFt = round(distInFt, 2)                     #Round to two decimal points
-
-            if distance > 2 and distance < 400:               #Check whether the distance is within range
-                print "Distance:",distance,"cm"               #Print distance with 0.5 cm calibration; other website has "distance - 0.5","cm"
-                print "Distance:",distInFt,"ft"               #Print distance in ft
-            else:
-                print "Out Of Range"                            #display out of range
-        except(KeyboardInterrupt):
-            return
-        
-
-def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event):
-
+def send_circadian_values():
     global USER_CIRCADIAN_TABLE
     global SLEEP_MODE_STATUS
     global CURRENT_MINUTE
     global lighting_ip
-    usr_DB_Event.wait()
-    pir_DB_Event.wait()
-    rgb_DB_Event.wait()
-    cmd_DB_Event.wait()
-    #exit()
+
     # print "circadian cli sock:%s" %circadian_cli_sock_host
     count = 0
     circadian_cmd = ""
 
-    while True:
+    time_mutex.acquire()
+    try:
+        CURRENT_MINUTE = time.localtime()[3]*60 + time.localtime()[4]
+
+    finally:
+        time_mutex.release()
+
+    while CURRENT_MINUTE < 1440:
+
+        sleep_mutex.acquire()
         try:
-            sleep_mutex.acquire()
-            try:
-                sleep_mode = sleep_mode_Event.isSet()
-            finally:
-                sleep_mutex.release()
-            change_par_mutex.acquire()
-            try:
-                change_par = change_par_Event.isSet()
-            finally:
-                change_par_mutex.release()
-            if sleep_mode == False and change_par == False:
+            if SLEEP_MODE_STATUS == 0:
                 time_mutex.acquire()
                 try:
-                    print "noon: ", USER_CIRCADIAN_TABLE[720]
-                    CURRENT_MINUTE = time.localtime()[3] * 60 + time.localtime()[4]
-                    print "now: ", USER_CIRCADIAN_TABLE[CURRENT_MINUTE]
+                    print "CURRENT_MINUTE: ", CURRENT_MINUTE
                     circadian_cmd += str(USER_CIRCADIAN_TABLE[CURRENT_MINUTE][0])
                     circadian_cmd += "|"
                     circadian_cmd += str(USER_CIRCADIAN_TABLE[CURRENT_MINUTE][1])
                     circadian_cmd += "|"
                     circadian_cmd += str(USER_CIRCADIAN_TABLE[CURRENT_MINUTE][2])
                     circadian_cmd += "|"
-                    # create client socket connection
-                    circadian_cli_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # * Create a socket object
-                    circadian_cli_sock_host = lighting_ip.strip()  # * Get lighting IP
-                    circadian_cli_sock_port = 12347  # * Reserve a port for your service.
-                    # send on socket
-                    circadian_cli_sock.connect((circadian_cli_sock_host, circadian_cli_sock_port))
-                    circadian_cli_sock.send(circadian_cmd)
-                    # close socket
-                    circadian_cli_sock.close()
                 finally:
                     time_mutex.release()
+
+                # create client socket connection
+                circadian_cli_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # * Create a socket object
+                circadian_cli_sock_host = lighting_ip.strip()  # * Get lighting IP
+                circadian_cli_sock_port = 12347  # * Reserve a port for your service.
+                # send on socket
+                circadian_cli_sock.connect((circadian_cli_sock_host, circadian_cli_sock_port))
+                circadian_cli_sock.send(circadian_cmd)
+                # close socket
+                circadian_cli_sock.close()
 
                 circadian_cmd = ""
                 # wait for a minute
                 while count < 60:
-                    sleep_mutex.acquire()
-                    try:
-                        sleep_mode = sleep_mode_Event.isSet()
-                    finally:
-                        sleep_mutex.release()
-                    change_par_mutex.acquire()
-                    try:
-                        change_par = change_par_Event.isSet()
-                    finally:
-                        change_par_mutex.release()
-                    if sleep_mode or change_par:
-                        break
                     print "count: ", count
                     time.sleep(1)
                     count += 1
                 count = 0
+                time_mutex.acquire()
+                try:
+                    if CURRENT_MINUTE == 1439:
+                        CURRENT_MINUTE = 0
+                    else:
+                        CURRENT_MINUTE += 1
+                finally:
+                    time_mutex.release()
             else:
                 print "checking again.."
                 time.sleep(1)
-        except(KeyboardInterrupt):
-            return
+        finally:
+            sleep_mutex.release()
 
 
-def wait_for_cmd(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event):
+
+
+def wait_for_cmd():
     print "Entered wait cmd!\n"
-    
+    #global cursor
+    global is_sensor_sub_paired
     global lighting_ip
     global COLOR_THRESHOLD
     global LIGHT_THRESHOLD
     global WAKE_UP_TIME
-    global THREADS
-
-    cmd_DB_Event.set()
-    usr_DB_Event.wait()
-    pir_DB_Event.wait()
-    rgb_DB_Event.wait()
-    
     # create server socket for user to connect to for changing values
 
     wait_cmd_svr_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)  # * Create a socket object
@@ -700,38 +633,19 @@ def wait_for_cmd(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, cha
 
     wait_cmd_svr_sock.listen(5)  # * Now wait for client connection.
     print "listening for cmds from user...."
-    while True:
-        try:
-            print "current values", WAKE_UP_TIME," ",COLOR_THRESHOLD," ", LIGHT_THRESHOLD
-            wait_cmd_svr_sock_connection, wait_cmd_svr_sock_connection_addr = wait_cmd_svr_sock.accept()  # * Establish connection w
-            print '\nGot connection from', wait_cmd_svr_sock_connection_addr, "\n"
-            
-            cmd = (wait_cmd_svr_sock_connection.recv(1024)).strip()  # * read light intensity from control
-            if len(cmd) == 0:
-                wait_cmd_svr_sock_connection.close()
-                continue
-            else:
-                change_par_Event.set()
-                
-                cmd = cmd.split('|')
-                print "cmd got: ", cmd
-                if cmd[0] != 'N':
-                    WAKE_UP_TIME = int(cmd[0])
-                    calc_user_circadian_table()
-                if cmd[1] != 'N':
-                    COLOR_THRESHOLD = int(cmd[1])
-                if cmd[2] != 'N':
-                    LIGHT_THRESHOLD = int(cmd[2])
-                
-                change_par_Event.clear()
 
+    while True:
+        wait_cmd_svr_sock_connection, wait_cmd_svr_sock_connection_addr = wait_cmd_svr_sock.accept()  # * Establish connection w
+        print '\nGot connection from', wait_cmd_svr_sock_connection_addr, "\n"
+
+        cmd = (wait_cmd_svr_sock_connection.recv(1024)).strip()  # * read light intensity from control
+        if len(cmd) == 0:
             wait_cmd_svr_sock_connection.close()
-        except(KeyboardInterrupt):
-            for i in THREADS:
-                THREADS[i].join()
-            sys.exit()
-   
-        
+            continue
+
+        print "cmd got: ", cmd
+
+        wait_cmd_svr_sock_connection.close()
 
 
 boot_up()
