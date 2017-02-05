@@ -277,27 +277,28 @@ def begin_threading():
     try:
         pir_thread = threading.Thread(name='pir_thread', target=PIR_sensor, args=(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event, keyboard_Event))
         pir_thread.start()
+        THREADS.append(pir_thread)
     except:
         print "Error: unable to start pir thread"
     try:
         rgb_thread = threading.Thread(name='rgb_thread', target=RGB_sensor, args=(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event, keyboard_Event))
         rgb_thread.start()
+        THREADS.append(rgb_thread)
     except:
         print "Error: unable to start rgb thread"
     try:
         usr_thread = threading.Thread(name='usr_thread', target=USR_sensor, args=(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event, keyboard_Event))
         usr_thread.start()
+        THREADS.append(usr_thread)
     except:
         print "Error: unable to start usr thread"
     try:
         circadian_thread = threading.Thread(name='circadian_thread', target=send_circadian_values, args=(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event, keyboard_Event))
         circadian_thread.start()
+        THREADS.append(circadian_thread)
     except:
         print "Error: unable to start circadian thread"
-    THREADS.append(pir_thread)
-    THREADS.append(rgb_thread)
-    THREADS.append(usr_thread)
-    THREADS.append(circadian_thread)
+
     wait_for_cmd(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event, keyboard_Event)
 
 

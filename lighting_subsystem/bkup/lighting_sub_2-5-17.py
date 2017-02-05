@@ -1,12 +1,13 @@
 #PIR code from: modmypi.com/blog/raspberry-pi-gpio-sensing-motion-detection
 #Socket code: tutorialspoint.com/python/python_networking.html
+import thread
 import time
 import socket
-import threading
+from threading import Lock
 import RPi.GPIO as GPIO
 import MySQLdb #Required for MySQL stuff
 import wiringpi
-import sys
+
 #PWM Stuff
 lightIntensity = -5
 
@@ -41,7 +42,7 @@ blue.start(0)
 
 pause_time = 0.02
 
-THREADS = []
+
 # Open database connection
 print "connecting to database..."
 db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
@@ -84,19 +85,15 @@ def boot_up():
         begin_threading()
 
 def begin_threading():
-    global THREADS
-    keyboard_Event = threading.Event()
-    keyboard_Event.set()
     # Create two threads as follows
     try:
-        pir_thread=threading.Thread(name='pir_thread', target=PIR_cmd, args=(keyboard_Event))
-        pir_thread.start()
-        THREADS.append(pir_thread)
+        thread.start_new_thread(PIR_cmd, ())
+        #thread.start_new_thread(light_cmd, ())
     except:
         print "Error: unable to start thread"
-    light_cmd(keyboard_Event)
+    light_cmd()
 
-def PIR_cmd(keyboard_Event):
+def PIR_cmd():
     global red
     global green
     global blue
@@ -143,12 +140,11 @@ def PIR_cmd(keyboard_Event):
 
         lighting_pir_svr_sock_connection.close()
 
-def light_cmd(keyboard_Event):
+def light_cmd():
     global red
     global green
     global blue
     global pinRelay
-    global THREADS
     # *establish server socket for Control subsystem to connect to for LI send
     lighting_lightCmd_svr_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)  # * Create a socket object
     lighting_lightCmd_svr_sock_host = ''  # * Get local machine name
@@ -159,40 +155,34 @@ def light_cmd(keyboard_Event):
     print "listening on light_cmd socket...."
     # print s.recv(1024)
     # s.close                     #* Close the socket when done
-    try:
-        while True:
-            lighting_lightCmd_svr_sock_connection, lighting_lightCmd_svr_sock_connection_addr = lighting_lightCmd_svr_sock.accept()  # * Establish connection w
-            print '\nGot connection from', lighting_lightCmd_svr_sock_connection_addr, "\n"
 
-            light_intensity = lighting_lightCmd_svr_sock_connection.recv(1024)
-            brightness_values = light_intensity.split('|')
-            print "GOT on light_cmd thread: ", brightness_values
-            if float(brightness_values[0]) == 0 and float(brightness_values[1]) == 0 and float(
-                    brightness_values[2]) == 0:
-                # * turn lights off
-                print "turning lights off"
-                GPIO.output(pinRelay, GPIO.LOW)
-                # red.stop()
-                # green.stop()
-                # blue.stop()
-                # GPIO.cleanup()
-            else:
-                # GPIO.output(pinRelay, GPIO.HIGH)
-                # dutyCycle = (float(light_intensity) / 100) * 1024
-                # wiringpi.pwmWrite(pinPWM, int(dutyCycle))
-                GPIO.output(pinRelay, GPIO.HIGH)
-                # brightness_values = light_intensity.split('|')
-                red.ChangeDutyCycle(float(brightness_values[0]) / 2)
-                green.ChangeDutyCycle(float(brightness_values[1]) / 2)
-                blue.ChangeDutyCycle(float(brightness_values[2]) / 2)
-            time.sleep(1)
+    while True:
+        lighting_lightCmd_svr_sock_connection, lighting_lightCmd_svr_sock_connection_addr = lighting_lightCmd_svr_sock.accept()  # * Establish connection w
+        print '\nGot connection from', lighting_lightCmd_svr_sock_connection_addr, "\n"
 
-            lighting_lightCmd_svr_sock_connection.close()
-    except KeyboardInterrupt:
-        for thread in THREADS:
-            thread.join()
-        sys.exit()
+        light_intensity = lighting_lightCmd_svr_sock_connection.recv(1024)
+        brightness_values = light_intensity.split('|')
+        print "GOT on light_cmd thread: ", brightness_values
+        if float(brightness_values[0]) == 0 and float(brightness_values[1]) == 0 and float(brightness_values[2]) == 0:
+            # * turn lights off
+            print "turning lights off"
+            GPIO.output(pinRelay, GPIO.LOW)
+            #red.stop()
+            #green.stop()
+            #blue.stop()
+            #GPIO.cleanup()
+        else:
+            # GPIO.output(pinRelay, GPIO.HIGH)
+            # dutyCycle = (float(light_intensity) / 100) * 1024
+            # wiringpi.pwmWrite(pinPWM, int(dutyCycle))
+            GPIO.output(pinRelay, GPIO.HIGH)
+            #brightness_values = light_intensity.split('|')
+            red.ChangeDutyCycle(float(brightness_values[0])/2)
+            green.ChangeDutyCycle(float(brightness_values[1])/2)
+            blue.ChangeDutyCycle(float(brightness_values[2])/2)
+        time.sleep(1)
 
+        lighting_lightCmd_svr_sock_connection.close()
 
 boot_up()
 
