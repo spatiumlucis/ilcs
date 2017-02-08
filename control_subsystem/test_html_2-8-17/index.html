@@ -1,0 +1,204 @@
+<!doctype html>
+<html>
+	<head>
+		<title> Welcome - ITS </title>
+		<meta name = "viewport" content = "width=device-width, initial-scale = 1" >
+		<!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css">
+		<link href = "css/index.css"  rel = "stylesheet">
+		
+		<!-- jQuery library -->
+		<script src="lib/jquery/jquery.min.js"></script>
+		
+		<!-- Latest compiled JavaScript -->
+		<script src="lib/bootstrap/js/bootstrap.min.js"></script>
+		<script src = "js/index.js"></script>
+		<script>
+			loadSensorData(LOAD_DATA);
+		</script>
+				
+	</head>
+	
+	<body onload="setInterval(readSensorsValues,1000);">
+	
+		<nav class = "navbar navbar-inverse">
+			<div class = "container-fluid">
+				<div class = "navbar-header">
+					<button class="navbar-toggle" data-toggle = "collapse" data-target = "#menu" >
+						<span class = "icon-bar"></span>
+						<span class = "icon-bar"></span>
+						<span class = "icon-bar"></span>
+					</button>
+					
+					<a class="navbar-brand" href="index.html"> ITS </a>
+				</div>
+				
+				<div class = "collapse navbar-collapse" id = "menu">
+					<ul class = "nav navbar-nav" id = "menu_items">
+						<li><a href = "#"> Home </a>
+						<li><a href = "#" id = "menu_add_room"> Add Room </a>
+						<li><a href = "#"> Logs </a>
+						<li><a href = "#"> Help </a>
+					</ul>
+					
+					<ul class = "nav navbar-nav navbar-right" id = "user_login_btn">
+						<li><a href ="#" data-toggle = "modal" data-target = "#login_form_container" data-keyboard = "true"><span class ="glyphicon glyphicon-log-in"></span> Login</a></li>
+					</ul>
+					
+					<ul class = "nav navbar-nav navbar-right" id = "user_logout_btn">
+						<button class= "btn btn-info navbar-btn" >Logout</button>
+					</ul>
+					
+				</div>
+			</div>
+		</nav>
+		
+		
+		
+		<div class = "container">
+			<div id = "sensor_container" class = "row">
+				<div id = "sensor_selection" class = "col-sm-6 col-sm-offset-2">
+					<select name = "room_select" id = "room_select" class="form-control">
+					</select>
+				</div>
+
+				<div id = "btn_container" class = "btn_container btn-group col">
+					<button class = "btn btn-primary" id = "room_edit_btn">Edit Room </button>
+					<button class = "btn btn-primary" data-toggle = "modal" data-target = "#delete_room_container" data-keyboard = "true">Delete Room </button>
+				</div>
+				
+				<div id = "sensors">
+					<input type = "hidden" id = "sensor_count" value = "0" />
+				</div>
+				
+			</div>
+		</div>
+		
+		<div class = "container-fluid" id = "no_room">
+			<h2> No Room Readings Available !</h2>
+			<h3><small>Add a Sensor Subsystem to view room readings </small></h3>
+		</div>
+		
+		
+		<div id = "log_container">
+		
+		</div>
+		
+		<div id = "help_container"> 
+		
+		</div>
+		
+		
+		
+		<div id = "room_form_main_container" class = "modal fade" role = "dialog">
+			<div id = "room_form_container" class = "modal-dialog modal-sm">
+				
+				<div class = "modal-content">
+				
+					<div class = "modal-header">
+						<button type="button" class="close" data-dismiss="modal">&times;</button>
+						<h4 class = "modal-title"> Add Room </h4>
+					</div>
+					
+					<div class = "modal-body">
+						<label for="room_name" class = "main_label"> Room Name </label>
+						<input type = "text" id = "room_name" name = "room_name" /> <br />
+					
+
+		
+					
+						<label for="room_wake_time" class = "main_label"> Wake-up Time </label>
+							<select name = "wake_time" id = "room_wake_time">
+			
+							</select>
+					
+						<br />
+						
+						<label for="room_light_threshold" class = "main_label">Light Threshold </label>
+						<!--<input type = "number" id = "room_light_threshold" name = "room_light_threshold" step = "10" min = "00" max = "100" value = "00" />% <br />-->
+						<select name = "room_light_threshold" id = "room_light_threshold">
+							
+						</select> % <br />
+					
+
+
+						<label for="room_color_threshold" class = "main_label">Color Threshold </label>
+						<!--<input type = "number" id = "room_color_threshold" name = "room_color_threshold" step = "10" min = "00" max = "100" value = "00" />% <br />-->
+						<select name = "room_color_threshold" id = "room_color_threshold">
+							
+						</select> %
+
+					</div>
+					
+					<div class = "modal-footer">
+						<button  id = "add_room_btn"> Add Room </button>
+						<button  data-dismiss="modal">Cancel</button>
+					</div>
+				</div>
+			</div>
+		</div>  <!-- end of add room form -->
+		
+		
+		<div id = "login_form_container" class = "modal fade" role = "dialog">
+			<div class = "modal-dialog modal-sm">
+				<div class = "modal-content">	
+					<div class = "modal-header">
+						<button type="button" class="close" data-dismiss="modal">&times;</button>
+						<h4 class = "modal-title"><span class = "glyphicon glyphicon-user"></span>  Login </h4>
+					</div>
+					
+					<div class = "modal-body">
+						<label for = "username">Username </label>
+						<input type = "text" name = "username" id = "username" /> <br />
+					
+						<label for = "password">Password </label>
+						<input type = "password" name = "password" id = "password" /> <br />
+					</div>
+					
+					<div class = "modal-footer">
+						<button  id = "login_btn"> Login </button>
+						<button  data-dismiss="modal">Cancel</button>
+					</div>
+					
+				</div>
+			</div>
+		</div> <!-- end of add room container -->
+		
+		<div class = "container-fluid modal fade" role = "dialog" id = "delete_room_container" >
+			<div class = "modal-dialog modal-sm">
+				<div class = "modal-content">
+				
+					<div class = "modal-header">
+						<h4> Delete Room</h4>
+					</div>
+					
+					<div class = "modal-body">
+						<h6> Are you sure you want to delete this room? </h6>
+					</div>
+					
+					<div class = "modal-footer">
+						<button  id = "delete_btn">Delete </button>
+						<button  data-dismiss="modal">Cancel</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		
+		<div id = "alert" class = "container-fluid alert alert-success alert-dismissable">
+			<h6></h6>
+		</div>
+
+		<button id = "alarm_switch" class = "alarm_off"></button>
+		<div id = "alert_danger" class = "container-fluid alert alert-danger alert-dismissable" style = "display: none";">
+			<a href="#" class="close" data-dismiss="alert" aria-label="close" id = "alarm_turn_off">&times;Close</a>
+            <audio id = "alert_sound" loop=true class = "off">
+            	<source src="media/alertsound.mp3" type= "audio/mpeg">
+                <p>Browser does not support audio </p>
+            </audio>
+			<h6></h6>
+		</div>		
+	</body>
+
+
+</html>

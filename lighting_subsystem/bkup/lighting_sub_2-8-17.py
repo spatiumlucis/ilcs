@@ -7,9 +7,6 @@ import RPi.GPIO as GPIO
 import MySQLdb #Required for MySQL stuff
 import wiringpi
 import sys
-import os
-import signal
-
 #PWM Stuff
 lightIntensity = -5
 
@@ -45,8 +42,6 @@ blue.start(0)
 pause_time = 0.02
 
 THREADS = []
-
-keyboard_Event_mutex = threading.Lock()
 # Open database connection
 print "connecting to database..."
 db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
@@ -94,12 +89,11 @@ def begin_threading():
     keyboard_Event.set()
     # Create two threads as follows
     try:
-        pir_thread=threading.Thread(name='pir_thread', target=PIR_cmd, args=(keyboard_Event,))
+        pir_thread=threading.Thread(name='pir_thread', target=PIR_cmd, args=(keyboard_Event))
         pir_thread.start()
         THREADS.append(pir_thread)
     except:
         print "Error: unable to start thread"
-    
     light_cmd(keyboard_Event)
 
 def PIR_cmd(keyboard_Event):
@@ -107,9 +101,6 @@ def PIR_cmd(keyboard_Event):
     global green
     global blue
     global pinRelay
-    global local_ip
-    global cursor
-    global db
     # *establish server socket for Control subsystem to connect to for LI send
     lighting_pir_svr_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)  # * Create a socket object
     lighting_pir_svr_sock_host = ''  # * Get local machine name
@@ -121,31 +112,14 @@ def PIR_cmd(keyboard_Event):
     # print s.recv(1024)
     # s.close                     #* Close the socket when done
 
-    while True and keyboard_Event.isSet():
-        keyboard_Event_mutex.acquire()
-        try:
-            keyboard = keyboard_Event.isSet()
-        finally:
-            keyboard_Event_mutex.release()
-        if not keyboard:
-            break
+    while True:
         lighting_pir_svr_sock_connection, lighting_pir_svr_sock_connection_addr = lighting_pir_svr_sock.accept()  # * Establish connection w
         print '\nGot connection from', lighting_pir_svr_sock_connection_addr, "\n"
 
         light_intensity = lighting_pir_svr_sock_connection.recv(1024)
         brightness_values = light_intensity.split('|')
         print "GOT on pir_cmd thread: ", brightness_values
-
-        if brightness_values[0] == 'D':
-##            sql = """DELETE FROM lighting_ip WHERE ip = %s"""
-##            try:
-##                cursor.execute(sql, (local_ip))
-##                db.commit()
-##            except:
-##                db.rollback()
-            pid = os.getpid()
-            os.kill(pid, signal.SIGKILL)
-        elif float(brightness_values[0]) == 0 and float(brightness_values[1]) == 0 and float(brightness_values[2]) == 0:
+        if float(brightness_values[0]) == 0 and float(brightness_values[1]) == 0 and float(brightness_values[2]) == 0:
             # * turn lights off
             print "entering sleep mode..."
             GPIO.output(pinRelay, GPIO.LOW)
@@ -154,6 +128,7 @@ def PIR_cmd(keyboard_Event):
             #blue.stop()
             #GPIO.cleanup()
             #GPIO.output(pinRelay, GPIO.LOW)
+
         else:
             #sepatate into red, green, blue values
             print "exiting sleep mode"
@@ -192,7 +167,8 @@ def light_cmd(keyboard_Event):
             light_intensity = lighting_lightCmd_svr_sock_connection.recv(1024)
             brightness_values = light_intensity.split('|')
             print "GOT on light_cmd thread: ", brightness_values
-            if float(brightness_values[0]) == 0 and float(brightness_values[1]) == 0 and float(brightness_values[2]) == 0:
+            if float(brightness_values[0]) == 0 and float(brightness_values[1]) == 0 and float(
+                    brightness_values[2]) == 0:
                 # * turn lights off
                 print "turning lights off"
                 GPIO.output(pinRelay, GPIO.LOW)
@@ -213,8 +189,6 @@ def light_cmd(keyboard_Event):
 
             lighting_lightCmd_svr_sock_connection.close()
     except KeyboardInterrupt:
-        keyboard_Event.clear()
-        time.sleep(1)
         for thread in THREADS:
             thread.join()
         sys.exit()
