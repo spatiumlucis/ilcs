@@ -21,14 +21,6 @@ COLOR_THRESHOLD = 0
 
 LIGHT_THRESHOLD = 0
 
-OLD_RED = 0
-
-OLD_GREEN = 0
-
-OLD_BLUE = 0
-
-DISTANCE = 8
-
 WAKE_UP_TIME = 0
 
 MASTER_CIRCADIAN_TABLE = []
@@ -459,10 +451,6 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
     global SLEEP_MODE_STATUS
     global WAKE_UP_TIME
     global local_ip
-    global OLD_RED
-    global OLD_GREEN
-    global OLD_BLUE
-    
     #global db
     # Open database connection
     print "Establishing Database connection.....\n"
@@ -513,115 +501,44 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
             if sleep_mode == False and change_par == False:
                 data = bus.read_i2c_block_data(0x29, 0)
                 clear = data[1] << 8 | data[0]
-                red = ((data[3] << 8 | data[2])/(2**16))*100
-                green = ((data[5] << 8 | data[4])/(2**16))*100
-                blue = ((data[7] << 8 | data[6])/(2**16))*100
+                red = data[3] << 8 | data[2]
+                green = data[5] << 8 | data[4]
+                blue = data[7] << 8 | data[6]
                 lux = int((-0.32466 * red) + (1.57837 * green) + (-0.73191 * blue))
                 crgbl = "C: %s, R: %s, G: %s, B: %s, Lux: %s" % (clear, red, green, blue, lux)
                 print crgbl
-                #sql = """UPDATE sensor_status SET red = %s, green = %s, blue = %s WHERE ip = %s"""
-                if red < (OLD_RED-(OLD_RED*0.05)) or red > (OLD_RED+(OLD_RED*0.05)):
-                    sql = """UPDATE sensor_status SET red = %s WHERE ip = %s"""
+                sql = """UPDATE sensor_status SET red = %s, green = %s, blue = %s WHERE ip = %s"""
+                try:
+                    # Execute the SQL command
+                    cursor.execute(sql, (red, green, blue, local_ip))
+                    # Commit your changes in the database
+                    db.commit()
+                except (AttributeError, MySQLdb.OperationalError):
+                    print "trying to reconnect..."
+                    #db_mutex.acquire()
+                    #try:
+                    print "Establishing Database connection.....\n"
+                    db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
+                    print "Database connection established.\n"
+                    #finally:
+                        #db_mutex.release()
+
+                    #cursor_mutex.acquire()
+                    #try:
+                    # prepare a cursor object using cursor() method
+                    cursor = db.cursor()
+                    #finally:
+                        #cursor_mutex.release()
                     try:
                         # Execute the SQL command
-                        cursor.execute(sql, (red, local_ip))
+                        cursor.execute(sql, (red, green, blue, local_ip))
                         # Commit your changes in the database
                         db.commit()
-                        OLD_RED = red
-                    except (AttributeError, MySQLdb.OperationalError):
-                        print "trying to reconnect..."
-                        #db_mutex.acquire()
-                        #try:
-                        print "Establishing Database connection.....\n"
-                        db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
-                        print "Database connection established.\n"
-                        #finally:
-                            #db_mutex.release()
-
-                        #cursor_mutex.acquire()
-                        #try:
-                        # prepare a cursor object using cursor() method
-                        cursor = db.cursor()
-                        #finally:
-                            #cursor_mutex.release()
-                        try:
-                            # Execute the SQL command
-                            cursor.execute(sql, (red, local_ip))
-                            # Commit your changes in the database
-                            db.commit()
-                        except:
-                            db.rollback()
                     except:
-                        # Rollback in case there is any error
                         db.rollback()
-                if green < (OLD_GREEN-(OLD_GREEN*0.05)) or green > (OLD_GREEN+(OLD_GREEN*0.05)):
-                    sql = """UPDATE sensor_status SET green = %s WHERE ip = %s"""
-                    try:
-                        # Execute the SQL command
-                        cursor.execute(sql, (green, local_ip))
-                        # Commit your changes in the database
-                        db.commit()
-                        OLD_GREEN = green
-                    except (AttributeError, MySQLdb.OperationalError):
-                        print "trying to reconnect..."
-                        #db_mutex.acquire()
-                        #try:
-                        print "Establishing Database connection.....\n"
-                        db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
-                        print "Database connection established.\n"
-                        #finally:
-                            #db_mutex.release()
-
-                        #cursor_mutex.acquire()
-                        #try:
-                        # prepare a cursor object using cursor() method
-                        cursor = db.cursor()
-                        #finally:
-                            #cursor_mutex.release()
-                        try:
-                            # Execute the SQL command
-                            cursor.execute(sql, (green, local_ip))
-                            # Commit your changes in the database
-                            db.commit()
-                        except:
-                            db.rollback()
-                    except:
-                        # Rollback in case there is any error
-                        db.rollback()
-                if blue < (OLD_BLUE-(OLD_BLUE*0.05)) or blue > (OLD_BLUE+(OLD_BLUE*0.05)):
-                    sql = """UPDATE sensor_status SET blue = %s WHERE ip = %s"""
-                    try:
-                        # Execute the SQL command
-                        cursor.execute(sql, (blue, local_ip))
-                        # Commit your changes in the database
-                        db.commit()
-                        OLD_BLUE = blue
-                    except (AttributeError, MySQLdb.OperationalError):
-                        print "trying to reconnect..."
-                        #db_mutex.acquire()
-                        #try:
-                        print "Establishing Database connection.....\n"
-                        db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
-                        print "Database connection established.\n"
-                        #finally:
-                            #db_mutex.release()
-
-                        #cursor_mutex.acquire()
-                        #try:
-                        # prepare a cursor object using cursor() method
-                        cursor = db.cursor()
-                        #finally:
-                            #cursor_mutex.release()
-                        try:
-                            # Execute the SQL command
-                            cursor.execute(sql, (blue, local_ip))
-                            # Commit your changes in the database
-                            db.commit()
-                        except:
-                            db.rollback()
-                    except:
-                        # Rollback in case there is any error
-                        db.rollback()
+                except:
+                    # Rollback in case there is any error
+                    db.rollback()
 
                 time.sleep(2)
             
@@ -648,42 +565,6 @@ def USR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
     #exit()
     # prepare a cursor object using cursor() method
     cursor = db.cursor()
-
-
-    sql = """UPDATE sensor_status SET distance = 8 WHERE ip = %s"""
-    try:
-        # Execute the SQL command
-        cursor.execute(sql, (local_ip))
-        # Commit your changes in the database
-        db.commit()
-    except (AttributeError, MySQLdb.OperationalError):
-        print "trying to reconnect..."
-        #db_mutex.acquire()
-        #try:
-        print "Establishing Database connection.....\n"
-        db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
-        print "Database connection established.\n"
-        #finally:
-            #db_mutex.release()
-
-        #cursor_mutex.acquire()
-        #try:
-        # prepare a cursor object using cursor() method
-        cursor = db.cursor()
-        #finally:
-            #cursor_mutex.release()
-        try:
-            # Execute the SQL command
-            cursor.execute(sql, (distInFt, local_ip))
-            # Commit your changes in the database
-            db.commit()
-        except:
-            db.rollback()
-    except:
-        # Rollback in case there is any error
-        db.rollback()
-
-    
     GPIO.setmode(GPIO.BOARD)                              #Set GPIO pin numbering 
 
     TRIG = 36                                           #Associate pin 36 to TRIG
@@ -715,45 +596,45 @@ def USR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
         distance = round(distance, 2)                     #Round to two decimal points
         distInFt = distance/30.48                         #Cm to ft conversion
         distInFt = round(distInFt, 2)                     #Round to two decimal points
+
+        sql = """UPDATE sensor_status SET distance = %s WHERE ip = %s"""
+        try:
+            # Execute the SQL command
+            cursor.execute(sql, (distInFt, local_ip))
+            # Commit your changes in the database
+            db.commit()
+        except (AttributeError, MySQLdb.OperationalError):
+            print "trying to reconnect..."
+            #db_mutex.acquire()
+            #try:
+            print "Establishing Database connection.....\n"
+            db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
+            print "Database connection established.\n"
+            #finally:
+                #db_mutex.release()
+
+            #cursor_mutex.acquire()
+            #try:
+            # prepare a cursor object using cursor() method
+            cursor = db.cursor()
+            #finally:
+                #cursor_mutex.release()
+            try:
+                # Execute the SQL command
+                cursor.execute(sql, (distInFt, local_ip))
+                # Commit your changes in the database
+                db.commit()
+            except:
+                db.rollback()
+        except:
+            # Rollback in case there is any error
+            db.rollback()
         
-        
-        if distInFt >= 8:               #Check whether the distance is within range
+        if distance > 2 and distance < 400:               #Check whether the distance is within range
             print "Distance:",distance,"cm"               #Print distance with 0.5 cm calibration; other website has "distance - 0.5","cm"
             print "Distance:",distInFt,"ft"               #Print distance in ft
         else:
             print "Out Of Range"                            #display out of range
-            sql = """UPDATE sensor_status SET distance = -1 WHERE ip = %s"""
-            try:
-                # Execute the SQL command
-                cursor.execute(sql, (local_ip))
-                # Commit your changes in the database
-                db.commit()
-            except (AttributeError, MySQLdb.OperationalError):
-                print "trying to reconnect..."
-                #db_mutex.acquire()
-                #try:
-                print "Establishing Database connection.....\n"
-                db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
-                print "Database connection established.\n"
-                #finally:
-                    #db_mutex.release()
-
-                #cursor_mutex.acquire()
-                #try:
-                # prepare a cursor object using cursor() method
-                cursor = db.cursor()
-                #finally:
-                    #cursor_mutex.release()
-                try:
-                    # Execute the SQL command
-                    cursor.execute(sql, (distInFt, local_ip))
-                    # Commit your changes in the database
-                    db.commit()
-                except:
-                    db.rollback()
-            except:
-                # Rollback in case there is any error
-                db.rollback()
         
 
 def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event, keyboard_Event, finalize_change_Event):

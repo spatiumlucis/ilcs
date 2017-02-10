@@ -137,7 +137,6 @@ def PIR_cmd(keyboard_Event):
         print "GOT on pir_cmd thread: ", brightness_values
 
         if brightness_values[0] == 'D':
-            GPIO.output(pinRelay, GPIO.LOW)
 ##            sql = """DELETE FROM lighting_ip WHERE ip = %s"""
 ##            try:
 ##                cursor.execute(sql, (local_ip))
