@@ -1,0 +1,77 @@
+#no_room{
+	margin-top:10%;
+	text-align: center;
+}
+
+#delete_room_container{
+	text-align: center;
+}
+
+#sensor_container{
+	display:none;
+	margin-top: 15%;
+}
+
+#delete_room_container, #alert{
+	display:none;
+}
+
+
+
+
+#action_sub_menu li{
+	display: inline;
+	margin-right: 10px;
+}
+
+
+#menu_items, #user_logout_btn, #alarm_switch{
+	display: none;
+	
+}
+
+#user_logout_btn{
+	color: white;
+	margin-left: 1px;
+	margin-top:2px;
+}
+
+
+#sleep_alert, #degrade_alert{
+	margin: 0 auto;
+	display: none;
+}
+
+.btn_container{
+	display: none;
+}
+
+
+.aroom_name{
+	display:none;
+}
+
+.mobile_submenu{
+	display: none;
+}
+
+
+@media (min-width: 768px) {
+
+    .navbar .navbar-nav {
+        display: inline-block;
+        float: none;
+        vertical-align: top;
+    }
+
+    .navbar .navbar-collapse {
+        text-align: center;
+    }
+	
+	#menu_items li{
+        margin-right:80px;
+    }
+	
+	
+}
+
