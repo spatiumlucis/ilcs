@@ -512,20 +512,14 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                 change_par_mutex.release()
             if sleep_mode == False and change_par == False:
                 data = bus.read_i2c_block_data(0x29, 0)
-                #print "data:", data
-                #clear = data[1]<<8 | data[0]
-                red = float(data[3]<<8 | data[2])/256
-                red = float(float(red/255))*100
-                red = int(red)
-                green = float(data[5]<<8| data[4])/256
-                green = float(float(green/255))*100
-                green = int(green)
-                blue = float(data[7]<<8 | data[6])/256
-                blue = float(float(blue/255))*100
-                blue = int(blue)
+                clear = data[1] << 8 | data[0]
+                red = ((data[3] << 8 | data[2])/(2**16))*100
+                green = ((data[5] << 8 | data[4])/(2**16))*100
+                blue = ((data[7] << 8 | data[6])/(2**16))*100
                 lux = int((-0.32466 * red) + (1.57837 * green) + (-0.73191 * blue))
-                print "R: %s, G: %s, B: %s, Lux: %s" % (red, green, blue, lux)
-##                #sql = """UPDATE sensor_status SET red = %s, green = %s, blue = %s WHERE ip = %s"""
+                crgbl = "C: %s, R: %s, G: %s, B: %s, Lux: %s" % (clear, red, green, blue, lux)
+                print crgbl
+                #sql = """UPDATE sensor_status SET red = %s, green = %s, blue = %s WHERE ip = %s"""
                 if red < (OLD_RED-(OLD_RED*0.05)) or red > (OLD_RED+(OLD_RED*0.05)):
                     sql = """UPDATE sensor_status SET red = %s WHERE ip = %s"""
                     try:
