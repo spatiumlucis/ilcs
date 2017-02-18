@@ -1,73 +1,16 @@
-"""
-File Name: sensor_sub.py
-
-Version Number: v1.0
-
-Target Device: Raspberry Pi 3
-
-Dependencies:
--Control Subsystem database is online and connected to the same network
--lighting_sub.py
-
-Authors:
--Zach Simpson
--Terry So
--Jeremy Trammell
--Chukwuebuka Nwankwo
-
-Code Description:
-This Python Script is to be used in the Intelligent Lighting Control System
-project, by team Spatium Lucis. The code should NOT be executed before the
-Lighting Subsystem Python script. This is because this script establishes
-client socket connections with its Lighting Subsystem pair. Also ensure that
-the Control Subsystem, both webserver and database are online and connected to
-the proper network. This is because this code will attempt to connect to the
-database in several locations.
-
-The Sensor Subsystem is responsible for reading information about the Lighting
-Subsystem and making sure that it is following the proper circadian rhythm values
-set by the user. Several threads are established to allow each of the sensors to
-read values independent of one another and write them to the database. Should there
-be any detected degradation, the Sensor Subsystem will tell the Lighting Subsystem
-to compensate.
-
-Sources:
--PIR sensor code:
-https://www.modmypi.com/blog/raspberry-pi-gpio-sensing-motion-detection
-
--RGB sensor code:
-http://bradsrpi.blogspot.com/2013/05/tcs34725-rgb-color-sensor-raspberry-pi.html
-
--USR sensor code:
-https://www.modmypi.com/blog/hc-sr04-ultrasonic-range-sensor-on-the-raspberry-pi
-
--Python socket code:
-https://www.tutorialspoint.com/python/python_networking.html
-http://stackoverflow.com/questions/166506/finding-local-ip-addresses-using-pythons-stdlib/25850698#25850698
-
--Python MySQL code:
-https://www.tutorialspoint.com/python/python_database_access.htm
-
--Python thread code:
-https://www.tutorialspoint.com/python/python_multithreading.htm
-"""
-
-"""
-Imports
-"""
+# PIR code from: modmypi.com/blog/raspberry-pi-gpio-sensing-motion-detection
+# Socket code: tutorialspoint.com/python/python_networking.html
 import time
 import socket
 import threading
-import RPi.GPIO as GPIO
-import MySQLdb
+import RPi.GPIO as GPIO  # Import GPIO library
+import MySQLdb  # Required for MySQL stuff
 import smbus
 import sys
 import os
 import signal
+#print "time", time.localtime()[3]*60,":",time.localtime()[4]
 
-"""
-Global Variables
-"""
 lighting_ip = ""
 
 is_sensor_sub_paired = 0
@@ -108,14 +51,9 @@ local_ip = ""
 
 THREADS = []
 
-"""
-Functions
-"""
 def get_ip():
-    """
-    This function is used to get the local IP address of the Raspberry Pi.
-    :return: The IP address as a string.
-    """
+    # source:
+    # http://stackoverflow.com/questions/166506/finding-local-ip-addresses-using-pythons-stdlib/25850698#25850698
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
         # doesn't even have to be reachable
@@ -127,23 +65,10 @@ def get_ip():
         s.close()
     return IP
 
+
 def boot_up():
-    """
-    This is the main boot up sequence for the Sensor Subsystem.
-    First, the function establishes a database connection and
-    calculates the master circadian table by calling init_circadian_table().
-    Then, the function will check the DB if this Raspberry Pi's IP address
-    exists in the DB. If it does, then it will re-establish connection
-    with the last known Lighting Subsystem it was paired with, as well as
-    retrieve the circadian parameters. If the Sensor Subsystem is new then
-    the code will wait until the Control Subsystem adds the room. After
-    the circadian parameters are obtained from the DB, the room's circadian
-    table is created by calling the calc_user_circadian_table() function.
-    Lastly, control is passed to the begin_threading() function so that the
-    sensors' threads can be created.
-    :return: None
-    """
     print "Booting up...."
+    #global cursor
     global is_sensor_sub_paired
     global lighting_ip
     global COLOR_THRESHOLD
@@ -151,30 +76,22 @@ def boot_up():
     global WAKE_UP_TIME
     global SLEEP_MODE_STATUS
     global local_ip
-    # global db
+    #global db
     # Open database connection
-    print "Establishing boot up database connection.....\n"
+    print "Establishing Database connection.....\n"
     db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
-    print "Boot up database connection established.\n"
+    print "Database connection established.\n"
     # prepare a cursor object using cursor() method
     cursor = db.cursor()
-    print "Creating master circadian table..."
     init_circadian_table()
-    print "Master circadian table created."
+    print "Circadian table created..."
     local_ip = get_ip()
-
-    """
-    Check DB if the sensor sub exists
-    """
     sql = """SELECT * FROM sensor_ip WHERE ip = %s"""
     cursor.execute(sql, (local_ip))
     temp = cursor.fetchall()
     if len(temp) == 0:
-        #print "empty tuple"
-        """
-        The sensor sub does NOT exist in the DB so insert it into
-        the sensor_ip and sensor_status tables
-        """
+        print "empty tuple"
+        # insert into DB
         sql = """INSERT INTO sensor_ip(ip, is_paired) VALUES(%s, 0)"""
         sql2 = """INSERT INTO sensor_status(ip, red, green, blue, lumens, red_degraded, green_degraded, blue_degraded, lumens_degraded, sleep_mode_status, distance) VALUEs(%s, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)"""
         try:
@@ -190,35 +107,23 @@ def boot_up():
             # is_sensor_sub_paired = temp[0][1]
 
     else:
-        """
-        The sensor sub DOES exist in the DB. Grab its paired status
-        """
         is_sensor_sub_paired = temp[0][1]
 
-    if is_sensor_sub_paired == 0:
+    if is_sensor_sub_paired == 0:  # not paired yet
         # establish server socket and wait to be told to continue
-        """
-        If the sensor sub is NOT paired with any lighting sub, then
-        establish server socket for control sub to connect to. This
-        socket acts as a signal; as soon as the control sub connects,
-        the sensor sub will continue with the adding process.
-        """
-        sensor_add_svr_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
-        sensor_add_svr_sock_host = ''
-        sensor_add_svr_sock_port = 12348
-        sensor_add_svr_sock.bind((sensor_add_svr_sock_host, sensor_add_svr_sock_port))
 
-        sensor_add_svr_sock.listen(5)
-        print "Waiting to be added by Control Subsystem..."
+        sensor_add_svr_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)  # * Create a socket object
+        sensor_add_svr_sock_host = ''  # * Get local machine name
+        sensor_add_svr_sock_port = 12348  # add sensor sub port
+        sensor_add_svr_sock.bind((sensor_add_svr_sock_host, sensor_add_svr_sock_port))  # * Bind to the port
+
+        sensor_add_svr_sock.listen(5)  # * Now wait for client connection.
+        print "listening on add sensor sub socket...."
 
         sensor_add_svr_sock_connection, sensor_add_svr_sock_connection_addr = sensor_add_svr_sock.accept()  # * Establish connection
         print '\nGot connection from', sensor_add_svr_sock_connection_addr, "\n"
         sensor_add_svr_sock_connection.close()
-
-        """
-        Grab the lighting sub IP to be paired with. It ALWAYS will fetch
-        the LAST IP in the lighing_ip table.
-        """
+        # grab ip for lighting subsystem pair
         sql = """SELECT * from lighting_ip ORDER BY ip DESC LIMIT 1"""
         cursor.execute(sql)
         temp = cursor.fetchall()
@@ -245,27 +150,20 @@ def boot_up():
         sql = """SELECT * FROM sensor_settings WHERE ip = %s"""
         cursor.execute(sql, (local_ip))
         temp = cursor.fetchall()
-        print "Sensor Subsystem added with user values: ", temp[0]
+        print "temp: ", temp
         WAKE_UP_TIME = temp[0][1]
         COLOR_THRESHOLD = temp[0][2]
         LIGHT_THRESHOLD = temp[0][3]
 
     else:
-        """
-        The sensor sub DOES have a pair. Grab what lighting sub
-        it was connected to by searching the sensor_light_pairs
-        table in the DB.
-        """
-        print "Reconnecting to previous Lighting Subsystem..."
+        # sensor sub has a pair
+        # grab the pair
         sql = """SELECT * FROM sensor_light_pairs WHERE sensor_ip = %s"""
         cursor.execute(sql, (local_ip))
         temp = cursor.fetchall()
-
+        print "temp: ", temp
         lighting_ip = temp[0][1]
-
-        """
-        Grab previous sensor sub settings
-        """
+        # retrieve old settings
         sql = """SELECT * FROM sensor_settings WHERE ip = %s"""
         cursor.execute(sql, (local_ip))
         temp = cursor.fetchall()
@@ -273,50 +171,30 @@ def boot_up():
         WAKE_UP_TIME = temp[0][1]
         COLOR_THRESHOLD = temp[0][2]
         LIGHT_THRESHOLD = temp[0][3]
-        print "Sensor-Light pair re-established with values: ", temp[0]
+
         sql = """SELECT * FROM sensor_status WHERE ip = %s"""
         cursor.execute(sql, (local_ip))
         temp = cursor.fetchall()
         SLEEP_MODE_STATUS = temp[0][9]
-    """
-    These events are just temporary for calling calc_user_circadian_table().
-    They are better explained in that function and the begin_threading()
-    function.
-    """
+
+        # print "old settings: ", WAKE_UP_TIME, " ", COLOR_THRESHOLD, " ", LIGHT_THRESHOLD," ",lighting_ip,"\n"
     finalize_change_Event = threading.Event()
     change_par_Event = threading.Event()
-
-    """
-    Calculate the user's circadian table for the sensor sub to use.
-    """
     calc_user_circadian_table(change_par_Event, finalize_change_Event)
-    print "Establishing threads..."
+    print "begining threads"
     begin_threading()
 
 
 def init_circadian_table():
-    """
-    This function is used for creating the master
-    circadian table. The table is a list that has
-    1440 locations (1 for each minute of the day).
-    Each location is also a list of R, G, B brightness
-    values.The value depends on what time of day is is.
-    Between different ranges of time there are different
-    linear functions for the brightness values.
-    :return:None
-    """
     global MASTER_CIRCADIAN_TABLE
     colors = []
 
     t = 0
 
     while t < 1440:
-        """
-        The colors list is always filled in the order R, G, B.
-        Afterwards it is appended to the MASTER_CIRCADIAN_TABLE
-        """
+        # print "t", t
         if t >= 300 and t <= 420:
-
+            # red_values.append((135/120)*t - 337.5)
             colors.append((((135.0 / 120) * t - 337.5) / 255) * 100)
 
             colors.append((((206.0 / 120) * t - 515) / 255) * 100)
@@ -370,7 +248,7 @@ def calc_user_circadian_table(change_par_Event, finalize_change_Event):
     global WAKE_UP_TIME
     global MASTER_CIRCADIAN_TABLE
     global USER_CIRCADIAN_TABLE
-
+    
     # Clear current values from USER_CIRCADIAN_TABLE
     USER_CIRCADIAN_TABLE = MASTER_CIRCADIAN_TABLE[:]
 
@@ -381,7 +259,7 @@ def calc_user_circadian_table(change_par_Event, finalize_change_Event):
         # user wakes earlier
         while count < 1440:
             USER_CIRCADIAN_TABLE[count + wake_diff] = MASTER_CIRCADIAN_TABLE[count]
-            count += 1
+            count +=1
     elif wake_diff > 0:
         # user wakes later
         while count < 1440:
@@ -397,7 +275,6 @@ def calc_user_circadian_table(change_par_Event, finalize_change_Event):
         finalize_change_Event.set()
         time.sleep(1)
 
-
 def begin_threading():
     global SLEEP_MODE_STATUS
     global THREADS
@@ -411,55 +288,48 @@ def begin_threading():
     keyboard_Event = threading.Event()
     keyboard_Event.set()
     finalize_change_Event = threading.Event()
-
+    
     if SLEEP_MODE_STATUS == 1:
         sleep_mode_Event.set()
 
     try:
-        pir_thread = threading.Thread(name='pir_thread', target=PIR_sensor, args=(
-        pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event, keyboard_Event,))
+        pir_thread = threading.Thread(name='pir_thread', target=PIR_sensor, args=(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event, keyboard_Event,))
         pir_thread.start()
         THREADS.append(pir_thread)
     except:
         print "Error: unable to start pir thread"
     try:
-        rgb_thread = threading.Thread(name='rgb_thread', target=RGB_sensor, args=(
-        pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event, keyboard_Event,))
+        rgb_thread = threading.Thread(name='rgb_thread', target=RGB_sensor, args=(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event, keyboard_Event,))
         rgb_thread.start()
         THREADS.append(rgb_thread)
     except:
         print "Error: unable to start rgb thread"
     try:
-        usr_thread = threading.Thread(name='usr_thread', target=USR_sensor, args=(
-        pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event, keyboard_Event,))
+        usr_thread = threading.Thread(name='usr_thread', target=USR_sensor, args=(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event, keyboard_Event,))
         usr_thread.start()
         THREADS.append(usr_thread)
     except:
         print "Error: unable to start usr thread"
     try:
-        circadian_thread = threading.Thread(name='circadian_thread', target=send_circadian_values, args=(
-        pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event, keyboard_Event,
-        finalize_change_Event,))
+        circadian_thread = threading.Thread(name='circadian_thread', target=send_circadian_values, args=(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event, keyboard_Event,finalize_change_Event, ))
         circadian_thread.start()
         THREADS.append(circadian_thread)
     except:
         print "Error: unable to start circadian thread"
 
-    wait_for_cmd(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event,
-                 keyboard_Event, finalize_change_Event)
+    wait_for_cmd(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event, keyboard_Event, finalize_change_Event)
 
 
-def PIR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event,
-               keyboard_Event):
+def PIR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event, keyboard_Event):
     print "Entered read_PIR!\n"
     # global CURRENT_LIGHT_INTENSITY
     global SLEEP_MODE_STATUS
-    # global cursor
+    #global cursor
     global lighting_ip
     global USER_CIRCADIAN_TABLE
     global CURRENT_MINUTE
     global SAVED_MINUTE
-    # global db
+    #global db
 
     # Open database connection
     print "Establishing Database connection.....\n"
@@ -471,12 +341,12 @@ def PIR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
     usr_DB_Event.wait()
     cmd_DB_Event.wait()
     cursor = db.cursor()
-    # exit()
+    #exit()
     local_ip = get_ip()
-
+    
     # * Set up PIR
     GPIO.setmode(GPIO.BOARD)  # Set GPIO pin numbering
-    # pir = 40  # Associate pin 40 to pir
+    #pir = 40  # Associate pin 40 to pir
     pir = 12
     GPIO.setup(pir, GPIO.IN)  # Set pin as GPIO in
     print "\nWaiting for sensor to settle\n"
@@ -541,21 +411,20 @@ def PIR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                     db.commit()
                 except (AttributeError, MySQLdb.OperationalError):
                     print "trying to reconnect..."
-                    # db_mutex.acquire()
-                    # try:
+                    #db_mutex.acquire()
+                    #try:
                     print "Establishing Database connection.....\n"
-                    db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis",
-                                         db="ilcs")
+                    db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
                     print "Database connection established.\n"
-                    # finally:
-                    # db_mutex.release()
+                    #finally:
+                        #db_mutex.release()
 
-                    # cursor_mutex.acquire()
-                    # try:
-                    # prepare a cursor object using cursor() method
+                    #cursor_mutex.acquire()
+                    #try:
+                        # prepare a cursor object using cursor() method
                     cursor = db.cursor()
-                    # finally:
-                    # cursor_mutex.release()
+                    #finally:
+                        #cursor_mutex.release()
                     try:
                         # Execute the SQL command
                         cursor.execute(sql, (local_ip))
@@ -565,6 +434,7 @@ def PIR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                         db.rollback()
                 except:
                     db.rollback()
+
 
                 sensor_to_lighting_cli_sock.close()
             timer = 0
@@ -576,12 +446,12 @@ def PIR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                 time.sleep(1)
 
                 # sensor_to_lighting_cli_sock.close()
+        
 
 
-def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event,
-               keyboard_Event):
+def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event, keyboard_Event):
     print "Entered read_RGB!\n"
-    # global cursor
+    #global cursor
     global is_sensor_sub_paired
     global lighting_ip
     global COLOR_THRESHOLD
@@ -592,8 +462,8 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
     global OLD_RED
     global OLD_GREEN
     global OLD_BLUE
-
-    # global db
+    
+    #global db
     # Open database connection
     print "Establishing Database connection.....\n"
     db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
@@ -603,15 +473,15 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
     pir_DB_Event.wait()
     usr_DB_Event.wait()
     cmd_DB_Event.wait()
-    # exit()
+    #exit()
     # prepare a cursor object using cursor() method
     cursor = db.cursor()
     bus = smbus.SMBus(1)
-    # bus = smbus.SMBus(0)
+    #bus = smbus.SMBus(0)
     # I2C address 0x29
     # Register address must be OR'ed wit 0x80
     bus.write_byte(0x29, 0x80 | 0x12)
-    # time.sleep(0.2)
+    #time.sleep(0.2)
     ver = bus.read_byte(0x29)
     # version # should be 0x44
 
@@ -624,11 +494,11 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
     if ver == 0x44:
         print "Device found\n"
         bus.write_byte(0x29, 0x80 | 0x00)  # 0x00 = ENABLE register
-        # time.sleep(0.2)
+        #time.sleep(0.2)
         bus.write_byte(0x29, 0x01 | 0x02)  # 0x01 = Power on, 0x02 RGB sensors enabled
-        # time.sleep(0.2)
+        #time.sleep(0.2)
         bus.write_byte(0x29, 0x80 | 0x14)  # Reading results start register 14, LSB then MSB
-        # time.sleep(0.2)
+        #time.sleep(0.2)
         while True and keyboard_Event.isSet():
             sleep_mutex.acquire()
             try:
@@ -642,21 +512,21 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                 change_par_mutex.release()
             if sleep_mode == False and change_par == False:
                 data = bus.read_i2c_block_data(0x29, 0)
-                # print "data:", data
-                # clear = data[1]<<8 | data[0]
-                red = float(data[3] << 8 | data[2]) / 256
-                red = float(float(red / 255)) * 100
+                #print "data:", data
+                #clear = data[1]<<8 | data[0]
+                red = float(data[3]<<8 | data[2])/256
+                red = float(float(red/255))*100
                 red = int(red)
-                green = float(data[5] << 8 | data[4]) / 256
-                green = float(float(green / 255)) * 100
+                green = float(data[5]<<8| data[4])/256
+                green = float(float(green/255))*100
                 green = int(green)
-                blue = float(data[7] << 8 | data[6]) / 256
-                blue = float(float(blue / 255)) * 100
+                blue = float(data[7]<<8 | data[6])/256
+                blue = float(float(blue/255))*100
                 blue = int(blue)
                 lux = int((-0.32466 * red) + (1.57837 * green) + (-0.73191 * blue))
                 print "R: %s, G: %s, B: %s, Lux: %s" % (red, green, blue, lux)
-                ##                #sql = """UPDATE sensor_status SET red = %s, green = %s, blue = %s WHERE ip = %s"""
-                if red < (OLD_RED - (OLD_RED * 0.05)) or red > (OLD_RED + (OLD_RED * 0.05)):
+##                #sql = """UPDATE sensor_status SET red = %s, green = %s, blue = %s WHERE ip = %s"""
+                if red < (OLD_RED-(OLD_RED*0.05)) or red > (OLD_RED+(OLD_RED*0.05)):
                     sql = """UPDATE sensor_status SET red = %s WHERE ip = %s"""
                     try:
                         # Execute the SQL command
@@ -666,21 +536,20 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                         OLD_RED = red
                     except (AttributeError, MySQLdb.OperationalError):
                         print "trying to reconnect..."
-                        # db_mutex.acquire()
-                        # try:
+                        #db_mutex.acquire()
+                        #try:
                         print "Establishing Database connection.....\n"
-                        db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis",
-                                             db="ilcs")
+                        db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
                         print "Database connection established.\n"
-                        # finally:
-                        # db_mutex.release()
+                        #finally:
+                            #db_mutex.release()
 
-                        # cursor_mutex.acquire()
-                        # try:
+                        #cursor_mutex.acquire()
+                        #try:
                         # prepare a cursor object using cursor() method
                         cursor = db.cursor()
-                        # finally:
-                        # cursor_mutex.release()
+                        #finally:
+                            #cursor_mutex.release()
                         try:
                             # Execute the SQL command
                             cursor.execute(sql, (red, local_ip))
@@ -691,7 +560,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                     except:
                         # Rollback in case there is any error
                         db.rollback()
-                if green < (OLD_GREEN - (OLD_GREEN * 0.05)) or green > (OLD_GREEN + (OLD_GREEN * 0.05)):
+                if green < (OLD_GREEN-(OLD_GREEN*0.05)) or green > (OLD_GREEN+(OLD_GREEN*0.05)):
                     sql = """UPDATE sensor_status SET green = %s WHERE ip = %s"""
                     try:
                         # Execute the SQL command
@@ -701,21 +570,20 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                         OLD_GREEN = green
                     except (AttributeError, MySQLdb.OperationalError):
                         print "trying to reconnect..."
-                        # db_mutex.acquire()
-                        # try:
+                        #db_mutex.acquire()
+                        #try:
                         print "Establishing Database connection.....\n"
-                        db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis",
-                                             db="ilcs")
+                        db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
                         print "Database connection established.\n"
-                        # finally:
-                        # db_mutex.release()
+                        #finally:
+                            #db_mutex.release()
 
-                        # cursor_mutex.acquire()
-                        # try:
+                        #cursor_mutex.acquire()
+                        #try:
                         # prepare a cursor object using cursor() method
                         cursor = db.cursor()
-                        # finally:
-                        # cursor_mutex.release()
+                        #finally:
+                            #cursor_mutex.release()
                         try:
                             # Execute the SQL command
                             cursor.execute(sql, (green, local_ip))
@@ -726,7 +594,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                     except:
                         # Rollback in case there is any error
                         db.rollback()
-                if blue < (OLD_BLUE - (OLD_BLUE * 0.05)) or blue > (OLD_BLUE + (OLD_BLUE * 0.05)):
+                if blue < (OLD_BLUE-(OLD_BLUE*0.05)) or blue > (OLD_BLUE+(OLD_BLUE*0.05)):
                     sql = """UPDATE sensor_status SET blue = %s WHERE ip = %s"""
                     try:
                         # Execute the SQL command
@@ -736,21 +604,20 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                         OLD_BLUE = blue
                     except (AttributeError, MySQLdb.OperationalError):
                         print "trying to reconnect..."
-                        # db_mutex.acquire()
-                        # try:
+                        #db_mutex.acquire()
+                        #try:
                         print "Establishing Database connection.....\n"
-                        db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis",
-                                             db="ilcs")
+                        db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
                         print "Database connection established.\n"
-                        # finally:
-                        # db_mutex.release()
+                        #finally:
+                            #db_mutex.release()
 
-                        # cursor_mutex.acquire()
-                        # try:
+                        #cursor_mutex.acquire()
+                        #try:
                         # prepare a cursor object using cursor() method
                         cursor = db.cursor()
-                        # finally:
-                        # cursor_mutex.release()
+                        #finally:
+                            #cursor_mutex.release()
                         try:
                             # Execute the SQL command
                             cursor.execute(sql, (blue, local_ip))
@@ -763,15 +630,14 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                         db.rollback()
 
                 time.sleep(2)
-
+            
     else:
         print "Device not found\n"
 
 
-def USR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event,
-               keyboard_Event):
+def USR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event, keyboard_Event):
     print "Entered read_USR!\n"
-    # global cursor
+    #global cursor
     global is_sensor_sub_paired
     global lighting_ip
     global COLOR_THRESHOLD
@@ -785,9 +651,10 @@ def USR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
     pir_DB_Event.wait()
     rgb_DB_Event.wait()
     cmd_DB_Event.wait()
-    # exit()
+    #exit()
     # prepare a cursor object using cursor() method
     cursor = db.cursor()
+
 
     sql = """UPDATE sensor_status SET distance = 8 WHERE ip = %s"""
     try:
@@ -797,20 +664,20 @@ def USR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
         db.commit()
     except (AttributeError, MySQLdb.OperationalError):
         print "trying to reconnect..."
-        # db_mutex.acquire()
-        # try:
+        #db_mutex.acquire()
+        #try:
         print "Establishing Database connection.....\n"
         db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
         print "Database connection established.\n"
-        # finally:
-        # db_mutex.release()
+        #finally:
+            #db_mutex.release()
 
-        # cursor_mutex.acquire()
-        # try:
+        #cursor_mutex.acquire()
+        #try:
         # prepare a cursor object using cursor() method
         cursor = db.cursor()
-        # finally:
-        # cursor_mutex.release()
+        #finally:
+            #cursor_mutex.release()
         try:
             # Execute the SQL command
             cursor.execute(sql, (distInFt, local_ip))
@@ -822,43 +689,45 @@ def USR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
         # Rollback in case there is any error
         db.rollback()
 
-    GPIO.setmode(GPIO.BOARD)  # Set GPIO pin numbering
+    
+    GPIO.setmode(GPIO.BOARD)                              #Set GPIO pin numbering 
 
-    TRIG = 36  # Associate pin 36 to TRIG
-    ECHO = 38  # Associate pin 38 to ECHO
+    TRIG = 36                                           #Associate pin 36 to TRIG
+    ECHO = 38                                           #Associate pin 38 to ECHO
 
     print "Distance measurement in progress"
 
-    GPIO.setup(TRIG, GPIO.OUT)  # Set pin as GPIO out
-    GPIO.setup(ECHO, GPIO.IN)  # Set pin as GPIO in
+    GPIO.setup(TRIG,GPIO.OUT)                           #Set pin as GPIO out
+    GPIO.setup(ECHO,GPIO.IN)                            #Set pin as GPIO in
 
     while True and keyboard_Event.isSet():
-        GPIO.output(TRIG, False)  # Set TRIG as LOW
+        GPIO.output(TRIG, False)                          #Set TRIG as LOW
         print "Waitng For Sensor To Settle"
-        time.sleep(2)  # Delay of 2 seconds
+        time.sleep(2)                                     #Delay of 2 seconds
 
-        GPIO.output(TRIG, True)  # Set TRIG as HIGH
-        time.sleep(0.00001)  # Delay of 0.00001 seconds
-        GPIO.output(TRIG, False)  # Set TRIG as LOW
+        GPIO.output(TRIG, True)                           #Set TRIG as HIGH
+        time.sleep(0.00001)                               #Delay of 0.00001 seconds
+        GPIO.output(TRIG, False)                          #Set TRIG as LOW
 
-        while GPIO.input(ECHO) == 0:  # Check whether the ECHO is LOW
-            pulse_start = time.time()  # Saves the last known time of LOW pulse
+        while GPIO.input(ECHO)==0:                        #Check whether the ECHO is LOW
+            pulse_start = time.time()                       #Saves the last known time of LOW pulse
 
-        while GPIO.input(ECHO) == 1:  # Check whether the ECHO is HIGH
-            pulse_end = time.time()  # Saves the last known time of HIGH pulse
+        while GPIO.input(ECHO)==1:                        #Check whether the ECHO is HIGH
+            pulse_end = time.time()                         #Saves the last known time of HIGH pulse
 
-        pulse_duration = pulse_end - pulse_start  # Get pulse duration to a variable
+        pulse_duration = pulse_end - pulse_start          #Get pulse duration to a variable
 
-        distance = pulse_duration * 17150  # Multiply pulse duration by 17150 to get distance
-        distance = round(distance, 2)  # Round to two decimal points
-        distInFt = distance / 30.48  # Cm to ft conversion
-        distInFt = round(distInFt, 2)  # Round to two decimal points
-
-        if distInFt >= 8:  # Check whether the distance is within range
-            print "Distance:", distance, "cm"  # Print distance with 0.5 cm calibration; other website has "distance - 0.5","cm"
-            print "Distance:", distInFt, "ft"  # Print distance in ft
+        distance = pulse_duration * 17150                 #Multiply pulse duration by 17150 to get distance
+        distance = round(distance, 2)                     #Round to two decimal points
+        distInFt = distance/30.48                         #Cm to ft conversion
+        distInFt = round(distInFt, 2)                     #Round to two decimal points
+        
+        
+        if distInFt >= 8:               #Check whether the distance is within range
+            print "Distance:",distance,"cm"               #Print distance with 0.5 cm calibration; other website has "distance - 0.5","cm"
+            print "Distance:",distInFt,"ft"               #Print distance in ft
         else:
-            print "Out Of Range"  # display out of range
+            print "Out Of Range"                            #display out of range
             sql = """UPDATE sensor_status SET distance = -1 WHERE ip = %s"""
             try:
                 # Execute the SQL command
@@ -867,21 +736,20 @@ def USR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                 db.commit()
             except (AttributeError, MySQLdb.OperationalError):
                 print "trying to reconnect..."
-                # db_mutex.acquire()
-                # try:
+                #db_mutex.acquire()
+                #try:
                 print "Establishing Database connection.....\n"
-                db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis",
-                                     db="ilcs")
+                db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
                 print "Database connection established.\n"
-                # finally:
-                # db_mutex.release()
+                #finally:
+                    #db_mutex.release()
 
-                # cursor_mutex.acquire()
-                # try:
+                #cursor_mutex.acquire()
+                #try:
                 # prepare a cursor object using cursor() method
                 cursor = db.cursor()
-                # finally:
-                # cursor_mutex.release()
+                #finally:
+                    #cursor_mutex.release()
                 try:
                     # Execute the SQL command
                     cursor.execute(sql, (distInFt, local_ip))
@@ -892,10 +760,10 @@ def USR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
             except:
                 # Rollback in case there is any error
                 db.rollback()
+        
 
+def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event, keyboard_Event, finalize_change_Event):
 
-def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event,
-                          keyboard_Event, finalize_change_Event):
     global USER_CIRCADIAN_TABLE
     global SLEEP_MODE_STATUS
     global CURRENT_MINUTE
@@ -904,7 +772,7 @@ def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_E
     pir_DB_Event.wait()
     rgb_DB_Event.wait()
     cmd_DB_Event.wait()
-    # exit()
+    #exit()
     # print "circadian cli sock:%s" %circadian_cli_sock_host
     count = 0
     circadian_cmd = ""
@@ -981,27 +849,26 @@ def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_E
             time.sleep(1)
 
 
-def wait_for_cmd(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event,
-                 keyboard_Event, finalize_change_Event):
+def wait_for_cmd(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event, keyboard_Event, finalize_change_Event):
     print "Entered wait cmd!\n"
-
+    
     global lighting_ip
     global COLOR_THRESHOLD
     global LIGHT_THRESHOLD
     global WAKE_UP_TIME
     global THREADS
     global local_ip
-
+    
     print "Establishing Database connection.....\n"
     db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
     print "Database connection established.\n"
     cursor = db.cursor()
-
+    
     cmd_DB_Event.set()
     usr_DB_Event.wait()
     pir_DB_Event.wait()
     rgb_DB_Event.wait()
-
+    
     # create server socket for user to connect to for changing values
 
     wait_cmd_svr_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)  # * Create a socket object
@@ -1022,7 +889,7 @@ def wait_for_cmd(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, cha
                 wait_cmd_svr_sock_connection.close()
                 continue
             else:
-
+    
                 cmd = cmd.split('|')
                 print "cmd got: ", cmd
                 if cmd[0] == 'D':
@@ -1035,7 +902,7 @@ def wait_for_cmd(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, cha
                         print "\nCould not connect to lighting subsystem\n"
                     delete_sock.send("D|")
                     delete_sock.close()
-
+                    
                     sql = """DELETE FROM sensor_ip WHERE ip = %s"""
                     try:
                         # Execute the SQL command
@@ -1044,21 +911,20 @@ def wait_for_cmd(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, cha
                         db.commit()
                     except (AttributeError, MySQLdb.OperationalError):
                         print "trying to reconnect..."
-                        # db_mutex.acquire()
-                        # try:
+                        #db_mutex.acquire()
+                        #try:
                         print "Establishing Database connection.....\n"
-                        db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis",
-                                             db="ilcs")
+                        db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
                         print "Database connection established.\n"
-                        # finally:
-                        # db_mutex.release()
+                        #finally:
+                            #db_mutex.release()
 
-                        # cursor_mutex.acquire()
-                        # try:
+                        #cursor_mutex.acquire()
+                        #try:
                         # prepare a cursor object using cursor() method
                         cursor = db.cursor()
-                        # finally:
-                        # cursor_mutex.release()
+                        #finally:
+                            #cursor_mutex.release()
                         try:
                             # Execute the SQL command
                             cursor.execute(sql, (local_ip))
@@ -1078,21 +944,20 @@ def wait_for_cmd(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, cha
                         db.commit()
                     except (AttributeError, MySQLdb.OperationalError):
                         print "trying to reconnect..."
-                        # db_mutex.acquire()
-                        # try:
+                        #db_mutex.acquire()
+                        #try:
                         print "Establishing Database connection.....\n"
-                        db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis",
-                                             db="ilcs")
+                        db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
                         print "Database connection established.\n"
-                        # finally:
-                        # db_mutex.release()
+                        #finally:
+                            #db_mutex.release()
 
-                        # cursor_mutex.acquire()
-                        # try:
+                        #cursor_mutex.acquire()
+                        #try:
                         # prepare a cursor object using cursor() method
                         cursor = db.cursor()
-                        # finally:
-                        # cursor_mutex.release()
+                        #finally:
+                            #cursor_mutex.release()
                         try:
                             # Execute the SQL command
                             cursor.execute(sql, (local_ip))
@@ -1103,7 +968,7 @@ def wait_for_cmd(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, cha
                     except:
                         # Rollback in case there is any error
                         db.rollback()
-
+                        
                     sql = """DELETE FROM sensor_status WHERE ip = %s"""
                     try:
                         # Execute the SQL command
@@ -1112,21 +977,20 @@ def wait_for_cmd(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, cha
                         db.commit()
                     except (AttributeError, MySQLdb.OperationalError):
                         print "trying to reconnect..."
-                        # db_mutex.acquire()
-                        # try:
+                        #db_mutex.acquire()
+                        #try:
                         print "Establishing Database connection.....\n"
-                        db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis",
-                                             db="ilcs")
+                        db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
                         print "Database connection established.\n"
-                        # finally:
-                        # db_mutex.release()
+                        #finally:
+                            #db_mutex.release()
 
-                        # cursor_mutex.acquire()
-                        # try:
+                        #cursor_mutex.acquire()
+                        #try:
                         # prepare a cursor object using cursor() method
                         cursor = db.cursor()
-                        # finally:
-                        # cursor_mutex.release()
+                        #finally:
+                            #cursor_mutex.release()
                         try:
                             # Execute the SQL command
                             cursor.execute(sql, (local_ip))
@@ -1145,21 +1009,20 @@ def wait_for_cmd(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, cha
                         db.commit()
                     except (AttributeError, MySQLdb.OperationalError):
                         print "trying to reconnect..."
-                        # db_mutex.acquire()
-                        # try:
+                        #db_mutex.acquire()
+                        #try:
                         print "Establishing Database connection.....\n"
-                        db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis",
-                                             db="ilcs")
+                        db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
                         print "Database connection established.\n"
-                        # finally:
-                        # db_mutex.release()
+                        #finally:
+                            #db_mutex.release()
 
-                        # cursor_mutex.acquire()
-                        # try:
+                        #cursor_mutex.acquire()
+                        #try:
                         # prepare a cursor object using cursor() method
                         cursor = db.cursor()
-                        # finally:
-                        # cursor_mutex.release()
+                        #finally:
+                            #cursor_mutex.release()
                         try:
                             # Execute the SQL command
                             cursor.execute(sql, (local_ip))
@@ -1178,21 +1041,20 @@ def wait_for_cmd(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, cha
                         db.commit()
                     except (AttributeError, MySQLdb.OperationalError):
                         print "trying to reconnect..."
-                        # db_mutex.acquire()
-                        # try:
+                        #db_mutex.acquire()
+                        #try:
                         print "Establishing Database connection.....\n"
-                        db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis",
-                                             db="ilcs")
+                        db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
                         print "Database connection established.\n"
-                        # finally:
-                        # db_mutex.release()
+                        #finally:
+                            #db_mutex.release()
 
-                        # cursor_mutex.acquire()
-                        # try:
+                        #cursor_mutex.acquire()
+                        #try:
                         # prepare a cursor object using cursor() method
                         cursor = db.cursor()
-                        # finally:
-                        # cursor_mutex.release()
+                        #finally:
+                            #cursor_mutex.release()
                         try:
                             # Execute the SQL command
                             cursor.execute(sql, (lighting_ip))
@@ -1225,6 +1087,5 @@ def wait_for_cmd(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, cha
         for thread in THREADS:
             thread.join()
         sys.exit()
-
 
 boot_up()
