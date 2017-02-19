@@ -111,6 +111,8 @@ THREADS = []
 """
 Functions
 """
+
+
 def get_ip():
     """
     This function is used to get the local IP address of the Raspberry Pi.
@@ -127,6 +129,7 @@ def get_ip():
     finally:
         s.close()
     return IP
+
 
 def boot_up():
     """
@@ -534,7 +537,8 @@ def begin_threading():
     try:
         print "Starting PIR thread..."
         pir_thread = threading.Thread(name='pir_thread', target=PIR_sensor, args=(
-        pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event, keyboard_Event,))
+            pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event,
+            keyboard_Event,))
         pir_thread.start()
         THREADS.append(pir_thread)
     except:
@@ -542,7 +546,8 @@ def begin_threading():
     try:
         print "Starting RGB thread..."
         rgb_thread = threading.Thread(name='rgb_thread', target=RGB_sensor, args=(
-        pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event, keyboard_Event,))
+            pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event,
+            keyboard_Event,))
         rgb_thread.start()
         THREADS.append(rgb_thread)
     except:
@@ -550,7 +555,8 @@ def begin_threading():
     try:
         print "Starting USR thread..."
         usr_thread = threading.Thread(name='usr_thread', target=USR_sensor, args=(
-        pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event, keyboard_Event,))
+            pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event,
+            keyboard_Event,))
         usr_thread.start()
         THREADS.append(usr_thread)
     except:
@@ -558,8 +564,8 @@ def begin_threading():
     try:
         print "Starting circadian command thread..."
         circadian_thread = threading.Thread(name='circadian_thread', target=send_circadian_values, args=(
-        pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event, keyboard_Event,
-        finalize_change_Event,))
+            pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event, keyboard_Event,
+            finalize_change_Event,))
         circadian_thread.start()
         THREADS.append(circadian_thread)
     except:
@@ -664,7 +670,7 @@ def PIR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                 print "Could not connect to lighting subsystem"
             sensor_to_lighting_cli_sock.send("0|0|0|")
 
-            print "Lighting Subsystem (IP: '%s') has entered sleep mode"%lighting_ip
+            print "Lighting Subsystem (IP: '%s') has entered sleep mode" % lighting_ip
 
             """
             Acquire mutex for sleep_mode_Event.
@@ -1082,7 +1088,6 @@ def USR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
         distInFt = distance / 30.48
         distInFt = round(distInFt, 2)
 
-
         if distInFt >= 8:
             """
             Print distance if >= 8. This will be removed.
@@ -1114,6 +1119,7 @@ def USR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                     db.rollback()
             except:
                 db.rollback()
+
 
 def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event,
                           keyboard_Event, finalize_change_Event):
@@ -1164,7 +1170,6 @@ def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_E
     rgb_DB_Event.wait()
     cmd_DB_Event.wait()
 
-
     count = 0
     circadian_cmd = ""
 
@@ -1192,9 +1197,9 @@ def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_E
             If the sleep_mode_Event and the change_par_Event
             are NOT set, then send a brightness command
             """
-            #time_mutex.acquire()
-            #try:
-            #print "noon: ", USER_CIRCADIAN_TABLE[720]
+            # time_mutex.acquire()
+            # try:
+            # print "noon: ", USER_CIRCADIAN_TABLE[720]
             """
             Get the current time from the Raspberry Pi.
             NOTE: If the device time is wrong, then
@@ -1369,7 +1374,7 @@ def wait_for_cmd(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, cha
     wait_cmd_svr_sock.listen(5)
     try:
         while True:
-            #print "current values", WAKE_UP_TIME, " ", COLOR_THRESHOLD, " ", LIGHT_THRESHOLD
+            # print "current values", WAKE_UP_TIME, " ", COLOR_THRESHOLD, " ", LIGHT_THRESHOLD
             wait_cmd_svr_sock_connection, wait_cmd_svr_sock_connection_addr = wait_cmd_svr_sock.accept()  # * Establish connection w
             print '\nGot connection from', wait_cmd_svr_sock_connection_addr, "\n"
 
@@ -1543,6 +1548,7 @@ def wait_for_cmd(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, cha
         End the script
         """
         sys.exit()
+
 
 """
 This is where the Script starts. The boot_up()
