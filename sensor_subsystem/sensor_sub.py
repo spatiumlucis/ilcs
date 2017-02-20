@@ -96,9 +96,12 @@ CURRENT_MINUTE = 0
 
 SAVED_MINUTE = 0
 
+"""
+Mutex locks are used to protect data that
+can be read or written to from more than
+one thread.
+"""
 sleep_mutex = threading.Lock()
-
-time_mutex = threading.Lock()
 
 change_par_mutex = threading.Lock()
 
@@ -302,7 +305,7 @@ def boot_up():
     Calculate the user's circadian table for the sensor sub to use.
     """
     calc_user_circadian_table(change_par_Event, finalize_change_Event)
-    print "Establishing threads..."
+    print "Initializing threads..."
     begin_threading()
 
 

@@ -1,61 +1,94 @@
-#PIR code from: modmypi.com/blog/raspberry-pi-gpio-sensing-motion-detection
-#Socket code: tutorialspoint.com/python/python_networking.html
+"""
+File Name: lighting_sub.py
+
+Version Number: v1.0
+
+Target Device: Raspberry Pi 3
+
+Dependencies:
+-Control Subsystem database is online and connected to the same network
+
+Authors:
+-Zach Simpson
+-Terry So
+-Jeremy Trammell
+-Chukwuebuka Nwankwo
+
+Code Description:
+
+Sources:
+-Python socket code:
+https://www.tutorialspoint.com/python/python_networking.html
+http://stackoverflow.com/questions/166506/finding-local-ip-addresses-using-pythons-stdlib/25850698#25850698
+
+-Python MySQL code:
+https://www.tutorialspoint.com/python/python_database_access.htm
+
+-Python thread code:
+https://www.tutorialspoint.com/python/python_multithreading.htm
+"""
+"""
+Global Variables
+"""
 import time
 import socket
 import threading
 import RPi.GPIO as GPIO
-import MySQLdb #Required for MySQL stuff
+import MySQLdb
 import wiringpi
 import sys
 import os
 import signal
 
-#PWM Stuff
-lightIntensity = -5
-
-#*Set up PWM for lights
-# pinPWM = 18
-# pinRelay = 7
-#
-# GPIO.setmode(GPIO.BOARD)
-# GPIO.setup(pinRelay, GPIO.OUT)
-#
-# wiringpi.wiringPiSetupGpio()
-# wiringpi.pinMode(pinPWM, 2)
-# wiringpi.pwmSetClock(5000)
-pinRelay = 4
-
-wiringpi.wiringPiSetupGpio()
+"""
+Establish GPIO paramters for the LEDs
+Red uses BCM pin 17
+Green uses BCM pin 27
+Blue uses BCM pin 22
+Relay uses BCM pin 4
+"""
 GPIO.setmode(GPIO.BCM) #choose BCM or BOARD numbering schemes
 GPIO.setup(17, GPIO.OUT) #set GIPO 17 as red led
 GPIO.setup(27, GPIO.OUT) #set GIPO 27 as green led
 GPIO.setup(22, GPIO.OUT) #set GIPO 22 as blue led
+pinRelay = 4
 GPIO.setup(pinRelay, GPIO.OUT)
 
+"""
+Set up PWM information for the LEDs
+"""
 red = GPIO.PWM(17, 100) #create object red for PWM on port 17 at 100Hz
 green = GPIO.PWM(27, 100) #create object red for PWM on port 27 at 100Hz
 blue = GPIO.PWM(22, 100) #create object red for PWM on port 22 at 100Hz
 
+"""
+Start the LED PWMs
+"""
 red.start(0)
 green.start(0)
 blue.start(0)
 
-#GPIO.output(pinRelay, GPIO.LOW)
-
 pause_time = 0.02
 
 THREADS = []
-
+"""
+Mutex locks are used to protect shared variables
+that can be read or written from multiple threads.
+"""
 keyboard_Event_mutex = threading.Lock()
-# Open database connection
-print "connecting to database..."
+
+"""
+Establish database connection
+"""
+print "Connecting to database in Lighting Subsystem..."
 db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
-# prepare a cursor object using cursor() method
 cursor = db.cursor()
 
 def get_ip():
-    # source:
-    # http://stackoverflow.com/questions/166506/finding-local-ip-addresses-using-pythons-stdlib/25850698#25850698
+    """
+    This function is used to get the local IP of the Raspberry Pi.
+    :return: The local IP address as a string
+    """
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
         # doesn't even have to be reachable
@@ -68,31 +101,67 @@ def get_ip():
     return IP
 
 def boot_up():
-    print "entered"
+    """
+    This is the main boot up function for the lighting subsystem.
+    It will look into the DB to see if its IP address exists in the
+    lighting_ip table. If the IP DOES exist, then the code will begin
+    waiting for brightness commands. If the IP DOES NOT exist, the IP
+    will be added to the end of the of the lighting_ip table and begin
+    waiting for brightness commands from the sensor subsystem.
+    :return: None.
+    """
+    """
+    Import global vars
+    """
     global cursor
-    # get local ip
+    global db
+
+    print "Booting up..."
     local_ip = get_ip()
+
+    """
+    Check DB for the local IP
+    """
     sql = """SELECT * FROM lighting_ip WHERE ip = %s"""
     cursor.execute(sql, (local_ip))
     temp = cursor.fetchall()
     if len(temp) == 0:
-        print "empty tuple"
-        #insert into DB
+        """
+        If the local IP doesn't exist in the DB,
+        then add it
+        """
+
         sql = """INSERT INTO lighting_ip(ip) VALUES(%s)"""
         try:
             cursor.execute(sql, (local_ip))
             db.commit()
         except:
             db.rollback()
-        begin_threading()
-    else:
-        begin_threading()
+    """
+    If the IP does exist, then create threads
+    """
+    print "Initializing threads..."
+    begin_threading()
 
 def begin_threading():
+    """
+    This function creates the threads for the lighting subsystem.
+    The pir_thread is used to listen for sleep mode commands from
+    the sensor subsystem. The main thread waits for normal brightness
+    commands.
+    :return: None.
+    """
+    """
+    Import global vars
+    """
     global THREADS
+
+    """
+    This event is useless
+    """
     keyboard_Event = threading.Event()
     keyboard_Event.set()
-    # Create two threads as follows
+    print "Trying to create PIR thread..."
     try:
         pir_thread=threading.Thread(name='pir_thread', target=PIR_cmd, args=(keyboard_Event,))
         pir_thread.start()
@@ -103,6 +172,19 @@ def begin_threading():
     light_cmd(keyboard_Event)
 
 def PIR_cmd(keyboard_Event):
+    """
+    This is the init function for the pir_thread. It listens
+    for sleep mode commands from the sensor subsystem. If a
+    sleep mode command is received, then the relay is triggered
+    and the lights are turned off. If a wake up command is received,
+    then the lights are turned back on.
+    :param keyboard_Event: This event is useless and will be removed
+    :return: None.
+    """
+
+    """
+    Import global vars
+    """
     global red
     global green
     global blue
@@ -110,16 +192,17 @@ def PIR_cmd(keyboard_Event):
     global local_ip
     global cursor
     global db
-    # *establish server socket for Control subsystem to connect to for LI send
-    lighting_pir_svr_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)  # * Create a socket object
-    lighting_pir_svr_sock_host = ''  # * Get local machine name
-    lighting_pir_svr_sock_port = 12346  # PIR port.
-    lighting_pir_svr_sock.bind((lighting_pir_svr_sock_host, lighting_pir_svr_sock_port))  # * Bind to the port
+    print "PIR thread created successfully.\nPlease activate the Sensor Subsystem."
 
-    lighting_pir_svr_sock.listen(5)  # * Now wait for client connection.
-    print "listening on light_pir socket...."
-    # print s.recv(1024)
-    # s.close                     #* Close the socket when done
+    """
+    Set up server socket for sensor subsystem to connect to
+    """
+    lighting_pir_svr_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
+    lighting_pir_svr_sock_host = ''
+    lighting_pir_svr_sock_port = 12346
+    lighting_pir_svr_sock.bind((lighting_pir_svr_sock_host, lighting_pir_svr_sock_port))
+
+    lighting_pir_svr_sock.listen(5)
 
     while True and keyboard_Event.isSet():
         keyboard_Event_mutex.acquire()
@@ -129,42 +212,37 @@ def PIR_cmd(keyboard_Event):
             keyboard_Event_mutex.release()
         if not keyboard:
             break
+        """
+        Receive connection from sensor sub and get
+        command values
+        """
         lighting_pir_svr_sock_connection, lighting_pir_svr_sock_connection_addr = lighting_pir_svr_sock.accept()  # * Establish connection w
-        print '\nGot connection from', lighting_pir_svr_sock_connection_addr, "\n"
+        print 'Got connection from', lighting_pir_svr_sock_connection_addr
 
         light_intensity = lighting_pir_svr_sock_connection.recv(1024)
         brightness_values = light_intensity.split('|')
-        print "GOT on pir_cmd thread: ", brightness_values
+        print "Received command on PIR thread: ", brightness_values
 
         if brightness_values[0] == 'D':
+            """
+            If command was 'D', then kill the
+            script
+            """
             GPIO.output(pinRelay, GPIO.LOW)
-##            sql = """DELETE FROM lighting_ip WHERE ip = %s"""
-##            try:
-##                cursor.execute(sql, (local_ip))
-##                db.commit()
-##            except:
-##                db.rollback()
             pid = os.getpid()
             os.kill(pid, signal.SIGKILL)
         elif float(brightness_values[0]) == 0 and float(brightness_values[1]) == 0 and float(brightness_values[2]) == 0:
-            # * turn lights off
-            print "entering sleep mode..."
+            """
+            If command is all 0s then turn lights off
+            """
+            print "Entering sleep mode..."
             GPIO.output(pinRelay, GPIO.LOW)
-            #red.stop()
-            #green.stop()
-            #blue.stop()
-            #GPIO.cleanup()
-            #GPIO.output(pinRelay, GPIO.LOW)
         else:
-            #sepatate into red, green, blue values
-            print "exiting sleep mode"
+            print "Exiting sleep mode..."
             GPIO.output(pinRelay, GPIO.HIGH)
             red.ChangeDutyCycle(float(brightness_values[0]) / 2)
             green.ChangeDutyCycle(float(brightness_values[1]) / 2)
             blue.ChangeDutyCycle(float(brightness_values[2]) / 2)
-            #GPIO.output(pinRelay, GPIO.HIGH)
-            #dutyCycle = (float(light_intensity) / 100) * 1024
-            #wiringpi.pwmWrite(pinPWM, int(dutyCycle))
         time.sleep(1)
 
         lighting_pir_svr_sock_connection.close()
@@ -175,16 +253,14 @@ def light_cmd(keyboard_Event):
     global blue
     global pinRelay
     global THREADS
-    # *establish server socket for Control subsystem to connect to for LI send
-    lighting_lightCmd_svr_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)  # * Create a socket object
-    lighting_lightCmd_svr_sock_host = ''  # * Get local machine name
-    lighting_lightCmd_svr_sock_port = 12347  # PIR port.
-    lighting_lightCmd_svr_sock.bind((lighting_lightCmd_svr_sock_host, lighting_lightCmd_svr_sock_port))  # * Bind to the port
 
-    lighting_lightCmd_svr_sock.listen(5)  # * Now wait for client connection.
+    lighting_lightCmd_svr_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
+    lighting_lightCmd_svr_sock_host = ''
+    lighting_lightCmd_svr_sock_port = 12347
+    lighting_lightCmd_svr_sock.bind((lighting_lightCmd_svr_sock_host, lighting_lightCmd_svr_sock_port))
+
+    lighting_lightCmd_svr_sock.listen(5)
     print "listening on light_cmd socket...."
-    # print s.recv(1024)
-    # s.close                     #* Close the socket when done
     try:
         while True:
             lighting_lightCmd_svr_sock_connection, lighting_lightCmd_svr_sock_connection_addr = lighting_lightCmd_svr_sock.accept()  # * Establish connection w
@@ -194,19 +270,10 @@ def light_cmd(keyboard_Event):
             brightness_values = light_intensity.split('|')
             print "GOT on light_cmd thread: ", brightness_values
             if float(brightness_values[0]) == 0 and float(brightness_values[1]) == 0 and float(brightness_values[2]) == 0:
-                # * turn lights off
                 print "turning lights off"
                 GPIO.output(pinRelay, GPIO.LOW)
-                # red.stop()
-                # green.stop()
-                # blue.stop()
-                # GPIO.cleanup()
             else:
-                # GPIO.output(pinRelay, GPIO.HIGH)
-                # dutyCycle = (float(light_intensity) / 100) * 1024
-                # wiringpi.pwmWrite(pinPWM, int(dutyCycle))
                 GPIO.output(pinRelay, GPIO.HIGH)
-                # brightness_values = light_intensity.split('|')
                 red.ChangeDutyCycle(float(brightness_values[0]) / 2)
                 green.ChangeDutyCycle(float(brightness_values[1]) / 2)
                 blue.ChangeDutyCycle(float(brightness_values[2]) / 2)
