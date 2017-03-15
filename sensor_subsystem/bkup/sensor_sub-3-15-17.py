@@ -90,11 +90,7 @@ WAKE_UP_TIME = 0
 
 MASTER_CIRCADIAN_TABLE = []
 
-MASTER_OFFSET_TABLE = []
-
 USER_CIRCADIAN_TABLE = []
-
-USER_OFFSET_TABLE = []
 
 CURRENT_MINUTE = 0
 
@@ -380,7 +376,6 @@ def boot_up():
         print "Sensor Subsystem added with user values: ", temp[0]
         WAKE_UP_TIME = temp[0][1]
         COLOR_THRESHOLD = float(temp[0][2])/100
-        print "COLOR_thres is:", COLOR_THRESHOLD
         LIGHT_THRESHOLD = float(temp[0][3])/100
 
     else:
@@ -445,10 +440,7 @@ def init_circadian_table():
     Import global MASTER_CIRCADIAN_TABLE so that it can be edited
     """
     global MASTER_CIRCADIAN_TABLE
-    global MASTER_OFFSET_TABLE
-
     colors = []
-    offsets = []
 
     t = 0
 
@@ -465,14 +457,8 @@ def init_circadian_table():
 
             colors.append((((250.0 / 120) * t - 625) / 255) * 100)
 
-            offsets.append((float(48)/120)*t - 120)
-            offsets.append((float(90)/120)*t - 225)
-            offsets.append((float(156)/120)*t - 390)
-
             MASTER_CIRCADIAN_TABLE.append(colors)
-            MASTER_OFFSET_TABLE.append(offsets)
             colors = []
-            offsets = []
 
         elif t >= 420 and t <= 720:
             colors.append((((120.0 / 300) * t - 33) / 255) * 100)
@@ -481,15 +467,8 @@ def init_circadian_table():
 
             colors.append((((5.0 / 300) * t + 243) / 255) * 100)
 
-            offsets.append((float(89) / 300) * t - 76.6)
-            offsets.append((float(28) / 300) * t + 50.8)
-            offsets.append((float(28) / 300) * t + 116.8)
-
-
             MASTER_CIRCADIAN_TABLE.append(colors)
-            MASTER_OFFSET_TABLE.append(offsets)
             colors = []
-            offsets = []
         elif t >= 720 and t <= 1140:
             colors.append((((-2.0 / 420) * t + 258.429) / 255) * 100)
 
@@ -497,13 +476,8 @@ def init_circadian_table():
 
             colors.append((((-172.0 / 420) * t + 549.857) / 255) * 100)
 
-            offsets.append((float(-8) / 420) * t + 150.7)
-            offsets.append((float(-91) / 420) * t + 274)
-            offsets.append((float(-144) / 420) * t + 430.86)
             MASTER_CIRCADIAN_TABLE.append(colors)
-            MASTER_OFFSET_TABLE.append(offsets)
             colors = []
-            offsets = []
         elif t >= 1140 and t <= 1380:
             colors.append((((-253.0 / 240) * t + 1454.75) / 255) * 100)
 
@@ -511,14 +485,8 @@ def init_circadian_table():
 
             colors.append((((-83.0 / 240) * t + 477.25) / 255) * 100)
 
-            offsets.append((float(-129) / 240) * t + 741.8)
-            offsets.append((float(-27) / 240) * t + 155.25)
-            offsets.append((float(-40) / 240) * t + 230)
-
             MASTER_CIRCADIAN_TABLE.append(colors)
-            MASTER_OFFSET_TABLE.append(offsets)
             colors = []
-            offsets = []
         else:
             colors.append(0)
 
@@ -526,14 +494,8 @@ def init_circadian_table():
 
             colors.append(0)
 
-            offsets.append(0)
-            offsets.append(0)
-            offsets.append(0)
-
             MASTER_CIRCADIAN_TABLE.append(colors)
-            MASTER_OFFSET_TABLE.append(offsets)
             colors = []
-            offsets = []
 
         t += 1
 
@@ -564,8 +526,7 @@ def calc_user_circadian_table(change_par_Event, finalize_change_Event):
     global WAKE_UP_TIME
     global MASTER_CIRCADIAN_TABLE
     global USER_CIRCADIAN_TABLE
-    global MASTER_OFFSET_TABLE
-    global USER_OFFSET_TABLE
+
     # Clear current values from USER_CIRCADIAN_TABLE
     """
     When calculating the USER_CIRCADIAN_TABLE again,
@@ -574,7 +535,6 @@ def calc_user_circadian_table(change_par_Event, finalize_change_Event):
     the USER_CIRCADIAN_TABLE to the MASTER_CIRCADIAN_TABLE.
     """
     USER_CIRCADIAN_TABLE = MASTER_CIRCADIAN_TABLE[:]
-    USER_OFFSET_TABLE = MASTER_OFFSET_TABLE[:]
     """
     Calculate if user wakes up earlier or later than 7 AM
     """
@@ -586,7 +546,6 @@ def calc_user_circadian_table(change_par_Event, finalize_change_Event):
         """
         while count < 1440:
             USER_CIRCADIAN_TABLE[count + wake_diff] = MASTER_CIRCADIAN_TABLE[count]
-            USER_OFFSET_TABLE[count + wake_diff] = MASTER_OFFSET_TABLE[count]
             count += 1
     elif wake_diff > 0:
         """
@@ -599,17 +558,14 @@ def calc_user_circadian_table(change_par_Event, finalize_change_Event):
                 to earlier indexes. Therefore, take the MOD.
                 """
                 USER_CIRCADIAN_TABLE[(count + wake_diff) % 1440] = MASTER_CIRCADIAN_TABLE[count]
-                USER_OFFSET_TABLE[(count + wake_diff) % 1440] = MASTER_OFFSET_TABLE[count]
             else:
                 USER_CIRCADIAN_TABLE[count + wake_diff] = MASTER_CIRCADIAN_TABLE[count]
-                USER_OFFSET_TABLE[count + wake_diff] = MASTER_OFFSET_TABLE[count]
             count += 1
     else:
         """
         User wakes up at 7 AM
         """
         USER_CIRCADIAN_TABLE = MASTER_CIRCADIAN_TABLE[:]
-        USER_OFFSET_TABLE = MASTER_OFFSET_TABLE[:]
     """
     If the user changed the wake up time, then the change_par_Event is set.
     Set the the finalize_change_Event and wait 1 sec. This allows for thread
@@ -694,15 +650,15 @@ def begin_threading():
     """
     Try to create the threads and add them to the THREADS list.
     """
-    # try:
-    #     print "Starting PIR thread..."
-    #     pir_thread = threading.Thread(name='pir_thread', target=PIR_sensor, args=(
-    #         pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event,
-    #         keyboard_Event,))
-    #     pir_thread.start()
-    #     THREADS.append(pir_thread)
-    # except:
-    #     print "Error: unable to start pir thread"
+    try:
+        print "Starting PIR thread..."
+        pir_thread = threading.Thread(name='pir_thread', target=PIR_sensor, args=(
+            pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event,
+            keyboard_Event,))
+        pir_thread.start()
+        THREADS.append(pir_thread)
+    except:
+        print "Error: unable to start pir thread"
     try:
         print "Starting RGB thread..."
         rgb_thread = threading.Thread(name='rgb_thread', target=RGB_sensor, args=(
@@ -819,7 +775,7 @@ def PIR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
     Get initial sleep mode state
     """
     trigger = 0
-    trigger2 = 1
+    trigger2 = 0
     sleep_mutex.acquire()
     try:
         sleep_mode = sleep_mode_Event.isSet()
@@ -829,7 +785,6 @@ def PIR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
     if sleep_mode:
         print "setting trigger"
         trigger = 1
-        trigger2 = 0
         
     while True and keyboard_Event.isSet():
         if timer == 60 or trigger:
@@ -981,8 +936,6 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
     global OLD_RED
     global OLD_GREEN
     global OLD_BLUE
-    global USER_OFFSET_TABLE
-    global USER_CIRCADIAN_TABLE
     print "RGB thread created successfully."
 
     """
@@ -997,7 +950,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
     Set the rgb_DB_Event and wait for other DB connections to finish
     """
     rgb_DB_Event.set()
-    #pir_DB_Event.wait()
+    pir_DB_Event.wait()
     usr_DB_Event.wait()
     cmd_DB_Event.wait()
 
@@ -1016,14 +969,6 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
     primary_red_degraded = False
     secondary_red_degraded = False
     secondary_red_on = False
-
-    primary_green_degraded = False
-    secondary_green_degraded = False
-    secondary_green_on = False
-
-    primary_blue_degraded = False
-    secondary_blue_degraded = False
-    secondary_blue_on = False
     if ver == 0x44:
         """
         Finish RGB setup
@@ -1067,36 +1012,22 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                 or B value, divide it by 256. Then to get the RGB brightness
                 divide by 255 and multiply by 100.
                 """
-                red = float(data[3] << 8 | data[2])
-#                red = float(float(red / 137)) * 100
-#                red = int(red);
-                green = float(data[5] << 8 | data[4])
-#                green = float(float(green / 118)) * 100
-#                green = int(green)
-                blue = float(data[7] << 8 | data[6])
-#                blue = float(float(blue / 184)) * 100
-#                blue = int(blue)
+                red = float(data[3] << 8 | data[2]) / 256
+                red = float(float(red / 255)) * 100
+                red = int(red)
+                green = float(data[5] << 8 | data[4]) / 256
+                green = float(float(green / 255)) * 100
+                green = int(green)
+                blue = float(data[7] << 8 | data[6]) / 256
+                blue = float(float(blue / 255)) * 100
+                blue = int(blue)
                 lux = int((-0.32466 * red) + (1.57837 * green) + (-0.73191 * blue))
                 print "R: %s, G: %s, B: %s, Lux: %s" % (red, green, blue, lux)
                 """
                 Get the current circadian table value for red
                 """
                 circadian_red = USER_CIRCADIAN_TABLE[current_minute][0]
-                circadian_green = USER_CIRCADIAN_TABLE[current_minute][1]
-                circadian_blue = USER_CIRCADIAN_TABLE[current_minute][2]
-                offset_red = USER_OFFSET_TABLE[current_minute][0]
-                offset_green = USER_OFFSET_TABLE[current_minute][1]
-                offset_blue = USER_OFFSET_TABLE[current_minute][2]
-                x = (float(circadian_red) / 100) * 137
-                y = (float(circadian_green) / 100) * 118
-                z = (float(circadian_blue) / 100) * 184
-
-                red2 = (float(red + (x - offset_red)) / 137 ) * 100
-                green2 = (float(green + (y - offset_green)) / 118) * 100
-                blue2 = (float(blue + (z - offset_blue)) / 184) * 100
-                print " RED should be: %s and is reading %s" % (circadian_red, red2)
-                print " GREEN should be: %s and is reading %s" % (circadian_green, green2)
-                print " BLUE should be: %s and is reading %s" % (circadian_blue, blue2)
+                print "Value should be: %s and is reading %s" % (circadian_red, red)
                 if red < (circadian_red - (circadian_red*COLOR_THRESHOLD)):
                     if primary_red_degraded:
                         """
@@ -1130,64 +1061,57 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                                 except:
                                     db.rollback()
                             else:
-##                                """
-##                                Secondaries have degraded
-##                                """
-##                                print "Secondaries degraded"
-##                                secondary_red_comp = circadian_red - red
-##                                primary_red_comp = circadian_red + (circadian_red - red)
-##                                comp_cmd = "SR|"
-##                                comp_cmd += str(primary_red_comp)
-##                                comp_cmd += "|"
-##                                comp_cmd += str(2 * secondary_red_comp)
-##                                comp_cmd += "|"
-##                                
-##                                """
-##                                Create client socket connection to the lighting sub
-##                                """
-##                                comp_cli_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-##                                comp_cli_sock_host = lighting_ip.strip()
-##                                comp_cli_sock_port = 12347
-##                                
-##                                """
-##                                Send the command string on the socket
-##                                """
-##                                comp_cli_sock.connect((comp_cli_sock_host, comp_cli_sock_port))
-##                                comp_cli_sock.send(comp_cmd)
-##                                comp_cli_sock.close()
-                                comp_cmd = ""
+                                """
+                                Secondaries have degraded
+                                """
+                                print "Secondaries degraded"
+                                # """
+                                # Send command to turn secondaries for red on
+                                # """
+                                # secondary_red_comp = circadian_red - red
+                                # primary_red_comp = circadian_red + (circadian_red - red)
+                                # comp_cmd = str(primary_red_comp) + "|" + str(2*secondary_red_comp)
+                                # """
+                                # Create client socket connection to the lighting sub
+                                # """
+                                # comp_cli_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                                # comp_cli_sock_host = lighting_ip.strip()
+                                # comp_cli_sock_port = 12347
+                                #
+                                # """
+                                # Send the command string on the socket
+                                # """
+                                # comp_cli_sock.connect((comp_cli_sock_host, comp_cli_sock_port))
+                                # comp_cli_sock.send(comp_cmd)
+                                # comp_cli_sock.close()
+                                # comp_cmd = ""
                                 secondary_red_degraded = True
                         else:
-##                            """
-##                            Turn secondaries on
-##                            """
-##                            print "Turning secondaries on"
-##                            
-##                            """
-##                            Send command to turn secondaries for red on
-##                            """
-##                            secondary_red_comp = circadian_red - red
-##                            primary_red_comp = circadian_red + (circadian_red - red)
-##                            comp_cmd = "SR|"
-##                            comp_cmd += str(primary_red_comp)
-##                            comp_cmd += "|"
-##                            comp_cmd += str(secondary_red_comp)
-##                            comp_cmd += "|"
-##                            
-##                            """
-##                            Create client socket connection to the lighting sub
-##                            """
-##                            comp_cli_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-##                            comp_cli_sock_host = lighting_ip.strip()
-##                            comp_cli_sock_port = 12347
-##                            
-##                            """
-##                            Send the command string on the socket
-##                            """
-##                            comp_cli_sock.connect((comp_cli_sock_host, comp_cli_sock_port))
-##                            comp_cli_sock.send(comp_cmd)
-##                            comp_cli_sock.close()
-##                            comp_cmd = ""
+                            """
+                            Turn secondaries on
+                            """
+                            print "Turning secondaries on"
+                            # """
+                            # Send command to turn secondaries for red on
+                            # """
+                            # secondary_red_comp = circadian_red - red
+                            # primary_red_comp = circadian_red + (circadian_red - red)
+                            # comp_cmd = str(primary_red_comp) + "|" + str(secondary_red_comp)
+                            #
+                            # """
+                            # Create client socket connection to the lighting sub
+                            # """
+                            # comp_cli_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                            # comp_cli_sock_host = lighting_ip.strip()
+                            # comp_cli_sock_port = 12347
+                            #
+                            # """
+                            # Send the command string on the socket
+                            # """
+                            # comp_cli_sock.connect((comp_cli_sock_host, comp_cli_sock_port))
+                            # comp_cli_sock.send(comp_cmd)
+                            # comp_cli_sock.close()
+                            # comp_cmd = ""
                             secondary_red_on = True
                     else:
                         """
@@ -1199,6 +1123,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                         try:
                             cursor.execute(sql, (local_ip))
                             db.commit()
+                            OLD_RED = red
                         except (AttributeError, MySQLdb.OperationalError):
                             """
                             If the DB connection was lost, then reconnect
@@ -1218,316 +1143,26 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                         except:
                             db.rollback()
 
-                        primary_red_comp = circadian_red + (circadian_red - red)
-                        comp_cmd = "PR|"
-                        comp_cmd += str(primary_red_comp) + "|"
-                        
-                        """
-                        Create client socket connection to the lighting sub
-                        """
-                        comp_cli_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                        comp_cli_sock_host = lighting_ip.strip()
-                        comp_cli_sock_port = 12347
-                        
-                        """
-                        Send the command string on the socket
-                        """
-                        comp_cli_sock.connect((comp_cli_sock_host, comp_cli_sock_port))
-                        comp_cli_sock.send(comp_cmd)
-                        comp_cli_sock.close()
-                        comp_cmd = ""
+                        # primary_red_comp = circadian_red + (circadian_red - red)
+                        # comp_cmd = str(primary_red_comp) + "|"
+                        #
+                        # """
+                        # Create client socket connection to the lighting sub
+                        # """
+                        # comp_cli_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                        # comp_cli_sock_host = lighting_ip.strip()
+                        # comp_cli_sock_port = 12347
+                        #
+                        # """
+                        # Send the command string on the socket
+                        # """
+                        # comp_cli_sock.connect((comp_cli_sock_host, comp_cli_sock_port))
+                        # comp_cli_sock.send(comp_cmd)
+                        # comp_cli_sock.close()
+                        # comp_cmd = ""
                         primary_red_degraded = True
                 else:
                     print "NO SIR ", (circadian_red - (circadian_red*COLOR_THRESHOLD)), COLOR_THRESHOLD
-
-
-                if green < (circadian_green - (circadian_green*COLOR_THRESHOLD)):
-                    if primary_green_degraded:
-                        """
-                        Primaries are degraded
-                        """
-                        if secondary_green_on:
-                            if secondary_green_degraded:
-                                """
-                                Update DB to service lighting sub
-                                """
-                                sql = """UPDATE sensor_status SET service = 1 WHERE ip = %s"""
-                                try:
-                                    cursor.execute(sql, (local_ip))
-                                    db.commit()
-                                except (AttributeError, MySQLdb.OperationalError):
-                                    """
-                                    If the DB connection was lost, then reconnect
-                                    """
-                                    print "Trying to reconnect to database in RGB thread..."
-                                    db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis",
-                                                         passwd="spatiumlucis",
-                                                         db="ilcs")
-                                    print "Database connection re-established in RGB thread."
-                                    cursor = db.cursor()
-
-                                    try:
-                                        cursor.execute(sql, (local_ip))
-                                        db.commit()
-                                    except:
-                                        db.rollback()
-                                except:
-                                    db.rollback()
-                            else:
-##                                """
-##                                Secondaries have degraded
-##                                """
-##                                print "Secondaries degraded"
-##                                secondary_green_comp = circadian_green - green
-##                                primary_green_comp = circadian_green + (circadian_green - green)
-##                                comp_cmd = "SG|"
-##                                comp_cmd += str(primary_green_comp)
-##                                comp_cmd += "|"
-##                                comp_cmd += str(2 * secondary_green_comp)
-##                                comp_cmd += "|"
-##                                
-##                                """
-##                                Create client socket connection to the lighting sub
-##                                """
-##                                comp_cli_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-##                                comp_cli_sock_host = lighting_ip.strip()
-##                                comp_cli_sock_port = 12347
-##                                
-##                                """
-##                                Send the command string on the socket
-##                                """
-##                                comp_cli_sock.connect((comp_cli_sock_host, comp_cli_sock_port))
-##                                comp_cli_sock.send(comp_cmd)
-##                                comp_cli_sock.close()
-                                comp_cmd = ""
-                                secondary_green_degraded = True
-                        else:
-##                            """
-##                            Turn secondaries on
-##                            """
-##                            print "Turning secondaries on"
-##                            
-##                            """
-##                            Send command to turn secondaries for red on
-##                            """
-##                            secondary_green_comp = circadian_green - green
-##                            primary_green_comp = circadian_green + (circadian_green - green)
-##                            comp_cmd = "SG|"
-##                            comp_cmd += str(primary_green_comp)
-##                            comp_cmd += "|"
-##                            comp_cmd += str(secondary_green_comp)
-##                            comp_cmd += "|"
-##                            
-##                            """
-##                            Create client socket connection to the lighting sub
-##                            """
-##                            comp_cli_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-##                            comp_cli_sock_host = lighting_ip.strip()
-##                            comp_cli_sock_port = 12347
-##                            
-##                            """
-##                            Send the command string on the socket
-##                            """
-##                            comp_cli_sock.connect((comp_cli_sock_host, comp_cli_sock_port))
-##                            comp_cli_sock.send(comp_cmd)
-##                            comp_cli_sock.close()
-##                            comp_cmd = ""
-                            secondary_green_on = True
-                    else:
-                        """
-                        Primary has now degraded
-                        """
-                        print "Primary Degraded"
-
-                        sql = """UPDATE sensor_status SET green_degraded = 1 WHERE ip = %s"""
-                        try:
-                            cursor.execute(sql, (local_ip))
-                            db.commit()
-                        except (AttributeError, MySQLdb.OperationalError):
-                            """
-                            If the DB connection was lost, then reconnect
-                            """
-                            print "Trying to reconnect to database in RGB thread..."
-                            db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis",
-                                                 passwd="spatiumlucis",
-                                                 db="ilcs")
-                            print "Database connection re-established in RGB thread."
-                            cursor = db.cursor()
-
-                            try:
-                                cursor.execute(sql, (local_ip))
-                                db.commit()
-                            except:
-                                db.rollback()
-                        except:
-                            db.rollback()
-
-                        primary_green_comp = circadian_green + (circadian_green - green)
-                        comp_cmd = "PG|"
-                        comp_cmd += str(primary_green_comp) + "|"
-                        
-                        """
-                        Create client socket connection to the lighting sub
-                        """
-                        comp_cli_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                        comp_cli_sock_host = lighting_ip.strip()
-                        comp_cli_sock_port = 12347
-                        
-                        """
-                        Send the command string on the socket
-                        """
-                        comp_cli_sock.connect((comp_cli_sock_host, comp_cli_sock_port))
-                        comp_cli_sock.send(comp_cmd)
-                        comp_cli_sock.close()
-                        comp_cmd = ""
-                        primary_green_degraded = True
-                else:
-                    print "NO SIR ", (circadian_green - (circadian_green*COLOR_THRESHOLD)), COLOR_THRESHOLD
-
-
-                if blue < (circadian_blue - (circadian_blue*COLOR_THRESHOLD)):
-                    if primary_blue_degraded:
-                        """
-                        Primaries are degraded
-                        """
-                        if secondary_blue_on:
-                            if secondary_blue_degraded:
-                                """
-                                Update DB to service lighting sub
-                                """
-                                sql = """UPDATE sensor_status SET service = 1 WHERE ip = %s"""
-                                try:
-                                    cursor.execute(sql, (local_ip))
-                                    db.commit()
-                                except (AttributeError, MySQLdb.OperationalError):
-                                    """
-                                    If the DB connection was lost, then reconnect
-                                    """
-                                    print "Trying to reconnect to database in RGB thread..."
-                                    db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis",
-                                                         passwd="spatiumlucis",
-                                                         db="ilcs")
-                                    print "Database connection re-established in RGB thread."
-                                    cursor = db.cursor()
-
-                                    try:
-                                        cursor.execute(sql, (local_ip))
-                                        db.commit()
-                                    except:
-                                        db.rollback()
-                                except:
-                                    db.rollback()
-                            else:
-##                                """
-##                                Secondaries have degraded
-##                                """
-##                                print "Secondaries degraded"
-##                                secondary_blue_comp = circadian_blue - blue
-##                                primary_blue_comp = circadian_blue + (circadian_blue - blue)
-##                                comp_cmd = "SB|"
-##                                comp_cmd += str(primary_blue_comp)
-##                                comp_cmd += "|"
-##                                comp_cmd += str(2 * secondary_blue_comp)
-##                                comp_cmd += "|"
-##                                
-##                                """
-##                                Create client socket connection to the lighting sub
-##                                """
-##                                comp_cli_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-##                                comp_cli_sock_host = lighting_ip.strip()
-##                                comp_cli_sock_port = 12347
-##                                
-##                                """
-##                                Send the command string on the socket
-##                                """
-##                                comp_cli_sock.connect((comp_cli_sock_host, comp_cli_sock_port))
-##                                comp_cli_sock.send(comp_cmd)
-##                                comp_cli_sock.close()
-                                comp_cmd = ""
-                                secondary_blue_degraded = True
-                        else:
-##                            """
-##                            Turn secondaries on
-##                            """
-##                            print "Turning secondaries on"
-##                            
-##                            """
-##                            Send command to turn secondaries for red on
-##                            """
-##                            secondary_blue_comp = circadian_blue - blue
-##                            primary_blue_comp = circadian_green + (circadian_blue - blue)
-##                            comp_cmd = "SB|"
-##                            comp_cmd += str(primary_blue_comp)
-##                            comp_cmd += "|"
-##                            comp_cmd += str(secondary_blue_comp)
-##                            comp_cmd += "|"
-##                            
-##                            """
-##                            Create client socket connection to the lighting sub
-##                            """
-##                            comp_cli_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-##                            comp_cli_sock_host = lighting_ip.strip()
-##                            comp_cli_sock_port = 12347
-##                            
-##                            """
-##                            Send the command string on the socket
-##                            """
-##                            comp_cli_sock.connect((comp_cli_sock_host, comp_cli_sock_port))
-##                            comp_cli_sock.send(comp_cmd)
-##                            comp_cli_sock.close()
-##                            comp_cmd = ""
-                            secondary_blue_on = True
-                    else:
-                        """
-                        Primary has now degraded
-                        """
-                        print "Primary Degraded"
-
-                        sql = """UPDATE sensor_status SET blue_degraded = 1 WHERE ip = %s"""
-                        try:
-                            cursor.execute(sql, (local_ip))
-                            db.commit()
-                        except (AttributeError, MySQLdb.OperationalError):
-                            """
-                            If the DB connection was lost, then reconnect
-                            """
-                            print "Trying to reconnect to database in RGB thread..."
-                            db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis",
-                                                 passwd="spatiumlucis",
-                                                 db="ilcs")
-                            print "Database connection re-established in RGB thread."
-                            cursor = db.cursor()
-
-                            try:
-                                cursor.execute(sql, (local_ip))
-                                db.commit()
-                            except:
-                                db.rollback()
-                        except:
-                            db.rollback()
-
-                        primary_blue_comp = circadian_blue + (circadian_blue - blue)
-                        comp_cmd = "PB|"
-                        comp_cmd += str(primary_blue_comp) + "|"
-                        
-                        """
-                        Create client socket connection to the lighting sub
-                        """
-                        comp_cli_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                        comp_cli_sock_host = lighting_ip.strip()
-                        comp_cli_sock_port = 12347
-                        
-                        """
-                        Send the command string on the socket
-                        """
-                        comp_cli_sock.connect((comp_cli_sock_host, comp_cli_sock_port))
-                        comp_cli_sock.send(comp_cmd)
-                        comp_cli_sock.close()
-                        comp_cmd = ""
-                        primary_blue_degraded = True
-                else:
-                    print "NO SIR ", (circadian_blue - (circadian_blue*COLOR_THRESHOLD)), COLOR_THRESHOLD
-                
                 if red < (OLD_RED - (OLD_RED * 0.05)) or red > (OLD_RED + (OLD_RED * 0.05)):
                     """
                     If the red color reading is 5% less or greater than the previous
@@ -1535,13 +1170,8 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                     """
                     sql = """UPDATE sensor_status SET red = %s WHERE ip = %s"""
                     try:
-                        if red2 > 100:
-                            sql = """UPDATE sensor_status SET red = 100 WHERE ip = %s"""
-                            cursor.execute(sql, (local_ip))
-                            db.commit()
-                        else:
-                            cursor.execute(sql, (red2, local_ip))
-                            db.commit()
+                        cursor.execute(sql, (red, local_ip))
+                        db.commit()
                         OLD_RED = red
                     except (AttributeError, MySQLdb.OperationalError):
                         """
@@ -1554,14 +1184,8 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                         cursor = db.cursor()
 
                         try:
-                            if red2 > 100:
-                                sql = """UPDATE sensor_status SET red = 100 WHERE ip = %s"""
-                                cursor.execute(sql, (local_ip))
-                                db.commit()
-                            else:
-                                cursor.execute(sql, (red2, local_ip))
-                                db.commit()
-                            OLD_RED = red
+                            cursor.execute(sql, (red, local_ip))
+                            db.commit()
                         except:
                             db.rollback()
                     except:
@@ -1574,13 +1198,8 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                     """
                     sql = """UPDATE sensor_status SET green = %s WHERE ip = %s"""
                     try:
-                        if green2 > 100:
-                            sql = """UPDATE sensor_status SET green = 100 WHERE ip = %s"""
-                            cursor.execute(sql, (local_ip))
-                            db.commit()
-                        else:
-                            cursor.execute(sql, (green2, local_ip))
-                            db.commit()
+                        cursor.execute(sql, (green, local_ip))
+                        db.commit()
                         OLD_GREEN = green
                     except (AttributeError, MySQLdb.OperationalError):
                         """
@@ -1592,14 +1211,8 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                         print "Database connection re-established in RGB thread."
                         cursor = db.cursor()
                         try:
-                            if green2 > 100:
-                                sql = """UPDATE sensor_status SET green = 100 WHERE ip = %s"""
-                                cursor.execute(sql, (local_ip))
-                                db.commit()
-                            else:
-                                cursor.execute(sql, (green2, local_ip))
-                                db.commit()
-                            OLD_GREEN = green
+                            cursor.execute(sql, (green, local_ip))
+                            db.commit()
                         except:
                             db.rollback()
                     except:
@@ -1615,13 +1228,8 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                     """
                     sql = """UPDATE sensor_status SET blue = %s WHERE ip = %s"""
                     try:
-                        if blue2 > 100:
-                            sql = """UPDATE sensor_status SET blue = 100 WHERE ip = %s"""
-                            cursor.execute(sql, (local_ip))
-                            db.commit()
-                        else:
-                            cursor.execute(sql, (blue2, local_ip))
-                            db.commit()
+                        cursor.execute(sql, (blue, local_ip))
+                        db.commit()
                         OLD_BLUE = blue
                     except (AttributeError, MySQLdb.OperationalError):
                         """
@@ -1633,14 +1241,8 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                         print "Database connection re-established in RGB thread."
                         cursor = db.cursor()
                         try:
-                            if blue2 > 100:
-                                sql = """UPDATE sensor_status SET blue = 100 WHERE ip = %s"""
-                                cursor.execute(sql, (local_ip))
-                                db.commit()
-                            else:
-                                cursor.execute(sql, (blue2, local_ip))
-                                db.commit()
-                            OLD_BLUE = blue
+                            cursor.execute(sql, (blue, local_ip))
+                            db.commit()
                         except:
                             db.rollback()
                     except:
@@ -1703,7 +1305,7 @@ def USR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
     Set the usr_DB_event and wait for other connections to finish
     """
     usr_DB_Event.set()
-    #pir_DB_Event.wait()
+    pir_DB_Event.wait()
     rgb_DB_Event.wait()
     cmd_DB_Event.wait()
 
@@ -1854,7 +1456,7 @@ def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_E
     Wait for DB connections to finish
     """
     usr_DB_Event.wait()
-    #pir_DB_Event.wait()
+    pir_DB_Event.wait()
     rgb_DB_Event.wait()
     cmd_DB_Event.wait()
 
@@ -2047,7 +1649,7 @@ def wait_for_cmd(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, cha
     """
     cmd_DB_Event.set()
     usr_DB_Event.wait()
-    #pir_DB_Event.wait()
+    pir_DB_Event.wait()
     rgb_DB_Event.wait()
 
     """
@@ -2207,13 +1809,13 @@ def wait_for_cmd(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, cha
                         If the color threshold field is NOT 'N' then
                         set the new COLOR_THRESHOLD value
                         """
-                        COLOR_THRESHOLD = float(cmd[1]) /100
+                        COLOR_THRESHOLD = int(cmd[1])
                     if cmd[2] != 'N':
                         """
                         If the light threshold field is NOT 'N' then
                         set the new LIGHT_THRESHOLD value
                         """
-                        LIGHT_THRESHOLD = float(cmd[2]) / 100
+                        LIGHT_THRESHOLD = int(cmd[2])
                     """
                     Clear the change_par_Event
                     """
