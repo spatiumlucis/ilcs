@@ -1,5 +1,13 @@
 <?php
 
+	session_start();
+	
+	if(!isset($_SESSION['user']) || !isset($_SESSION['admin']))
+		exit;
+	
+	if(!$_SESSION['admin'])
+		exit;
+
 	function changeDateFormat($wake_time){
 		$temp = explode(":", $wake_time);
 		echo count($temp);
@@ -11,14 +19,12 @@
 	require_once('db_connect.php');
 	$roomName       = $_POST['room_name'];
 	$roomIp         = $_POST['room_ip'];
-	$wakeTime         = $_POST['wake_time'];
-	$lightThreshold = $_POST['light_threshold'];
-	$colorThreshold = $_POST['color_threshold'];
+	$wakeTime       = $_POST['wake_time'];
+	$threshold      = $_POST['threshold'];
 	
 	
-	$wakeTime = changeDateFormat($wakeTime);
 	
-	$db_query = "INSERT INTO sensor_settings(ip, wake_time, color_thres, light_thres, name) VALUES('". $roomIp."', '". $wakeTime ."', '". $colorThreshold."', '". $lightThreshold. "', '". $roomName. "')";
+	$db_query = "INSERT INTO sensor_settings(ip, wake_time, color_thres, light_thres, name) VALUES('". $roomIp."', '". $wakeTime ."', '". $threshold."', '". 0 . "', '". $roomName. "')";
 
 
 	$sensor_port = "12348";

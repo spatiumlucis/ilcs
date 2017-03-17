@@ -1,0 +1,15 @@
+
+
+.modal-header{
+	background-color: #404040;
+	color: white;
+}
+
+.modal-header button{
+	color: white;
+}
+
+
+.room_name_container span{
+	display: none;
+}

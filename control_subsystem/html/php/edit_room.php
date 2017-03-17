@@ -1,10 +1,13 @@
 <?php
 
-	function changeDateFormat($wake_time){
-		$wake_time = explode(":", $wake_time);
-		$wake_time = (intval($wake_time[0]) * 60 ) + intval($wake_time[1]);
-		return $wake_time;
-	}
+	session_start();
+	
+	if(!isset($_SESSION['user']) || !isset($_SESSION['admin']))
+		exit;
+	
+	if(!$_SESSION['admin'])
+		exit;
+
 
 
 	require_once('db_connect.php');
@@ -12,26 +15,18 @@
 	$roomName       = $_POST['room_name'];
 	$roomIp         = $_POST['room_ip'];
 	$wakeTime         = $_POST['wake_time'];
-	$lightThreshold = $_POST['light_threshold'];
-	$colorThreshold = $_POST['color_threshold'];
+	$lightThreshold = 0;
+	$threshold = $_POST['threshold'];
 	$code           = $_POST['edit_code'];
 
 
 	$sensor_port = "12349";
 
-	$temp = explode($code, "|");
 
-	/*if($temp[0] == 'R'){
-		array_shift($temp);
-		$code = implode($temp, "|");
-	}
-	*/
 
-	$wakeTime = changeDateFormat($wakeTime);
 
-	$code = "".$wakeTime."|".$code;
 
-	$db_query =  "UPDATE sensor_settings SET name = '".$roomName."', light_thres = '".$lightThreshold."', color_thres = '".$colorThreshold."', wake_time = '" .$wakeTime ."' WHERE ip = '".$roomIp."'";
+	$db_query =  "UPDATE sensor_settings SET name = '".$roomName."', light_thres = '".$lightThreshold."', color_thres = '".$threshold."', wake_time = '" .$wakeTime ."' WHERE ip = '".$roomIp."'";
 
 	
 

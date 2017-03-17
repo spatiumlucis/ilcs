@@ -1,0 +1,222 @@
+
+
+.navbar{
+	margin-bottom: 0;
+	border-radius: 0;
+	border:0;
+	background-color: #404040;
+}
+
+
+#menu_items{
+	font-weight: bold;
+}
+
+.title{
+	/*background-color: #0074D9;*/
+	background-image : url("../media/sunrise.jpg");
+	background-position: 0% -30%;
+	margin-top: 0;
+	
+	
+}
+
+.well{
+	background-color: transparent;
+	border: 0px;
+}
+
+.well h1{
+	
+	text-align: center;
+	font-family: Georgia, Times, serif;
+	color: white;
+	
+}
+
+.glyphicon-menu-up{
+	display: none;
+}
+
+
+
+.notification p{
+	text-align: center;
+	text-weight: bold;
+	font-size: 24px;
+	background-color: black;
+	color: white;
+	width: auto;
+}
+
+
+
+
+#alert{
+	text-align: center;
+}
+
+.sensor_values{
+	border-top: 5px solid grey;
+
+}
+
+.dropdown_notification{
+	margin: 0px;
+}
+
+.degradation_header, .sleep_mode_header, .service_header, .sleep_divider, .service_divider{
+	display: none;
+}
+
+
+
+#no_room{
+	margin-top:5%;
+	text-align: center;
+}
+
+#delete_room_container{
+	text-align: center;
+}
+
+#sensor_container{
+	display:none;
+	margin-top: 3%;
+}
+
+
+
+
+
+#delete_room_container, #alert{
+	display:none;
+}
+
+
+.login_error{
+	display:none;
+	color: red;
+}
+
+
+
+#action_sub_menu li{
+	display: inline;
+	margin-right: 10px;
+}
+
+
+#menu_items, #user_logout_btn, #alarm_switch, .room_alert{
+	display: none;
+	
+}
+
+#user_logout_btn{
+	color: white;
+	margin-left: 1px;
+	margin-top:2px;
+}
+
+
+#sleep_alert, #degrade_alert{
+	margin: 0 auto;
+	display: none;
+}
+
+.admin_view{
+	display: none;
+
+}
+
+.btn_container{
+	display: none;
+}
+
+
+.aroom_name{
+	display:none;
+}
+
+.mobile_submenu, .desktop_submenu{
+	display: none;
+}
+
+
+
+.chart {
+	/*background-color:#808080;*/
+	background-color: #cccccc;
+	padding: 10px;
+}
+
+
+
+.error{
+	color: red;
+
+}
+@media (min-width: 768px) {
+	
+	
+	.well h1{
+		font-size: 60px;
+	}
+	
+	.user_set_values{
+		text-align: right;
+	}
+
+	.sensor_values{
+		border-top: 0px;
+		border-left: 5px solid grey;
+		padding-left: 25px;
+	}
+    .navbar .navbar-nav {
+        display: inline-block;
+        float: none;
+        vertical-align: top;
+    }
+
+    .navbar .navbar-collapse {
+        text-align: center;
+    }
+	
+	#menu_items li{
+        margin-right:80px;
+    }
+	
+	.dropdown-header{
+		font-size: 18px;
+		margin: 0px;
+	}
+
+	.degradation_list, .sleep_mode_list{
+		font-size: 16px;
+	}
+
+
+	.chart {
+		border-top: 0;
+		border-right: 1px solid white;
+
+	}
+	
+	
+}
+
+
+@media (min-height: 700px){
+	#sensor_container{
+		display:none;
+		margin-top: 6%;
+	}
+
+	.chart {
+		margin-top: 6%;
+
+	}
+
+	
+}
+
