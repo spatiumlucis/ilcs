@@ -99,7 +99,7 @@ USER_OFFSET_TABLE = []
 CURRENT_MINUTE = 0
 
 SAVED_MINUTE = 0
-GPIO.setwarnings(False)
+
 """
 Mutex locks are used to protect data that
 can be read or written to from more than
@@ -679,7 +679,6 @@ def begin_threading():
     cmd_DB_Event = threading.Event()
     finalize_change_Event = threading.Event()
     keyboard_Event = threading.Event()
-    first_time_Event = threading.Event()
     """
     Set the keyboard_Event so that the Ctrl C
     command will be detected by the other threads
@@ -708,7 +707,7 @@ def begin_threading():
         print "Starting RGB thread..."
         rgb_thread = threading.Thread(name='rgb_thread', target=RGB_sensor, args=(
             pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event,
-            keyboard_Event, first_time_Event,))
+            keyboard_Event,))
         rgb_thread.start()
         THREADS.append(rgb_thread)
     except:
@@ -726,7 +725,7 @@ def begin_threading():
         print "Starting circadian command thread..."
         circadian_thread = threading.Thread(name='circadian_thread', target=send_circadian_values, args=(
             pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event, keyboard_Event,
-            finalize_change_Event,first_time_Event,))
+            finalize_change_Event,))
         circadian_thread.start()
         THREADS.append(circadian_thread)
     except:
@@ -941,7 +940,7 @@ def PIR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
 
 
 def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event,
-               keyboard_Event, first_time_Event):
+               keyboard_Event):
     """
     This function is the init function for the RGB thread. This function will first
     establish a DB connection and then wait for the other threads to establish their
@@ -989,9 +988,9 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
     """
     Establish DB connection
     """
-    print "Establishing Database connection in RGB thread...\n"
+    print "Establishing Database connection.....\n"
     db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
-    print "Database connection in RGB thread established.\n"
+    print "Database connection established.\n"
     cursor = db.cursor()
 
     """
@@ -1001,7 +1000,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
     #pir_DB_Event.wait()
     usr_DB_Event.wait()
     cmd_DB_Event.wait()
-    first_time_Event.wait()
+
     """
     Initialize the RGB sensor
     The RGB sensor uses I2C Bus (smbus)
@@ -1025,8 +1024,6 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
     primary_blue_degraded = False
     secondary_blue_degraded = False
     secondary_blue_on = False
-
-
     if ver == 0x44:
         """
         Finish RGB setup
@@ -1058,8 +1055,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                 Get current minute
                 """
                 current_minute = time.localtime()[3] * 60 + time.localtime()[4]
-                comp_list = ["N", "N", "N", "N", "N", "N"]
-                comp_cmd = ""
+
                 """
                 If the sleep_mode_Event and the change_par_Event
                 are NOT set, then read from the RGB sensor
@@ -1134,31 +1130,64 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                                 except:
                                     db.rollback()
                             else:
-                                """
-                                Secondaries have degraded
-                                """
-                                print "Secondaries degraded"
-                                secondary_red_comp = circadian_red - red
-                                primary_red_comp = circadian_red + (circadian_red - red)
-
-                                comp_list[0] = str(primary_red_comp)
-                                comp_list[1]= str(2 * secondary_red_comp)
-
+##                                """
+##                                Secondaries have degraded
+##                                """
+##                                print "Secondaries degraded"
+##                                secondary_red_comp = circadian_red - red
+##                                primary_red_comp = circadian_red + (circadian_red - red)
+##                                comp_cmd = "SR|"
+##                                comp_cmd += str(primary_red_comp)
+##                                comp_cmd += "|"
+##                                comp_cmd += str(2 * secondary_red_comp)
+##                                comp_cmd += "|"
+##                                
+##                                """
+##                                Create client socket connection to the lighting sub
+##                                """
+##                                comp_cli_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+##                                comp_cli_sock_host = lighting_ip.strip()
+##                                comp_cli_sock_port = 12347
+##                                
+##                                """
+##                                Send the command string on the socket
+##                                """
+##                                comp_cli_sock.connect((comp_cli_sock_host, comp_cli_sock_port))
+##                                comp_cli_sock.send(comp_cmd)
+##                                comp_cli_sock.close()
+                                comp_cmd = ""
                                 secondary_red_degraded = True
                         else:
-                            """
-                            Turn secondaries on
-                            """
-                            print "Turning secondaries on"
-
-                            """
-                            Send command to turn secondaries for red on
-                            """
-                            secondary_red_comp = circadian_red - red
-                            primary_red_comp = circadian_red + (circadian_red - red)
-                            comp_list[0] = str(primary_red_comp)
-                            comp_list[1] = str(secondary_red_comp)
-
+##                            """
+##                            Turn secondaries on
+##                            """
+##                            print "Turning secondaries on"
+##                            
+##                            """
+##                            Send command to turn secondaries for red on
+##                            """
+##                            secondary_red_comp = circadian_red - red
+##                            primary_red_comp = circadian_red + (circadian_red - red)
+##                            comp_cmd = "SR|"
+##                            comp_cmd += str(primary_red_comp)
+##                            comp_cmd += "|"
+##                            comp_cmd += str(secondary_red_comp)
+##                            comp_cmd += "|"
+##                            
+##                            """
+##                            Create client socket connection to the lighting sub
+##                            """
+##                            comp_cli_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+##                            comp_cli_sock_host = lighting_ip.strip()
+##                            comp_cli_sock_port = 12347
+##                            
+##                            """
+##                            Send the command string on the socket
+##                            """
+##                            comp_cli_sock.connect((comp_cli_sock_host, comp_cli_sock_port))
+##                            comp_cli_sock.send(comp_cmd)
+##                            comp_cli_sock.close()
+##                            comp_cmd = ""
                             secondary_red_on = True
                     else:
                         """
@@ -1190,9 +1219,23 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                             db.rollback()
 
                         primary_red_comp = circadian_red + (circadian_red - red)
-
-                        comp_list[0] = str(primary_red_comp)
-
+                        comp_cmd = "PR|"
+                        comp_cmd += str(primary_red_comp) + "|"
+                        
+                        """
+                        Create client socket connection to the lighting sub
+                        """
+                        comp_cli_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                        comp_cli_sock_host = lighting_ip.strip()
+                        comp_cli_sock_port = 12347
+                        
+                        """
+                        Send the command string on the socket
+                        """
+                        comp_cli_sock.connect((comp_cli_sock_host, comp_cli_sock_port))
+                        comp_cli_sock.send(comp_cmd)
+                        comp_cli_sock.close()
+                        comp_cmd = ""
                         primary_red_degraded = True
                 else:
                     print "NO SIR ", (circadian_red - (circadian_red*COLOR_THRESHOLD)), COLOR_THRESHOLD
@@ -1231,35 +1274,64 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                                 except:
                                     db.rollback()
                             else:
-                                """
-                                Secondaries have degraded
-                                """
-                                print "Secondaries degraded"
-                                secondary_green_comp = circadian_green - green
-                                primary_green_comp = circadian_green + (circadian_green - green)
-
-                                comp_list[2] = str(primary_green_comp)
-
-                                comp_list[3] = str(2 * secondary_green_comp)
-
+##                                """
+##                                Secondaries have degraded
+##                                """
+##                                print "Secondaries degraded"
+##                                secondary_green_comp = circadian_green - green
+##                                primary_green_comp = circadian_green + (circadian_green - green)
+##                                comp_cmd = "SG|"
+##                                comp_cmd += str(primary_green_comp)
+##                                comp_cmd += "|"
+##                                comp_cmd += str(2 * secondary_green_comp)
+##                                comp_cmd += "|"
+##                                
+##                                """
+##                                Create client socket connection to the lighting sub
+##                                """
+##                                comp_cli_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+##                                comp_cli_sock_host = lighting_ip.strip()
+##                                comp_cli_sock_port = 12347
+##                                
+##                                """
+##                                Send the command string on the socket
+##                                """
+##                                comp_cli_sock.connect((comp_cli_sock_host, comp_cli_sock_port))
+##                                comp_cli_sock.send(comp_cmd)
+##                                comp_cli_sock.close()
+                                comp_cmd = ""
                                 secondary_green_degraded = True
                         else:
-                            """
-                            Turn secondaries on
-                            """
-                            print "Turning secondaries on"
-
-                            """
-                            Send command to turn secondaries for red on
-                            """
-                            secondary_green_comp = circadian_green - green
-                            primary_green_comp = circadian_green + (circadian_green - green)
-
-                            comp_list[2] = str(primary_green_comp)
-
-                            comp_list[3] = str(secondary_green_comp)
-
-
+##                            """
+##                            Turn secondaries on
+##                            """
+##                            print "Turning secondaries on"
+##                            
+##                            """
+##                            Send command to turn secondaries for red on
+##                            """
+##                            secondary_green_comp = circadian_green - green
+##                            primary_green_comp = circadian_green + (circadian_green - green)
+##                            comp_cmd = "SG|"
+##                            comp_cmd += str(primary_green_comp)
+##                            comp_cmd += "|"
+##                            comp_cmd += str(secondary_green_comp)
+##                            comp_cmd += "|"
+##                            
+##                            """
+##                            Create client socket connection to the lighting sub
+##                            """
+##                            comp_cli_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+##                            comp_cli_sock_host = lighting_ip.strip()
+##                            comp_cli_sock_port = 12347
+##                            
+##                            """
+##                            Send the command string on the socket
+##                            """
+##                            comp_cli_sock.connect((comp_cli_sock_host, comp_cli_sock_port))
+##                            comp_cli_sock.send(comp_cmd)
+##                            comp_cli_sock.close()
+##                            comp_cmd = ""
                             secondary_green_on = True
                     else:
                         """
@@ -1291,10 +1363,23 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                             db.rollback()
 
                         primary_green_comp = circadian_green + (circadian_green - green)
-
-                        comp_list[2] = str(primary_green_comp)
+                        comp_cmd = "PG|"
+                        comp_cmd += str(primary_green_comp) + "|"
                         
-
+                        """
+                        Create client socket connection to the lighting sub
+                        """
+                        comp_cli_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                        comp_cli_sock_host = lighting_ip.strip()
+                        comp_cli_sock_port = 12347
+                        
+                        """
+                        Send the command string on the socket
+                        """
+                        comp_cli_sock.connect((comp_cli_sock_host, comp_cli_sock_port))
+                        comp_cli_sock.send(comp_cmd)
+                        comp_cli_sock.close()
+                        comp_cmd = ""
                         primary_green_degraded = True
                 else:
                     print "NO SIR ", (circadian_green - (circadian_green*COLOR_THRESHOLD)), COLOR_THRESHOLD
@@ -1333,37 +1418,64 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                                 except:
                                     db.rollback()
                             else:
-                                """
-                                Secondaries have degraded
-                                """
-                                print "Secondaries degraded"
-                                secondary_blue_comp = circadian_blue - blue
-                                primary_blue_comp = circadian_blue + (circadian_blue - blue)
-
-                                comp_list[4] = str(primary_blue_comp)
-
-                                comp_list[5] = str(2 * secondary_blue_comp)
-
-
-
+##                                """
+##                                Secondaries have degraded
+##                                """
+##                                print "Secondaries degraded"
+##                                secondary_blue_comp = circadian_blue - blue
+##                                primary_blue_comp = circadian_blue + (circadian_blue - blue)
+##                                comp_cmd = "SB|"
+##                                comp_cmd += str(primary_blue_comp)
+##                                comp_cmd += "|"
+##                                comp_cmd += str(2 * secondary_blue_comp)
+##                                comp_cmd += "|"
+##                                
+##                                """
+##                                Create client socket connection to the lighting sub
+##                                """
+##                                comp_cli_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+##                                comp_cli_sock_host = lighting_ip.strip()
+##                                comp_cli_sock_port = 12347
+##                                
+##                                """
+##                                Send the command string on the socket
+##                                """
+##                                comp_cli_sock.connect((comp_cli_sock_host, comp_cli_sock_port))
+##                                comp_cli_sock.send(comp_cmd)
+##                                comp_cli_sock.close()
+                                comp_cmd = ""
                                 secondary_blue_degraded = True
                         else:
-                            """
-                            Turn secondaries on
-                            """
-                            print "Turning secondaries on"
-
-                            """
-                            Send command to turn secondaries for red on
-                            """
-                            secondary_blue_comp = circadian_blue - blue
-                            primary_blue_comp = circadian_green + (circadian_blue - blue)
-
-                            comp_list[4] = str(primary_blue_comp)
-
-                            comp_list[5] = str(secondary_blue_comp)
-
-
+##                            """
+##                            Turn secondaries on
+##                            """
+##                            print "Turning secondaries on"
+##                            
+##                            """
+##                            Send command to turn secondaries for red on
+##                            """
+##                            secondary_blue_comp = circadian_blue - blue
+##                            primary_blue_comp = circadian_green + (circadian_blue - blue)
+##                            comp_cmd = "SB|"
+##                            comp_cmd += str(primary_blue_comp)
+##                            comp_cmd += "|"
+##                            comp_cmd += str(secondary_blue_comp)
+##                            comp_cmd += "|"
+##                            
+##                            """
+##                            Create client socket connection to the lighting sub
+##                            """
+##                            comp_cli_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+##                            comp_cli_sock_host = lighting_ip.strip()
+##                            comp_cli_sock_port = 12347
+##                            
+##                            """
+##                            Send the command string on the socket
+##                            """
+##                            comp_cli_sock.connect((comp_cli_sock_host, comp_cli_sock_port))
+##                            comp_cli_sock.send(comp_cmd)
+##                            comp_cli_sock.close()
+##                            comp_cmd = ""
                             secondary_blue_on = True
                     else:
                         """
@@ -1395,35 +1507,16 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                             db.rollback()
 
                         primary_blue_comp = circadian_blue + (circadian_blue - blue)
-
-                        comp_list[4] = str(primary_blue_comp)
+                        comp_cmd = "PB|"
+                        comp_cmd += str(primary_blue_comp) + "|"
                         
-
-                        primary_blue_degraded = True
-                else:
-                    print "NO SIR ", (circadian_blue - (circadian_blue*COLOR_THRESHOLD)), COLOR_THRESHOLD
-                for key in comp_list:
-                    if key != "N":
-                        comp_cmd += comp_list[0]
-                        comp_cmd += "|"
-                        comp_cmd += comp_list[1]
-                        comp_cmd += "|"
-                        comp_cmd += comp_list[2]
-                        comp_cmd += "|"
-                        comp_cmd += comp_list[3]
-                        comp_cmd += "|"
-                        comp_cmd += comp_list[4]
-                        comp_cmd += "|"
-                        comp_cmd += comp_list[5]
-                        comp_cmd += "|"
-                        print "comp_cmd:",comp_cmd
                         """
                         Create client socket connection to the lighting sub
                         """
                         comp_cli_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                         comp_cli_sock_host = lighting_ip.strip()
-                        comp_cli_sock_port = 12356
-
+                        comp_cli_sock_port = 12347
+                        
                         """
                         Send the command string on the socket
                         """
@@ -1431,9 +1524,10 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                         comp_cli_sock.send(comp_cmd)
                         comp_cli_sock.close()
                         comp_cmd = ""
-                        comp_list = []
-                        break
-
+                        primary_blue_degraded = True
+                else:
+                    print "NO SIR ", (circadian_blue - (circadian_blue*COLOR_THRESHOLD)), COLOR_THRESHOLD
+                
                 if red < (OLD_RED - (OLD_RED * 0.05)) or red > (OLD_RED + (OLD_RED * 0.05)):
                     """
                     If the red color reading is 5% less or greater than the previous
@@ -1510,6 +1604,10 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                             db.rollback()
                     except:
                         db.rollback()
+                    """
+                    Check if sensor reading is within threshold
+                    """
+                    #code
                 if blue < (OLD_BLUE - (OLD_BLUE * 0.05)) or blue > (OLD_BLUE + (OLD_BLUE * 0.05)):
                     """
                     If the blue color readings are 5% less or greater than previous reading, then
@@ -1547,6 +1645,10 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                             db.rollback()
                     except:
                         db.rollback()
+                    """
+                    Check if sensor reading is within threshold
+                    """
+                    #code
 
                 time.sleep(2)
 
@@ -1708,7 +1810,7 @@ def USR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
 
 
 def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event,
-                          keyboard_Event, finalize_change_Event, first_time_Event):
+                          keyboard_Event, finalize_change_Event):
     """
     This function sends a new RGB brightness command to the lighting sub via socket
     every minute. If the sleep_mode_Event is set then no command will be sent until
@@ -1758,7 +1860,6 @@ def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_E
 
     count = 0
     circadian_cmd = ""
-    first_time = 1
 
     while True and keyboard_Event.isSet():
         """
@@ -1818,10 +1919,7 @@ def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_E
             circadian_cli_sock.connect((circadian_cli_sock_host, circadian_cli_sock_port))
             circadian_cli_sock.send(circadian_cmd)
             circadian_cli_sock.close()
-            if first_time:
-                print "It's my first time..."
-                first_time_Event.set()
-                first_time = not first_time
+
             """
             Clear the command string
             """
@@ -1990,12 +2088,12 @@ def wait_for_cmd(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, cha
                     """
                     delete_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # * Create a socket object
                     delete_sock_host = lighting_ip  # * Get lighting IP
-                    delete_sock_port = 12355  # * Reserve a port for your service.
+                    delete_sock_port = 12346  # * Reserve a port for your service.
                     try:
                         delete_sock.connect((delete_sock_host, delete_sock_port))
                     except:
                         print "\nCould not connect to lighting subsystem\n"
-
+                    delete_sock.send("D|")
                     delete_sock.close()
 
                     sql = """DELETE FROM sensor_ip WHERE ip = %s"""

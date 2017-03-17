@@ -60,17 +60,7 @@ pause_time = 0.02
 
 THREADS = []
 
-GPIO.setwarnings(False)
 keyboard_Event_mutex = threading.Lock()
-red_mutex = threading.Lock()
-green_mutex = threading.Lock()
-blue_mutex = threading.Lock()
-
-redS_mutex = threading.Lock()
-greenS_mutex = threading.Lock()
-blueS_mutex = threading.Lock()
-
-comp_Event_mutex = threading.Lock()
 # Open database connection
 print "connecting to database..."
 db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
@@ -116,119 +106,17 @@ def begin_threading():
     global THREADS
     keyboard_Event = threading.Event()
     keyboard_Event.set()
-    comp_Event = threading.Event()
-    comp_Event.set()
-
     # Create two threads as follows
     try:
-        pir_thread=threading.Thread(name='pir_thread', target=PIR_cmd, args=(keyboard_Event,comp_Event,))
+        pir_thread=threading.Thread(name='pir_thread', target=PIR_cmd, args=(keyboard_Event,))
         pir_thread.start()
         THREADS.append(pir_thread)
     except:
-        print "Error: unable to start sleep mode thread"
-    try:
-        delete_thread=threading.Thread(name='delete_thread', target=delete_cmd, args=())
-        delete_thread.start()
-        THREADS.append(pir_thread)
-    except:
-        print "Error: unable to start delete thread"
-    try:
-        comp_thread=threading.Thread(name='comp_thread', target=comp_cmd, args=(comp_Event,))
-        comp_thread.start()
-        THREADS.append(pir_thread)
-    except:
-        print "Error: unable to start delete thread"
+        print "Error: unable to start thread"
     
-    light_cmd(keyboard_Event,comp_Event)
-def delete_cmd():
-    global pinRelay
-    global pinRelayS
-    lighting_del_svr_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)  # * Create a socket object
-    lighting_del_svr_sock_host = ''  # * Get local machine name
-    lighting_del_svr_sock_port = 12355  # delete port.
-    lighting_del_svr_sock.bind((lighting_del_svr_sock_host, lighting_del_svr_sock_port))  # * Bind to the port
+    light_cmd(keyboard_Event)
 
-    lighting_del_svr_sock.listen(5)  # * Now wait for client connection.
-    print "listening on light_pir socket...."
-    lighting_del_svr_sock_connection, lighting_del_svr_sock_connection_addr = lighting_del_svr_sock.accept()  # * Establish connection w
-    print '\nGot connection from', lighting_del_svr_sock_connection_addr, "\n"
-
-    GPIO.output(pinRelay, GPIO.LOW)
-    GPIO.output(pinRelayS, GPIO.LOW)
-
-    pid = os.getpid()
-    os.kill(pid, signal.SIGKILL)
-def comp_cmd(comp_Event):
-    global red
-    global redS
-    global green
-    global greenS
-    global blue
-    global blueS
-
-    lighting_comp_svr_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)  # * Create a socket object
-    lighting_comp_svr_sock_host = ''  # * Get local machine name
-    lighting_comp_svr_sock_port = 12356  # comp port.
-    lighting_comp_svr_sock.bind((lighting_comp_svr_sock_host, lighting_comp_svr_sock_port))  # * Bind to the port
-    lighting_comp_svr_sock.listen(5)
-    while True:
-
-        lighting_comp_svr_sock_connection, lighting_comp_svr_sock_connection_addr = lighting_comp_svr_sock.accept()  # * Establish connection w
-        print '\nGot connection from', lighting_comp_svr_sock_connection_addr, "\n"
-
-        light_intensity = lighting_comp_svr_sock_connection.recv(1024)
-        cmd = light_intensity.split('|')
-        print "GOT on pir_cmd thread: ", cmd
-        comp_Event_mutex.acquire()
-        try:
-            comp_Event.clear()
-        finally:
-            comp_Event_mutex.release()
-
-        if cmd[0] != "N":
-            red_mutex.acquire()
-            try:
-                red.ChangeDutyCycle(float(cmd[0]) / 2)
-            finally:
-                red_mutex.release()
-        if cmd[1] != "N":
-            redS_mutex.acquire()
-            try:
-                redS.ChangeDutyCycle(float(cmd[1]) / 2)
-            finally:
-                redS_mutex.release()
-        if cmd[2] != "N":
-            green_mutex.acquire()
-            try:
-                green.ChangeDutyCycle(float(cmd[2]) / 2)
-            finally:
-                green_mutex.release()
-        if cmd[3] != "N":
-            greenS_mutex.acquire()
-            try:
-                greenS.ChangeDutyCycle(float(cmd[3]) / 2)
-            finally:
-                greenS_mutex.release()
-        if cmd[4] != "N":
-            blue_mutex.acquire()
-            try:
-                blue.ChangeDutyCycle(float(cmd[4]) / 2)
-            finally:
-                blue_mutex.release()
-        if cmd[5] != "N":
-            blue_mutex.acquire()
-            try:
-                blue.ChangeDutyCycle(float(cmd[5]) / 2)
-            finally:
-                blue_mutex.release()
-        comp_Event_mutex.acquire()
-        try:
-            comp_Event.set()
-        finally:
-            comp_Event_mutex.release()
-        lighting_comp_svr_sock_connection.close()
-
-def PIR_cmd(keyboard_Event, comp_Event):
+def PIR_cmd(keyboard_Event):
     global red
     global green
     global blue
@@ -263,15 +151,19 @@ def PIR_cmd(keyboard_Event, comp_Event):
         brightness_values = light_intensity.split('|')
         print "GOT on pir_cmd thread: ", brightness_values
 
-        if float(brightness_values[0]) == 0 and float(brightness_values[1]) == 0 and float(brightness_values[2]) == 0:
+        if brightness_values[0] == 'D':
+            GPIO.output(pinRelay, GPIO.LOW)
+            GPIO.output(pinRelayS, GPIO.LOW)
+##            sql = """DELETE FROM lighting_ip WHERE ip = %s"""
+##            try:
+##                cursor.execute(sql, (local_ip))
+##                db.commit()
+##            except:
+##                db.rollback()
+            pid = os.getpid()
+            os.kill(pid, signal.SIGKILL)
+        elif float(brightness_values[0]) == 0 and float(brightness_values[1]) == 0 and float(brightness_values[2]) == 0:
             # * turn lights off
-            comp_Event_mutex.acquire()
-            try:
-                comp_status = comp_Event.isSet()
-            finally:
-                comp_Event_mutex.release()
-            if not comp_status:
-                comp_Event.wait()
             print "entering sleep mode..."
             GPIO.output(pinRelay, GPIO.LOW)
             GPIO.output(pinRelayS, GPIO.LOW)
@@ -282,13 +174,6 @@ def PIR_cmd(keyboard_Event, comp_Event):
             #GPIO.output(pinRelay, GPIO.LOW)
         else:
             #sepatate into red, green, blue values
-            comp_Event_mutex.acquire()
-            try:
-                comp_status = comp_Event.isSet()
-            finally:
-                comp_Event_mutex.release()
-            if not comp_status:
-                comp_Event.wait()
             print "exiting sleep mode"
             GPIO.output(pinRelay, GPIO.HIGH)
             red.ChangeDutyCycle(float(brightness_values[0]) / 2)
@@ -301,7 +186,7 @@ def PIR_cmd(keyboard_Event, comp_Event):
 
         lighting_pir_svr_sock_connection.close()
 
-def light_cmd(keyboard_Event, comp_Event):
+def light_cmd(keyboard_Event):
     global red
     global green
     global blue
@@ -330,15 +215,20 @@ def light_cmd(keyboard_Event, comp_Event):
             brightness_values = light_intensity.split('|')
             print "GOT on light_cmd thread: ", brightness_values
 
-            if float(brightness_values[0]) == 0 and float(brightness_values[1]) == 0 and float(brightness_values[2]) == 0:
+            if brightness_values[0] == "PR":
+                red.ChangeDutyCycle(float(brightness_values[1]) / 2)
+            elif brightness_values[0] == "PG":
+                green.ChangeDutyCycle(float(brightness_values[1]) / 2)
+            elif brightness_values[0] == "PB":
+                blue.ChangeDutyCycle(float(brightness_values[1]) / 2)
+            elif brightness_values[0] == "SR":
+                GPIO.output(pinRelayS, GPIO.HIGH)
+                red.ChangeDutyCycle(float(brightness_values[1]) / 2)
+                redS.ChangeDutyCycle(float(brightness_values[2]) / 2)
+                greenS.ChangeDutyCycle(0)
+                blueS.ChangeDutyCycle(0)
+            elif float(brightness_values[0]) == 0 and float(brightness_values[1]) == 0 and float(brightness_values[2]) == 0:
                 # * turn lights off
-                comp_Event_mutex.acquire()
-                try:
-                    comp_status = comp_Event.isSet()
-                finally:
-                    comp_Event_mutex.release()
-                if not comp_status:
-                    comp_Event.wait()
                 print "turning lights off"
                 GPIO.output(pinRelay, GPIO.LOW)
                 # red.stop()
@@ -346,13 +236,9 @@ def light_cmd(keyboard_Event, comp_Event):
                 # blue.stop()
                 # GPIO.cleanup()
             else:
-                comp_Event_mutex.acquire()
-                try:
-                    comp_status = comp_Event.isSet()
-                finally:
-                    comp_Event_mutex.release()
-                if not comp_status:
-                    comp_Event.wait()
+                # GPIO.output(pinRelay, GPIO.HIGH)
+                # dutyCycle = (float(light_intensity) / 100) * 1024
+                # wiringpi.pwmWrite(pinPWM, int(dutyCycle))
                 GPIO.output(pinRelay, GPIO.HIGH)
                 # brightness_values = light_intensity.split('|')
                 red.ChangeDutyCycle(float(brightness_values[0]) / 2)
