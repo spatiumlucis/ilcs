@@ -64,7 +64,6 @@ import smbus
 import sys
 import os
 import signal
-import math
 
 """
 Global Variables
@@ -85,15 +84,13 @@ OLD_GREEN = 0
 
 OLD_BLUE = 0
 
-PREV_COLORS = [0, 0, 0]
+DISTANCE = 8
 
 WAKE_UP_TIME = 0
 
 MASTER_CIRCADIAN_TABLE = []
 
 MASTER_OFFSET_TABLE = []
-
-MASTER_LUX_TABLE = []
 
 USER_CIRCADIAN_TABLE = []
 
@@ -114,15 +111,7 @@ change_par_mutex = threading.Lock()
 
 keyboard_Event_mutex = threading.Lock()
 
-color_threshold_mutex = threading.Lock()
-
-user_ct_mutex = threading.Lock()
-
-user_ot_mutex = threading.Lock()
-
-wake_up_mutex = threading.Lock()
-
-finalize_par_mutex = threading.Lock()
+local_ip = ""
 
 THREADS = []
 
@@ -175,7 +164,7 @@ def boot_up():
     global LIGHT_THRESHOLD
     global WAKE_UP_TIME
     global SLEEP_MODE_STATUS
-
+    global local_ip
     print "Booting up..."
     """
     Establish DB connection
@@ -194,10 +183,8 @@ def boot_up():
     Check DB if the sensor sub exists
     """
     sql = """SELECT * FROM sensor_ip WHERE ip = %s"""
-    cursor.execute(sql, ([local_ip]))
+    cursor.execute(sql, (local_ip))
     temp = cursor.fetchall()
-
-
     if len(temp) == 0:
         """
         The sensor sub does NOT exist in the DB so insert it into
@@ -206,15 +193,16 @@ def boot_up():
         sql = """INSERT INTO sensor_ip(ip, is_paired) VALUES(%s, 0)"""
         sql2 = """INSERT INTO sensor_status(ip, red, green, blue, lumens, red_degraded, green_degraded, blue_degraded, lumens_degraded, sleep_mode_status, distance, service) VALUEs(%s, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)"""
         try:
-            cursor.execute(sql, ([local_ip]))
+            cursor.execute(sql, (local_ip))
             db.commit()
         except:
             db.rollback()
         try:
-            cursor.execute(sql2, ([local_ip]))
+            cursor.execute(sql2, (local_ip))
             db.commit()
         except:
             db.rollback()
+
     else:
         """
         The sensor sub DOES exist in the DB. Grab its paired status
@@ -225,7 +213,7 @@ def boot_up():
         Check degrade status for red
         """
         sql = """SELECT * FROM sensor_status WHERE ip = %s"""
-        cursor.execute(sql, ([local_ip]))
+        cursor.execute(sql, (local_ip))
         temp = cursor.fetchall()
         is_sensor_service = temp[0][11]
         is_red_deg = temp[0][5]
@@ -235,7 +223,7 @@ def boot_up():
         if is_sensor_service:
             sql = """UPDATE sensor_status SET service = 0 WHERE ip = %s"""
             try:
-                cursor.execute(sql, ([local_ip]))
+                cursor.execute(sql, (local_ip))
                 db.commit()
             except (AttributeError, MySQLdb.OperationalError):
                 """
@@ -251,7 +239,7 @@ def boot_up():
                     """
                     Try to update DB again
                     """
-                    cursor.execute(sql, ([local_ip]))
+                    cursor.execute(sql, (local_ip))
                     db.commit()
                 except:
                     db.rollback()
@@ -260,7 +248,7 @@ def boot_up():
         if is_red_deg:
             sql = """UPDATE sensor_status SET red_degraded = 0 WHERE ip = %s"""
             try:
-                cursor.execute(sql, ([local_ip]))
+                cursor.execute(sql, (local_ip))
                 db.commit()
             except (AttributeError, MySQLdb.OperationalError):
                 """
@@ -276,7 +264,7 @@ def boot_up():
                     """
                     Try to update DB again
                     """
-                    cursor.execute(sql, ([local_ip]))
+                    cursor.execute(sql, (local_ip))
                     db.commit()
                 except:
                     db.rollback()
@@ -285,7 +273,7 @@ def boot_up():
         if is_green_deg:
             sql = """UPDATE sensor_status SET green_degraded = 0 WHERE ip = %s"""
             try:
-                cursor.execute(sql, ([local_ip]))
+                cursor.execute(sql, (local_ip))
                 db.commit()
             except (AttributeError, MySQLdb.OperationalError):
                 """
@@ -301,7 +289,7 @@ def boot_up():
                     """
                     Try to update DB again
                     """
-                    cursor.execute(sql, ([local_ip]))
+                    cursor.execute(sql, (local_ip))
                     db.commit()
                 except:
                     db.rollback()
@@ -310,7 +298,7 @@ def boot_up():
         if is_blue_deg:
             sql = """UPDATE sensor_status SET blue_degraded = 0 WHERE ip = %s"""
             try:
-                cursor.execute(sql, ([local_ip]))
+                cursor.execute(sql, (local_ip))
                 db.commit()
             except (AttributeError, MySQLdb.OperationalError):
                 """
@@ -326,7 +314,7 @@ def boot_up():
                     """
                     Try to update DB again
                     """
-                    cursor.execute(sql, ([local_ip]))
+                    cursor.execute(sql, (local_ip))
                     db.commit()
                 except:
                     db.rollback()
@@ -369,7 +357,7 @@ def boot_up():
         sql = """UPDATE sensor_ip SET is_paired = 1 WHERE ip = %s"""
 
         try:
-            cursor.execute(sql, ([local_ip]))
+            cursor.execute(sql, (local_ip))
             db.commit()
         except:
             db.rollback()
@@ -379,7 +367,7 @@ def boot_up():
         sql = """INSERT INTO sensor_light_pairs(sensor_ip, lighting_ip) VALUES(%s, %s)"""
 
         try:
-            cursor.execute(sql, ([local_ip, lighting_ip]))
+            cursor.execute(sql, (local_ip, lighting_ip))
             db.commit()
         except:
             db.rollback()
@@ -387,7 +375,7 @@ def boot_up():
         Grab user's values
         """
         sql = """SELECT * FROM sensor_settings WHERE ip = %s"""
-        cursor.execute(sql, ([local_ip]))
+        cursor.execute(sql, (local_ip))
         temp = cursor.fetchall()
         print "Sensor Subsystem added with user values: ", temp[0]
         WAKE_UP_TIME = temp[0][1]
@@ -403,7 +391,7 @@ def boot_up():
         """
         print "Reconnecting to previous Lighting Subsystem..."
         sql = """SELECT * FROM sensor_light_pairs WHERE sensor_ip = %s"""
-        cursor.execute(sql, ([local_ip]))
+        cursor.execute(sql, (local_ip))
         temp = cursor.fetchall()
 
         lighting_ip = temp[0][1]
@@ -412,7 +400,7 @@ def boot_up():
         Grab previous sensor sub settings
         """
         sql = """SELECT * FROM sensor_settings WHERE ip = %s"""
-        cursor.execute(sql, ([local_ip]))
+        cursor.execute(sql, (local_ip))
         temp = cursor.fetchall()
 
         WAKE_UP_TIME = temp[0][1]
@@ -420,7 +408,7 @@ def boot_up():
         LIGHT_THRESHOLD = float(temp[0][3])/100
         print "Sensor-Light pair re-established with values: ", temp[0]
         sql = """SELECT * FROM sensor_status WHERE ip = %s"""
-        cursor.execute(sql, ([local_ip]))
+        cursor.execute(sql, (local_ip))
         temp = cursor.fetchall()
         SLEEP_MODE_STATUS = temp[0][9]
     """
@@ -458,7 +446,6 @@ def init_circadian_table():
     """
     global MASTER_CIRCADIAN_TABLE
     global MASTER_OFFSET_TABLE
-    global MASTER_LUX_TABLE
 
     colors = []
     offsets = []
@@ -482,7 +469,6 @@ def init_circadian_table():
             offsets.append((float(90)/120)*t - 225)
             offsets.append((float(156)/120)*t - 390)
 
-            MASTER_LUX_TABLE.append((21.0 / 120) * t - 52.5)
             MASTER_CIRCADIAN_TABLE.append(colors)
             MASTER_OFFSET_TABLE.append(offsets)
             colors = []
@@ -499,7 +485,7 @@ def init_circadian_table():
             offsets.append((float(28) / 300) * t + 50.8)
             offsets.append((float(28) / 300) * t + 116.8)
 
-            MASTER_LUX_TABLE.append((6.0 / 300) * t + 12.6)
+
             MASTER_CIRCADIAN_TABLE.append(colors)
             MASTER_OFFSET_TABLE.append(offsets)
             colors = []
@@ -516,7 +502,6 @@ def init_circadian_table():
             offsets.append((float(-144) / 420) * t + 430.86)
             MASTER_CIRCADIAN_TABLE.append(colors)
             MASTER_OFFSET_TABLE.append(offsets)
-            MASTER_LUX_TABLE.append((-18.0 / 420) * t + 57.86)
             colors = []
             offsets = []
         elif t >= 1140 and t <= 1380:
@@ -532,7 +517,6 @@ def init_circadian_table():
 
             MASTER_CIRCADIAN_TABLE.append(colors)
             MASTER_OFFSET_TABLE.append(offsets)
-            MASTER_LUX_TABLE.append((-9.0 / 240) * t + 51.75)
             colors = []
             offsets = []
         else:
@@ -545,7 +529,7 @@ def init_circadian_table():
             offsets.append(0)
             offsets.append(0)
             offsets.append(0)
-            MASTER_LUX_TABLE.append(0)
+
             MASTER_CIRCADIAN_TABLE.append(colors)
             MASTER_OFFSET_TABLE.append(offsets)
             colors = []
@@ -589,64 +573,51 @@ def calc_user_circadian_table(change_par_Event, finalize_change_Event):
     same length as the MASTER_CIRCADIAN_TABLE. So, set
     the USER_CIRCADIAN_TABLE to the MASTER_CIRCADIAN_TABLE.
     """
-    user_ct_mutex.acquire()
-    try:
-        USER_CIRCADIAN_TABLE = MASTER_CIRCADIAN_TABLE[:]
-        USER_OFFSET_TABLE = MASTER_OFFSET_TABLE[:]
+    USER_CIRCADIAN_TABLE = MASTER_CIRCADIAN_TABLE[:]
+    USER_OFFSET_TABLE = MASTER_OFFSET_TABLE[:]
+    """
+    Calculate if user wakes up earlier or later than 7 AM
+    """
+    wake_diff = WAKE_UP_TIME - 420
+    count = 0
+    if wake_diff < 0:
         """
-        Calculate if user wakes up earlier or later than 7 AM
+        User wakes earlier than 7 AM
         """
-        wake_diff = WAKE_UP_TIME - 420
-        count = 0
-        if wake_diff < 0:
-            """
-            User wakes earlier than 7 AM
-            """
-            while count < 1440:
+        while count < 1440:
+            USER_CIRCADIAN_TABLE[count + wake_diff] = MASTER_CIRCADIAN_TABLE[count]
+            USER_OFFSET_TABLE[count + wake_diff] = MASTER_OFFSET_TABLE[count]
+            count += 1
+    elif wake_diff > 0:
+        """
+        User wakes up later than 7 AM
+        """
+        while count < 1440:
+            if (count + wake_diff) > 1439:
+                """
+                For later indexes in the list, the values must wrap around
+                to earlier indexes. Therefore, take the MOD.
+                """
+                USER_CIRCADIAN_TABLE[(count + wake_diff) % 1440] = MASTER_CIRCADIAN_TABLE[count]
+                USER_OFFSET_TABLE[(count + wake_diff) % 1440] = MASTER_OFFSET_TABLE[count]
+            else:
                 USER_CIRCADIAN_TABLE[count + wake_diff] = MASTER_CIRCADIAN_TABLE[count]
                 USER_OFFSET_TABLE[count + wake_diff] = MASTER_OFFSET_TABLE[count]
-                count += 1
-        elif wake_diff > 0:
-            """
-            User wakes up later than 7 AM
-            """
-            while count < 1440:
-                if (count + wake_diff) > 1439:
-                    """
-                    For later indexes in the list, the values must wrap around
-                    to earlier indexes. Therefore, take the MOD.
-                    """
-                    USER_CIRCADIAN_TABLE[(count + wake_diff) % 1440] = MASTER_CIRCADIAN_TABLE[count]
-                    USER_OFFSET_TABLE[(count + wake_diff) % 1440] = MASTER_OFFSET_TABLE[count]
-                else:
-                    USER_CIRCADIAN_TABLE[count + wake_diff] = MASTER_CIRCADIAN_TABLE[count]
-                    USER_OFFSET_TABLE[count + wake_diff] = MASTER_OFFSET_TABLE[count]
-                count += 1
-        else:
-            """
-            User wakes up at 7 AM
-            """
-            USER_CIRCADIAN_TABLE = MASTER_CIRCADIAN_TABLE[:]
-            USER_OFFSET_TABLE = MASTER_OFFSET_TABLE[:]
+            count += 1
+    else:
         """
-        If the user changed the wake up time, then the change_par_Event is set.
-        Set the the finalize_change_Event and wait 1 sec. This allows for thread
-        synchronization.
+        User wakes up at 7 AM
         """
-        change_par_mutex.acquire()
-        try:
-            change_par_status = change_par_Event.isSet()
-        finally:
-            change_par_mutex.release()
-        if change_par_status:
-            finalize_par_mutex.acquire()
-            try:
-                finalize_change_Event.set()
-            finally:
-                finalize_par_mutex.release()
-            time.sleep(1)
-    finally:
-        user_ct_mutex.release()
+        USER_CIRCADIAN_TABLE = MASTER_CIRCADIAN_TABLE[:]
+        USER_OFFSET_TABLE = MASTER_OFFSET_TABLE[:]
+    """
+    If the user changed the wake up time, then the change_par_Event is set.
+    Set the the finalize_change_Event and wait 1 sec. This allows for thread
+    synchronization.
+    """
+    if change_par_Event.isSet():
+        finalize_change_Event.set()
+        time.sleep(1)
 
 
 def begin_threading():
@@ -802,6 +773,7 @@ def PIR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
     """
     Import global vars
     """
+    global SLEEP_MODE_STATUS
     global lighting_ip
     global USER_CIRCADIAN_TABLE
     global SAVED_MINUTE
@@ -876,15 +848,6 @@ def PIR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
             except:
                 print "Could not connect to lighting subsystem"
             sensor_to_lighting_cli_sock.send("0|0|0|")
-            current_minute = time.localtime()[3] * 60 + time.localtime()[4]
-            user_ct_mutex.acquire()
-            try:
-                user_ct = USER_CIRCADIAN_TABLE[:]
-            finally:
-                user_ct_mutex.release()
-            pir_cmd = str(user_ct[current_minute][0]) + "|" + str(
-                user_ct[current_minute][1]) + "|" + str(user_ct[current_minute][2]) + "|"
-            sensor_to_lighting_cli_sock.send(pir_cmd)
 
             print "Lighting Subsystem (IP: '%s') has entered sleep mode" % lighting_ip
 
@@ -904,7 +867,7 @@ def PIR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
             sql = """UPDATE sensor_status SET sleep_mode_status = 1 WHERE ip = %s"""
             try:
 
-                cursor.execute(sql, ([local_ip]))
+                cursor.execute(sql, (local_ip))
                 db.commit()
             except:
                 db.rollback()
@@ -937,7 +900,7 @@ def PIR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                 """
                 sql = """UPDATE sensor_status SET sleep_mode_status = 0 WHERE ip = %s"""
                 try:
-                    cursor.execute(sql, ([local_ip]))
+                    cursor.execute(sql, (local_ip))
                     db.commit()
                 except (AttributeError, MySQLdb.OperationalError):
                     """
@@ -953,7 +916,7 @@ def PIR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                         """
                         Try to update DB again
                         """
-                        cursor.execute(sql, ([local_ip]))
+                        cursor.execute(sql, (local_ip))
                         db.commit()
                     except:
                         db.rollback()
@@ -1009,15 +972,18 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
     """
     Import global vars.
     """
-
+    global is_sensor_sub_paired
     global lighting_ip
     global COLOR_THRESHOLD
+    global LIGHT_THRESHOLD
+    global SLEEP_MODE_STATUS
+    global WAKE_UP_TIME
+    global local_ip
     global OLD_RED
     global OLD_GREEN
     global OLD_BLUE
     global USER_OFFSET_TABLE
     global USER_CIRCADIAN_TABLE
-    global MASTER_LUX_TABLE
     print "RGB thread created successfully."
 
     """
@@ -1035,7 +1001,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
     #pir_DB_Event.wait()
     usr_DB_Event.wait()
     cmd_DB_Event.wait()
-
+    first_time_Event.wait()
     """
     Initialize the RGB sensor
     The RGB sensor uses I2C Bus (smbus)
@@ -1044,7 +1010,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
     bus = smbus.SMBus(1)
     bus.write_byte(0x29, 0x80 | 0x12)
     ver = bus.read_byte(0x29)
-    local_ip = get_ip()
+
     """
     Variables for degradation detection
     """
@@ -1098,7 +1064,6 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                 If the sleep_mode_Event and the change_par_Event
                 are NOT set, then read from the RGB sensor
                 """
-                first_time_Event.wait()
                 data = bus.read_i2c_block_data(0x29, 0)
                 """
                 The sensor readings must be converted to an RGB brightness.
@@ -1115,21 +1080,17 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                 blue = float(data[7] << 8 | data[6])
 #                blue = float(float(blue / 184)) * 100
 #                blue = int(blue)
-                #lux = int((-0.32466 * red) + (1.57837 * green) + (-0.73191 * blue))
+                lux = int((-0.32466 * red) + (1.57837 * green) + (-0.73191 * blue))
                 print "R: %s, G: %s, B: %s, Lux: %s" % (red, green, blue, lux)
                 """
                 Get the current circadian table value for red
                 """
-                user_ct_mutex.acquire()
-                try:
-                    circadian_red = USER_CIRCADIAN_TABLE[current_minute][0]
-                    circadian_green = USER_CIRCADIAN_TABLE[current_minute][1]
-                    circadian_blue = USER_CIRCADIAN_TABLE[current_minute][2]
-                    offset_red = USER_OFFSET_TABLE[current_minute][0]
-                    offset_green = USER_OFFSET_TABLE[current_minute][1]
-                    offset_blue = USER_OFFSET_TABLE[current_minute][2]
-                finally:
-                    user_ct_mutex.release()
+                circadian_red = USER_CIRCADIAN_TABLE[current_minute][0]
+                circadian_green = USER_CIRCADIAN_TABLE[current_minute][1]
+                circadian_blue = USER_CIRCADIAN_TABLE[current_minute][2]
+                offset_red = USER_OFFSET_TABLE[current_minute][0]
+                offset_green = USER_OFFSET_TABLE[current_minute][1]
+                offset_blue = USER_OFFSET_TABLE[current_minute][2]
                 x = (float(circadian_red) / 100) * 137
                 y = (float(circadian_green) / 100) * 118
                 z = (float(circadian_blue) / 100) * 184
@@ -1137,19 +1098,10 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                 red2 = (float(red + (x - offset_red)) / 137 ) * 100
                 green2 = (float(green + (y - offset_green)) / 118) * 100
                 blue2 = (float(blue + (z - offset_blue)) / 184) * 100
-                dist_in_meters = 8 * 0.3048
-                lux = ((red2 + green2 + blue2) / (circadian_red+circadian_green+circadian_blue)) * MASTER_LUX_TABLE[current_minute]
-                lumens = calc_Illuminance(lux, dist_in_meters, 120)
                 print " RED should be: %s and is reading %s" % (circadian_red, red2)
                 print " GREEN should be: %s and is reading %s" % (circadian_green, green2)
                 print " BLUE should be: %s and is reading %s" % (circadian_blue, blue2)
-                print "Lux: %s ; Lumens: %s " % (lux, lumens)
-                color_threshold_mutex.acquire()
-                try:
-                    color_threshold = COLOR_THRESHOLD
-                finally:
-                    color_threshold_mutex.release()
-                if red2 < (circadian_red - (circadian_red*color_threshold)):
+                if red < (circadian_red - (circadian_red*COLOR_THRESHOLD)):
                     if primary_red_degraded:
                         """
                         Primaries are degraded
@@ -1161,7 +1113,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                                 """
                                 sql = """UPDATE sensor_status SET service = 1 WHERE ip = %s"""
                                 try:
-                                    cursor.execute(sql, ([local_ip]))
+                                    cursor.execute(sql, (local_ip))
                                     db.commit()
                                 except (AttributeError, MySQLdb.OperationalError):
                                     """
@@ -1175,7 +1127,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                                     cursor = db.cursor()
 
                                     try:
-                                        cursor.execute(sql, ([local_ip]))
+                                        cursor.execute(sql, (local_ip))
                                         db.commit()
                                     except:
                                         db.rollback()
@@ -1216,7 +1168,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
 
                         sql = """UPDATE sensor_status SET red_degraded = 1 WHERE ip = %s"""
                         try:
-                            cursor.execute(sql, ([local_ip]))
+                            cursor.execute(sql, (local_ip))
                             db.commit()
                         except (AttributeError, MySQLdb.OperationalError):
                             """
@@ -1230,7 +1182,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                             cursor = db.cursor()
 
                             try:
-                                cursor.execute(sql, ([local_ip]))
+                                cursor.execute(sql, (local_ip))
                                 db.commit()
                             except:
                                 db.rollback()
@@ -1243,10 +1195,10 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
 
                         primary_red_degraded = True
                 else:
-                    print "NO SIR ", (circadian_red - (circadian_red*color_threshold)), color_threshold
+                    print "NO SIR ", (circadian_red - (circadian_red*COLOR_THRESHOLD)), COLOR_THRESHOLD
 
 
-                if green2 < (circadian_green - (circadian_green*color_threshold)):
+                if green < (circadian_green - (circadian_green*COLOR_THRESHOLD)):
                     if primary_green_degraded:
                         """
                         Primaries are degraded
@@ -1258,7 +1210,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                                 """
                                 sql = """UPDATE sensor_status SET service = 1 WHERE ip = %s"""
                                 try:
-                                    cursor.execute(sql, ([local_ip]))
+                                    cursor.execute(sql, (local_ip))
                                     db.commit()
                                 except (AttributeError, MySQLdb.OperationalError):
                                     """
@@ -1272,7 +1224,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                                     cursor = db.cursor()
 
                                     try:
-                                        cursor.execute(sql, ([local_ip]))
+                                        cursor.execute(sql, (local_ip))
                                         db.commit()
                                     except:
                                         db.rollback()
@@ -1317,7 +1269,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
 
                         sql = """UPDATE sensor_status SET green_degraded = 1 WHERE ip = %s"""
                         try:
-                            cursor.execute(sql, ([local_ip]))
+                            cursor.execute(sql, (local_ip))
                             db.commit()
                         except (AttributeError, MySQLdb.OperationalError):
                             """
@@ -1331,7 +1283,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                             cursor = db.cursor()
 
                             try:
-                                cursor.execute(sql, ([local_ip]))
+                                cursor.execute(sql, (local_ip))
                                 db.commit()
                             except:
                                 db.rollback()
@@ -1345,10 +1297,10 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
 
                         primary_green_degraded = True
                 else:
-                    print "NO SIR ", (circadian_green - (circadian_green*color_threshold)), color_threshold
+                    print "NO SIR ", (circadian_green - (circadian_green*COLOR_THRESHOLD)), COLOR_THRESHOLD
 
 
-                if blue2 < (circadian_blue - (circadian_blue*color_threshold)):
+                if blue < (circadian_blue - (circadian_blue*COLOR_THRESHOLD)):
                     if primary_blue_degraded:
                         """
                         Primaries are degraded
@@ -1360,7 +1312,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                                 """
                                 sql = """UPDATE sensor_status SET service = 1 WHERE ip = %s"""
                                 try:
-                                    cursor.execute(sql, ([local_ip]))
+                                    cursor.execute(sql, (local_ip))
                                     db.commit()
                                 except (AttributeError, MySQLdb.OperationalError):
                                     """
@@ -1374,7 +1326,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                                     cursor = db.cursor()
 
                                     try:
-                                        cursor.execute(sql, ([local_ip]))
+                                        cursor.execute(sql, (local_ip))
                                         db.commit()
                                     except:
                                         db.rollback()
@@ -1421,7 +1373,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
 
                         sql = """UPDATE sensor_status SET blue_degraded = 1 WHERE ip = %s"""
                         try:
-                            cursor.execute(sql, ([local_ip]))
+                            cursor.execute(sql, (local_ip))
                             db.commit()
                         except (AttributeError, MySQLdb.OperationalError):
                             """
@@ -1435,7 +1387,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                             cursor = db.cursor()
 
                             try:
-                                cursor.execute(sql, ([local_ip]))
+                                cursor.execute(sql, (local_ip))
                                 db.commit()
                             except:
                                 db.rollback()
@@ -1449,7 +1401,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
 
                         primary_blue_degraded = True
                 else:
-                    print "NO SIR ", (circadian_blue - (circadian_blue*color_threshold)), color_threshold
+                    print "NO SIR ", (circadian_blue - (circadian_blue*COLOR_THRESHOLD)), COLOR_THRESHOLD
                 for key in comp_list:
                     if key != "N":
                         comp_cmd += comp_list[0]
@@ -1482,7 +1434,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                         comp_list = []
                         break
 
-                if red2 < (OLD_RED - (OLD_RED * 0.05)) or red > (OLD_RED + (OLD_RED * 0.05)):
+                if red < (OLD_RED - (OLD_RED * 0.05)) or red > (OLD_RED + (OLD_RED * 0.05)):
                     """
                     If the red color reading is 5% less or greater than the previous
                     value, then update the database
@@ -1491,12 +1443,12 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                     try:
                         if red2 > 100:
                             sql = """UPDATE sensor_status SET red = 100 WHERE ip = %s"""
-                            cursor.execute(sql, ([local_ip]))
+                            cursor.execute(sql, (local_ip))
                             db.commit()
                         else:
-                            cursor.execute(sql, ([red2, local_ip]))
+                            cursor.execute(sql, (red2, local_ip))
                             db.commit()
-                        OLD_RED = red2
+                        OLD_RED = red
                     except (AttributeError, MySQLdb.OperationalError):
                         """
                         If the DB connection was lost, then reconnect
@@ -1510,18 +1462,18 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                         try:
                             if red2 > 100:
                                 sql = """UPDATE sensor_status SET red = 100 WHERE ip = %s"""
-                                cursor.execute(sql, ([local_ip]))
+                                cursor.execute(sql, (local_ip))
                                 db.commit()
                             else:
-                                cursor.execute(sql, ([red2, local_ip]))
+                                cursor.execute(sql, (red2, local_ip))
                                 db.commit()
-                            OLD_RED = red2
+                            OLD_RED = red
                         except:
                             db.rollback()
                     except:
                         db.rollback()
 
-                if green2 < (OLD_GREEN - (OLD_GREEN * 0.05)) or green > (OLD_GREEN + (OLD_GREEN * 0.05)):
+                if green < (OLD_GREEN - (OLD_GREEN * 0.05)) or green > (OLD_GREEN + (OLD_GREEN * 0.05)):
                     """
                     If the green color reading is 5% less or greater than the previous
                     value, then update the database
@@ -1530,12 +1482,12 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                     try:
                         if green2 > 100:
                             sql = """UPDATE sensor_status SET green = 100 WHERE ip = %s"""
-                            cursor.execute(sql, ([local_ip]))
+                            cursor.execute(sql, (local_ip))
                             db.commit()
                         else:
-                            cursor.execute(sql, ([green2, local_ip]))
+                            cursor.execute(sql, (green2, local_ip))
                             db.commit()
-                        OLD_GREEN = green2
+                        OLD_GREEN = green
                     except (AttributeError, MySQLdb.OperationalError):
                         """
                         If DB connection was lost, then reconnect
@@ -1548,17 +1500,17 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                         try:
                             if green2 > 100:
                                 sql = """UPDATE sensor_status SET green = 100 WHERE ip = %s"""
-                                cursor.execute(sql, ([local_ip]))
+                                cursor.execute(sql, (local_ip))
                                 db.commit()
                             else:
-                                cursor.execute(sql, ([green2, local_ip]))
+                                cursor.execute(sql, (green2, local_ip))
                                 db.commit()
-                            OLD_GREEN = green2
+                            OLD_GREEN = green
                         except:
                             db.rollback()
                     except:
                         db.rollback()
-                if blue2 < (OLD_BLUE - (OLD_BLUE * 0.05)) or blue > (OLD_BLUE + (OLD_BLUE * 0.05)):
+                if blue < (OLD_BLUE - (OLD_BLUE * 0.05)) or blue > (OLD_BLUE + (OLD_BLUE * 0.05)):
                     """
                     If the blue color readings are 5% less or greater than previous reading, then
                     update the DB
@@ -1567,12 +1519,12 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                     try:
                         if blue2 > 100:
                             sql = """UPDATE sensor_status SET blue = 100 WHERE ip = %s"""
-                            cursor.execute(sql, ([local_ip]))
+                            cursor.execute(sql, (local_ip))
                             db.commit()
                         else:
-                            cursor.execute(sql, ([blue2, local_ip]))
+                            cursor.execute(sql, (blue2, local_ip))
                             db.commit()
-                        OLD_BLUE = blue2
+                        OLD_BLUE = blue
                     except (AttributeError, MySQLdb.OperationalError):
                         """
                         If DB connection was lost, then reconnect
@@ -1585,12 +1537,12 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                         try:
                             if blue2 > 100:
                                 sql = """UPDATE sensor_status SET blue = 100 WHERE ip = %s"""
-                                cursor.execute(sql, ([local_ip]))
+                                cursor.execute(sql, (local_ip))
                                 db.commit()
                             else:
-                                cursor.execute(sql, ([blue2, local_ip]))
+                                cursor.execute(sql, (blue2, local_ip))
                                 db.commit()
-                            OLD_BLUE = blue2
+                            OLD_BLUE = blue
                         except:
                             db.rollback()
                     except:
@@ -1631,7 +1583,14 @@ def USR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
     :return: None.
     """
     print "USR thread created successfully."
-
+    """
+    import global vars
+    """
+    global is_sensor_sub_paired
+    global lighting_ip
+    global COLOR_THRESHOLD
+    global LIGHT_THRESHOLD
+    global WAKE_UP_TIME
     """
     Connect to DB
     """
@@ -1645,14 +1604,14 @@ def USR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
     #pir_DB_Event.wait()
     rgb_DB_Event.wait()
     cmd_DB_Event.wait()
-    local_ip = get_ip()
+
     cursor = db.cursor()
     """
     Set the distance to be 8 in the DB
     """
     sql = """UPDATE sensor_status SET distance = 8 WHERE ip = %s"""
     try:
-        cursor.execute(sql, ([local_ip]))
+        cursor.execute(sql, (local_ip))
         db.commit()
     except (AttributeError, MySQLdb.OperationalError):
         print "Trying to reconnect to database in USR thread..."
@@ -1660,7 +1619,7 @@ def USR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
         print "Database connection re-established in USR thread."
         cursor = db.cursor()
         try:
-            cursor.execute(sql, ([distInFt, local_ip]))
+            cursor.execute(sql, (distInFt, local_ip))
             db.commit()
         except:
             db.rollback()
@@ -1673,10 +1632,8 @@ def USR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
     The ECHO pin is 38 and will be GPIO in
     """
     GPIO.setmode(GPIO.BOARD)
-    # TRIG = 36
-    # ECHO = 38
-    TRIG = 7
-    ECHO = 11
+    TRIG = 36
+    ECHO = 38
     GPIO.setup(TRIG, GPIO.OUT)
     GPIO.setup(ECHO, GPIO.IN)
 
@@ -1727,10 +1684,10 @@ def USR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
             """
             If distance is out of range then update DB
             """
-            print "Out Of Range",distInFt  # display out of range
+            print "Out Of Range"  # display out of range
             sql = """UPDATE sensor_status SET distance = -1 WHERE ip = %s"""
             try:
-                cursor.execute(sql, ([local_ip]))
+                cursor.execute(sql, (local_ip))
                 db.commit()
             except (AttributeError, MySQLdb.OperationalError):
                 """
@@ -1742,7 +1699,7 @@ def USR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                 print "Database connection re-established in USR thread."
                 cursor = db.cursor()
                 try:
-                    cursor.execute(sql, ([distInFt, local_ip]))
+                    cursor.execute(sql, (distInFt, local_ip))
                     db.commit()
                 except:
                     db.rollback()
@@ -1787,6 +1744,7 @@ def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_E
     Import global vars
     """
     global USER_CIRCADIAN_TABLE
+    global SLEEP_MODE_STATUS
     #global CURRENT_MINUTE
     global lighting_ip
 
@@ -1797,8 +1755,9 @@ def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_E
     #pir_DB_Event.wait()
     rgb_DB_Event.wait()
     cmd_DB_Event.wait()
-    #local_ip = get_ip()
+
     count = 0
+    circadian_cmd = ""
     first_time = 1
 
     while True and keyboard_Event.isSet():
@@ -1839,15 +1798,12 @@ def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_E
             Create the command string. Format:
                         R|G|B|
             """
-            user_ct_mutex.acquire()
-            try:
-                circadian_cmd = str(USER_CIRCADIAN_TABLE[current_minute][0])+"|"+str(USER_CIRCADIAN_TABLE[current_minute][1])+"|"+str(USER_CIRCADIAN_TABLE[current_minute][2])+"|"
-                circadian_cmd += (str(PREV_COLORS[0])+"|"+str(PREV_COLORS[1])+"|"+str(PREV_COLORS[2])+"|")
-                PREV_COLORS[0] = USER_CIRCADIAN_TABLE[current_minute][0]
-                PREV_COLORS[1] = USER_CIRCADIAN_TABLE[current_minute][1]
-                PREV_COLORS[2] = USER_CIRCADIAN_TABLE[current_minute][2]
-            finally:
-                user_ct_mutex.release()
+            circadian_cmd += str(USER_CIRCADIAN_TABLE[current_minute][0])
+            circadian_cmd += "|"
+            circadian_cmd += str(USER_CIRCADIAN_TABLE[current_minute][1])
+            circadian_cmd += "|"
+            circadian_cmd += str(USER_CIRCADIAN_TABLE[current_minute][2])
+            circadian_cmd += "|"
 
             """
             Create client socket connection to the lighting sub
@@ -1866,6 +1822,10 @@ def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_E
                 print "It's my first time..."
                 first_time_Event.set()
                 first_time = not first_time
+            """
+            Clear the command string
+            """
+            circadian_cmd = ""
 
             """
             Count for 1 minute
@@ -1908,11 +1868,7 @@ def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_E
                         wait for the changes to finalize
                         """
                         finalize_change_Event.wait()
-                        finalize_par_mutex.acquire()
-                        try:
-                            finalize_change_Event.clear()
-                        finally:
-                            finalize_par_mutex.release()
+                        finalize_change_Event.clear()
                     break
                 print "count: ", count
                 time.sleep(1)
@@ -1978,7 +1934,8 @@ def wait_for_cmd(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, cha
     global LIGHT_THRESHOLD
     global WAKE_UP_TIME
     global THREADS
-    global USER_CIRCADIAN_TABLE
+    global local_ip
+
     """
     Establish DB connection
     """
@@ -1994,7 +1951,7 @@ def wait_for_cmd(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, cha
     usr_DB_Event.wait()
     #pir_DB_Event.wait()
     rgb_DB_Event.wait()
-    local_ip = get_ip()
+
     """
     Create server socket for control subsystem to connect to
     and send commands
@@ -2019,7 +1976,6 @@ def wait_for_cmd(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, cha
                 wait_cmd_svr_sock_connection.close()
                 continue
             else:
-                current_minute = time.localtime()[3] * 60 + time.localtime()[4]
                 """
                 Split the string on '|'
                 """
@@ -2039,17 +1995,12 @@ def wait_for_cmd(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, cha
                         delete_sock.connect((delete_sock_host, delete_sock_port))
                     except:
                         print "\nCould not connect to lighting subsystem\n"
-                    user_ct_mutex.acquire()
-                    try:
-                        delete_cmd = str(USER_CIRCADIAN_TABLE[current_minute][0])+"|"+str(USER_CIRCADIAN_TABLE[current_minute][1])+"|"+str(USER_CIRCADIAN_TABLE[current_minute][2])+"|"
-                    finally:
-                        user_ct_mutex.release()
-                    delete_sock.send(delete_cmd)
+
                     delete_sock.close()
 
                     sql = """DELETE FROM sensor_ip WHERE ip = %s"""
                     try:
-                        cursor.execute(sql, ([local_ip]))
+                        cursor.execute(sql, (local_ip))
                         db.commit()
                     except (AttributeError, MySQLdb.OperationalError):
                         print "Re-establishing database connection in main thread..."
@@ -2058,7 +2009,7 @@ def wait_for_cmd(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, cha
                         print "Database connection re-established in main thread."
                         cursor = db.cursor()
                         try:
-                            cursor.execute(sql, ([local_ip]))
+                            cursor.execute(sql, (local_ip))
                             db.commit()
                         except:
                             db.rollback()
@@ -2067,7 +2018,7 @@ def wait_for_cmd(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, cha
 
                     sql = """DELETE FROM sensor_settings WHERE ip = %s"""
                     try:
-                        cursor.execute(sql, ([local_ip]))
+                        cursor.execute(sql, (local_ip))
                         db.commit()
                     except (AttributeError, MySQLdb.OperationalError):
                         print "Re-establishing database connection in main thread..."
@@ -2076,7 +2027,7 @@ def wait_for_cmd(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, cha
                         print "Database connection re-established in main thread."
                         cursor = db.cursor()
                         try:
-                            cursor.execute(sql, ([local_ip]))
+                            cursor.execute(sql, (local_ip))
                             db.commit()
                         except:
                             db.rollback()
@@ -2085,7 +2036,7 @@ def wait_for_cmd(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, cha
 
                     sql = """DELETE FROM sensor_status WHERE ip = %s"""
                     try:
-                        cursor.execute(sql, ([local_ip]))
+                        cursor.execute(sql, (local_ip))
                         db.commit()
                     except (AttributeError, MySQLdb.OperationalError):
                         print "Re-establishing database connection in main thread..."
@@ -2094,7 +2045,7 @@ def wait_for_cmd(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, cha
                         print "Database connection re-established in main thread."
                         cursor = db.cursor()
                         try:
-                            cursor.execute(sql, ([local_ip]))
+                            cursor.execute(sql, (local_ip))
                             db.commit()
                         except:
                             db.rollback()
@@ -2102,7 +2053,7 @@ def wait_for_cmd(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, cha
                         db.rollback()
                     sql = """DELETE FROM sensor_light_pairs WHERE sensor_ip = %s"""
                     try:
-                        cursor.execute(sql, ([local_ip]))
+                        cursor.execute(sql, (local_ip))
                         db.commit()
                     except (AttributeError, MySQLdb.OperationalError):
                         print "Re-establishing Database connection in main thread..."
@@ -2111,7 +2062,7 @@ def wait_for_cmd(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, cha
                         print "Database connection established in main thread."
                         cursor = db.cursor()
                         try:
-                            cursor.execute(sql, ([local_ip]))
+                            cursor.execute(sql, (local_ip))
                             db.commit()
                         except:
                             db.rollback()
@@ -2119,7 +2070,7 @@ def wait_for_cmd(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, cha
                         db.rollback()
                     sql = """DELETE FROM lighting_ip WHERE ip = %s"""
                     try:
-                        cursor.execute(sql, ([lighting_ip]))
+                        cursor.execute(sql, (lighting_ip))
                         db.commit()
                     except (AttributeError, MySQLdb.OperationalError):
                         print "Re-establishing database connection in main thread..."
@@ -2128,7 +2079,7 @@ def wait_for_cmd(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, cha
                         print "Database connection re-established in main thread."
                         cursor = db.cursor()
                         try:
-                            cursor.execute(sql, ([lighting_ip]))
+                            cursor.execute(sql, (lighting_ip))
                             db.commit()
                         except:
                             db.rollback()
@@ -2144,11 +2095,7 @@ def wait_for_cmd(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, cha
                     If the control subsystem sent a command string then
                     set the change_par_Event so that other threads pause.
                     """
-                    change_par_mutex.acquire()
-                    try:
-                        change_par_Event.set()
-                    finally:
-                        change_par_mutex.release()
+                    change_par_Event.set()
                     time.sleep(2)
                     if cmd[0] != 'N':
                         """
@@ -2156,38 +2103,23 @@ def wait_for_cmd(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, cha
                         the USER_CIRCADIAN_TABLE
                         """
                         WAKE_UP_TIME = int(cmd[0])
-                        user_ct_mutex.acquire()
-                        try:
-                            PREV_COLORS[0] = USER_CIRCADIAN_TABLE[current_minute][0]
-                            PREV_COLORS[1] = USER_CIRCADIAN_TABLE[current_minute][1]
-                            PREV_COLORS[2] = USER_CIRCADIAN_TABLE[current_minute][2]
-                        finally:
-                            user_ct_mutex.release()
                         calc_user_circadian_table(change_par_Event, finalize_change_Event)
                     if cmd[1] != 'N':
                         """
                         If the color threshold field is NOT 'N' then
                         set the new COLOR_THRESHOLD value
                         """
-                        color_threshold_mutex.acquire()
-                        try:
-                            COLOR_THRESHOLD = float(cmd[1]) /100
-                        finally:
-                            color_threshold_mutex.release()
-                    # if cmd[2] != 'N':
-                    #     """
-                    #     If the light threshold field is NOT 'N' then
-                    #     set the new LIGHT_THRESHOLD value
-                    #     """
-                    #     LIGHT_THRESHOLD = float(cmd[2]) / 100
+                        COLOR_THRESHOLD = float(cmd[1]) /100
+                    if cmd[2] != 'N':
+                        """
+                        If the light threshold field is NOT 'N' then
+                        set the new LIGHT_THRESHOLD value
+                        """
+                        LIGHT_THRESHOLD = float(cmd[2]) / 100
                     """
                     Clear the change_par_Event
                     """
-                    change_par_mutex.acquire()
-                    try:
-                        change_par_Event.clear()
-                    finally:
-                        change_par_mutex.release()
+                    change_par_Event.clear()
 
             wait_cmd_svr_sock_connection.close()
     except KeyboardInterrupt:
@@ -2207,18 +2139,7 @@ def wait_for_cmd(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, cha
         """
         sys.exit()
 
-def calc_Illuminance(lux, distance, angle):
-    lum = lux * toArea(angle, distance)
-    return lum
 
-def toArea(angleInDeg, distance):
-    return toSr(toRad(angleInDeg)) * distance * distance
-
-def toSr(rad):
-    return 2.0 * math.pi * (1.0 - math.cos(rad / 2.0))
-
-def toRad(deg):
-    return deg * (2.0 * math.pi / 360.0)
 """
 This is where the Script starts. The boot_up()
 function is always the first thing that will

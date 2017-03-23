@@ -10,19 +10,8 @@ import sys
 import os
 import signal
 
-#PWM Stuff
-lightIntensity = -5
 
-#*Set up PWM for lights
-# pinPWM = 18
-# pinRelay = 7
-#
-# GPIO.setmode(GPIO.BOARD)
-# GPIO.setup(pinRelay, GPIO.OUT)
-#
-# wiringpi.wiringPiSetupGpio()
-# wiringpi.pinMode(pinPWM, 2)
-# wiringpi.pwmSetClock(5000)
+GPIO.setwarnings(False)
 pinRelay = 4
 pinRelayS = 5
 
@@ -60,22 +49,18 @@ pause_time = 0.02
 
 THREADS = []
 
-GPIO.setwarnings(False)
 keyboard_Event_mutex = threading.Lock()
-red_mutex = threading.Lock()
-green_mutex = threading.Lock()
-blue_mutex = threading.Lock()
-
-redS_mutex = threading.Lock()
-greenS_mutex = threading.Lock()
-blueS_mutex = threading.Lock()
+delete_Event_mutex = threading.Lock()
+#red_mutex = threading.Lock()
+#green_mutex = threading.Lock()
+#blue_mutex = threading.Lock()
+light_mutex = threading.Lock()
+secondary_mutex = threading.Lock()
+#redS_mutex = threading.Lock()
+#greenS_mutex = threading.Lock()
+#blueS_mutex = threading.Lock()
 
 comp_Event_mutex = threading.Lock()
-# Open database connection
-print "connecting to database..."
-db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
-# prepare a cursor object using cursor() method
-cursor = db.cursor()
 
 def get_ip():
     # source:
@@ -93,7 +78,12 @@ def get_ip():
 
 def boot_up():
     print "entered"
-    global cursor
+    # Open database connection
+    print "connecting to database..."
+    db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
+    # prepare a cursor object using cursor() method
+    cursor = db.cursor()
+
     # get local ip
     local_ip = get_ip()
     sql = """SELECT * FROM lighting_ip WHERE ip = %s"""
@@ -110,6 +100,7 @@ def boot_up():
             db.rollback()
         begin_threading()
     else:
+        db.close()
         begin_threading()
 
 def begin_threading():
@@ -118,47 +109,79 @@ def begin_threading():
     keyboard_Event.set()
     comp_Event = threading.Event()
     comp_Event.set()
-
+    delete_Event = threading.Event()
+    delete_Event.set()
     # Create two threads as follows
     try:
-        pir_thread=threading.Thread(name='pir_thread', target=PIR_cmd, args=(keyboard_Event,comp_Event,))
+        pir_thread=threading.Thread(name='pir_thread', target=PIR_cmd, args=(keyboard_Event,comp_Event,delete_Event,))
         pir_thread.start()
         THREADS.append(pir_thread)
     except:
         print "Error: unable to start sleep mode thread"
     try:
-        delete_thread=threading.Thread(name='delete_thread', target=delete_cmd, args=())
+        delete_thread=threading.Thread(name='delete_thread', target=delete_cmd, args=(delete_Event,))
         delete_thread.start()
-        THREADS.append(pir_thread)
+        THREADS.append(delete_thread)
     except:
         print "Error: unable to start delete thread"
     try:
-        comp_thread=threading.Thread(name='comp_thread', target=comp_cmd, args=(comp_Event,))
+        comp_thread=threading.Thread(name='comp_thread', target=comp_cmd, args=(comp_Event,delete_Event,))
         comp_thread.start()
-        THREADS.append(pir_thread)
+        THREADS.append(comp_thread)
     except:
         print "Error: unable to start delete thread"
     
-    light_cmd(keyboard_Event,comp_Event)
-def delete_cmd():
+    light_cmd(keyboard_Event,comp_Event, delete_Event)
+
+def delete_cmd(delete_Event):
     global pinRelay
     global pinRelayS
+    global red
+    global blue
+    global green
+
     lighting_del_svr_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)  # * Create a socket object
     lighting_del_svr_sock_host = ''  # * Get local machine name
     lighting_del_svr_sock_port = 12355  # delete port.
     lighting_del_svr_sock.bind((lighting_del_svr_sock_host, lighting_del_svr_sock_port))  # * Bind to the port
 
     lighting_del_svr_sock.listen(5)  # * Now wait for client connection.
-    print "listening on light_pir socket...."
+    print "listening on delete thread..."
     lighting_del_svr_sock_connection, lighting_del_svr_sock_connection_addr = lighting_del_svr_sock.accept()  # * Establish connection w
     print '\nGot connection from', lighting_del_svr_sock_connection_addr, "\n"
-
-    GPIO.output(pinRelay, GPIO.LOW)
-    GPIO.output(pinRelayS, GPIO.LOW)
+    delete_Event_mutex.acquire()
+    try:
+        delete_Event.clear()
+    finally:
+        delete_Event_mutex.release()
+    cmd = (lighting_del_svr_sock_connection.recv(1024)).strip()
+    cmd = cmd.split('|')
+    end_red = int(float(cmd[0]))
+    end_green = int(float(cmd[1]))
+    end_blue = int(float(cmd[2]))
+    print "Values at delete: %s %s %s"%(end_red, end_green, end_blue)
+    light_mutex.acquire()
+    try:
+        while end_red > 0 or end_green > 0 or end_blue > 0:
+            if end_red > 0:
+                end_red -= 1
+                red.ChangeDutyCycle(end_red / 2)
+            if end_green > 0:
+                end_green -= 1
+                green.ChangeDutyCycle(end_green / 2)
+            if end_blue > 0:
+                end_blue -= 1
+                blue.ChangeDutyCycle(end_blue / 2)
+            time.sleep(0.005)
+        GPIO.output(pinRelay, GPIO.LOW)
+        GPIO.output(pinRelayS, GPIO.LOW)
+    finally:
+        light_mutex.release()
 
     pid = os.getpid()
     os.kill(pid, signal.SIGKILL)
-def comp_cmd(comp_Event):
+
+def comp_cmd(comp_Event, delete_Event):
     global red
     global redS
     global green
@@ -171,56 +194,43 @@ def comp_cmd(comp_Event):
     lighting_comp_svr_sock_port = 12356  # comp port.
     lighting_comp_svr_sock.bind((lighting_comp_svr_sock_host, lighting_comp_svr_sock_port))  # * Bind to the port
     lighting_comp_svr_sock.listen(5)
+    print "Listening on comp_cmd thread..."
     while True:
-
         lighting_comp_svr_sock_connection, lighting_comp_svr_sock_connection_addr = lighting_comp_svr_sock.accept()  # * Establish connection w
         print '\nGot connection from', lighting_comp_svr_sock_connection_addr, "\n"
 
         light_intensity = lighting_comp_svr_sock_connection.recv(1024)
         cmd = light_intensity.split('|')
-        print "GOT on pir_cmd thread: ", cmd
+        print "GOT on comp_cmd thread: ", cmd
         comp_Event_mutex.acquire()
         try:
             comp_Event.clear()
         finally:
             comp_Event_mutex.release()
-
-        if cmd[0] != "N":
-            red_mutex.acquire()
-            try:
+        delete_Event_mutex.acquire()
+        try:
+            delete_status = delete_Event.isSet()
+        finally:
+            delete_Event_mutex.release()
+        if not delete_status:
+            delete_Event.wait()
+        light_mutex.acquire()
+        try:
+            if cmd[0] != "N":
                 red.ChangeDutyCycle(float(cmd[0]) / 2)
-            finally:
-                red_mutex.release()
-        if cmd[1] != "N":
-            redS_mutex.acquire()
-            try:
+            if cmd[1] != "N":
                 redS.ChangeDutyCycle(float(cmd[1]) / 2)
-            finally:
-                redS_mutex.release()
-        if cmd[2] != "N":
-            green_mutex.acquire()
-            try:
+            if cmd[2] != "N":
                 green.ChangeDutyCycle(float(cmd[2]) / 2)
-            finally:
-                green_mutex.release()
-        if cmd[3] != "N":
-            greenS_mutex.acquire()
-            try:
+            if cmd[3] != "N":
                 greenS.ChangeDutyCycle(float(cmd[3]) / 2)
-            finally:
-                greenS_mutex.release()
-        if cmd[4] != "N":
-            blue_mutex.acquire()
-            try:
+            if cmd[4] != "N":
                 blue.ChangeDutyCycle(float(cmd[4]) / 2)
-            finally:
-                blue_mutex.release()
-        if cmd[5] != "N":
-            blue_mutex.acquire()
-            try:
-                blue.ChangeDutyCycle(float(cmd[5]) / 2)
-            finally:
-                blue_mutex.release()
+            if cmd[5] != "N":
+                blueS.ChangeDutyCycle(float(cmd[5]) / 2)
+        finally:
+            light_mutex.release()
+
         comp_Event_mutex.acquire()
         try:
             comp_Event.set()
@@ -228,7 +238,7 @@ def comp_cmd(comp_Event):
             comp_Event_mutex.release()
         lighting_comp_svr_sock_connection.close()
 
-def PIR_cmd(keyboard_Event, comp_Event):
+def PIR_cmd(keyboard_Event, comp_Event, delete_Event):
     global red
     global green
     global blue
@@ -244,7 +254,7 @@ def PIR_cmd(keyboard_Event, comp_Event):
     lighting_pir_svr_sock.bind((lighting_pir_svr_sock_host, lighting_pir_svr_sock_port))  # * Bind to the port
 
     lighting_pir_svr_sock.listen(5)  # * Now wait for client connection.
-    print "listening on light_pir socket...."
+    print "listening on pir thread...."
     # print s.recv(1024)
     # s.close                     #* Close the socket when done
 
@@ -256,52 +266,37 @@ def PIR_cmd(keyboard_Event, comp_Event):
             keyboard_Event_mutex.release()
         if not keyboard:
             break
+        if not delete_Event.isSet():
+            delete_Event.wait()
         lighting_pir_svr_sock_connection, lighting_pir_svr_sock_connection_addr = lighting_pir_svr_sock.accept()  # * Establish connection w
         print '\nGot connection from', lighting_pir_svr_sock_connection_addr, "\n"
 
-        light_intensity = lighting_pir_svr_sock_connection.recv(1024)
-        brightness_values = light_intensity.split('|')
-        print "GOT on pir_cmd thread: ", brightness_values
-
-        if float(brightness_values[0]) == 0 and float(brightness_values[1]) == 0 and float(brightness_values[2]) == 0:
-            # * turn lights off
-            comp_Event_mutex.acquire()
-            try:
-                comp_status = comp_Event.isSet()
-            finally:
-                comp_Event_mutex.release()
-            if not comp_status:
-                comp_Event.wait()
-            print "entering sleep mode..."
+        cmd = lighting_pir_svr_sock_connection.recv(1024)
+        cmd = cmd.split('|')
+        print "GOT on pir_cmd thread: ", cmd
+        end_red = int(float(cmd[0]))
+        end_green = int(float(cmd[1]))
+        end_blue = int(float(cmd[2]))
+        print "Values at delete: %s %s %s" % (end_red, end_green, end_blue)
+        light_mutex.acquire()
+        try:
+            while end_red > 0 or end_green > 0 or end_blue > 0:
+                if end_red > 0:
+                    end_red -= 1
+                    red.ChangeDutyCycle(end_red / 2)
+                if end_green > 0:
+                    end_green -= 1
+                    green.ChangeDutyCycle(end_green / 2)
+                if end_blue > 0:
+                    end_blue -= 1
+                    blue.ChangeDutyCycle(end_blue / 2)
+                time.sleep(0.005)
             GPIO.output(pinRelay, GPIO.LOW)
-            GPIO.output(pinRelayS, GPIO.LOW)
-            #red.stop()
-            #green.stop()
-            #blue.stop()
-            #GPIO.cleanup()
-            #GPIO.output(pinRelay, GPIO.LOW)
-        else:
-            #sepatate into red, green, blue values
-            comp_Event_mutex.acquire()
-            try:
-                comp_status = comp_Event.isSet()
-            finally:
-                comp_Event_mutex.release()
-            if not comp_status:
-                comp_Event.wait()
-            print "exiting sleep mode"
-            GPIO.output(pinRelay, GPIO.HIGH)
-            red.ChangeDutyCycle(float(brightness_values[0]) / 2)
-            green.ChangeDutyCycle(float(brightness_values[1]) / 2)
-            blue.ChangeDutyCycle(float(brightness_values[2]) / 2)
-            #GPIO.output(pinRelay, GPIO.HIGH)
-            #dutyCycle = (float(light_intensity) / 100) * 1024
-            #wiringpi.pwmWrite(pinPWM, int(dutyCycle))
-        time.sleep(1)
-
+        finally:
+            light_mutex.release()
         lighting_pir_svr_sock_connection.close()
 
-def light_cmd(keyboard_Event, comp_Event):
+def light_cmd(keyboard_Event, comp_Event, delete_Event):
     global red
     global green
     global blue
@@ -318,7 +313,7 @@ def light_cmd(keyboard_Event, comp_Event):
     lighting_lightCmd_svr_sock.bind((lighting_lightCmd_svr_sock_host, lighting_lightCmd_svr_sock_port))  # * Bind to the port
 
     lighting_lightCmd_svr_sock.listen(5)  # * Now wait for client connection.
-    print "listening on light_cmd socket...."
+    print "listening on light_cmd thread..."
     # print s.recv(1024)
     # s.close                     #* Close the socket when done
     try:
@@ -329,7 +324,11 @@ def light_cmd(keyboard_Event, comp_Event):
             light_intensity = lighting_lightCmd_svr_sock_connection.recv(1024)
             brightness_values = light_intensity.split('|')
             print "GOT on light_cmd thread: ", brightness_values
-
+            prev_red = int(float(brightness_values[3]))
+            prev_green = int(float(brightness_values[4]))
+            prev_blue = int(float(brightness_values[5]))
+            if not delete_Event.isSet():
+                delete_Event.wait()
             if float(brightness_values[0]) == 0 and float(brightness_values[1]) == 0 and float(brightness_values[2]) == 0:
                 # * turn lights off
                 comp_Event_mutex.acquire()
@@ -340,11 +339,29 @@ def light_cmd(keyboard_Event, comp_Event):
                 if not comp_status:
                     comp_Event.wait()
                 print "turning lights off"
-                GPIO.output(pinRelay, GPIO.LOW)
-                # red.stop()
-                # green.stop()
-                # blue.stop()
-                # GPIO.cleanup()
+
+                light_mutex.acquire()
+                try:
+                    while prev_red > 0 or prev_green > 0 or prev_blue > 0:
+                        if prev_red > 0:
+                            prev_red -= 1
+                            red.ChangeDutyCycle(prev_red / 2)
+                        if prev_green > 0:
+                            prev_green -= 1
+                            green.ChangeDutyCycle(prev_green / 2)
+                        if prev_blue > 0:
+                            prev_blue -= 1
+                            blue.ChangeDutyCycle(prev_blue / 2)
+                        time.sleep(0.005)
+                    GPIO.output(pinRelay, GPIO.LOW)
+                finally:
+                    light_mutex.release()
+                # light_mutex.acquire()
+                # try:
+                #     GPIO.output(pinRelay, GPIO.LOW)
+                # finally:
+                #     light_mutex.release()
+                # #GPIO.output(pinRelay, GPIO.LOW)
             else:
                 comp_Event_mutex.acquire()
                 try:
@@ -353,13 +370,151 @@ def light_cmd(keyboard_Event, comp_Event):
                     comp_Event_mutex.release()
                 if not comp_status:
                     comp_Event.wait()
-                GPIO.output(pinRelay, GPIO.HIGH)
-                # brightness_values = light_intensity.split('|')
-                red.ChangeDutyCycle(float(brightness_values[0]) / 2)
-                green.ChangeDutyCycle(float(brightness_values[1]) / 2)
-                blue.ChangeDutyCycle(float(brightness_values[2]) / 2)
-            time.sleep(1)
 
+                print "Values at change: %s %s %s" % (prev_red, prev_green, prev_blue)
+                GPIO.output(pinRelay, GPIO.HIGH)
+                if prev_red < float(brightness_values[0]) and prev_green < float(brightness_values[1]) and prev_blue < float(brightness_values[2]):
+                    #time.sleep(0.05)
+                    light_mutex.acquire()
+                    try:
+                        while prev_red < float(brightness_values[0]) or prev_green < float(brightness_values[1]) or prev_blue < float(brightness_values[2]):
+                            if prev_red < float(brightness_values[0]):
+                                prev_red += 1
+                                #print "prev_red is:",prev_red
+                                red.ChangeDutyCycle(float(prev_red) / 2)
+                            if prev_green < float(brightness_values[1]):
+                                prev_green += 1
+                                #print "prev_green is:", prev_green
+                                green.ChangeDutyCycle(float(prev_green) / 2)
+                            if prev_blue < float(brightness_values[2]):
+                                prev_blue += 1
+                                #print "prev_blue is:", prev_blue
+                                blue.ChangeDutyCycle(float(prev_blue) / 2)
+                            time.sleep(0.005)
+                    finally:
+                        light_mutex.release()
+                elif prev_red < float(brightness_values[0]) and prev_green < float(brightness_values[1]) and prev_blue > float(brightness_values[2]):
+                    light_mutex.acquire()
+                    try:
+                        while prev_red < float(brightness_values[0]) or prev_green < float(brightness_values[1]) or prev_blue > float(brightness_values[2]):
+                            if prev_red < float(brightness_values[0]):
+                                prev_red += 1
+                                red.ChangeDutyCycle(float(prev_red) / 2)
+                            if prev_green < float(brightness_values[1]):
+                                prev_green += 1
+                                green.ChangeDutyCycle(float(prev_green) / 2)
+                            if prev_blue > float(brightness_values[2]):
+                                prev_blue -= 1
+                                blue.ChangeDutyCycle(float(prev_blue) / 2)
+                            time.sleep(0.005)
+                    finally:
+                        light_mutex.release()
+                elif prev_red < float(brightness_values[0]) and prev_green > float(brightness_values[1]) and prev_blue < float(brightness_values[2]):
+                    light_mutex.acquire()
+                    try:
+                        while prev_red < float(brightness_values[0]) or prev_green > float(brightness_values[1]) or prev_blue < float(brightness_values[2]):
+                            if prev_red < float(brightness_values[0]):
+                                prev_red += 1
+                                red.ChangeDutyCycle(float(prev_red) / 2)
+                            if prev_green > float(brightness_values[1]):
+                                prev_green -= 1
+                                green.ChangeDutyCycle(float(prev_green) / 2)
+                            if prev_blue < float(brightness_values[2]):
+                                prev_blue += 1
+                                blue.ChangeDutyCycle(float(prev_blue) / 2)
+                            time.sleep(0.005)
+                    finally:
+                        light_mutex.release()
+                elif prev_red < float(brightness_values[0]) and prev_green > float(brightness_values[1]) and prev_blue > float(brightness_values[2]):
+                    light_mutex.acquire()
+                    try:
+                        while prev_red < float(brightness_values[0]) or prev_green > float(brightness_values[1]) or prev_blue > float(brightness_values[2]):
+                            if prev_red < float(brightness_values[0]):
+                                prev_red += 1
+                                red.ChangeDutyCycle(float(prev_red) / 2)
+                            if prev_green > float(brightness_values[1]):
+                                prev_green -= 1
+                                green.ChangeDutyCycle(float(prev_green) / 2)
+                            if prev_blue > float(brightness_values[2]):
+                                prev_blue -= 1
+                                blue.ChangeDutyCycle(float(prev_blue) / 2)
+                            time.sleep(0.005)
+                    finally:
+                        light_mutex.release()
+                elif prev_red > float(brightness_values[0]) and prev_green < float(brightness_values[1]) and prev_blue < float(brightness_values[2]):
+                    light_mutex.acquire()
+                    try:
+                        while prev_red > float(brightness_values[0]) or prev_green < float(brightness_values[1]) or prev_blue < float(brightness_values[2]):
+                            if prev_red > float(brightness_values[0]):
+                                prev_red -= 1
+                                red.ChangeDutyCycle(float(prev_red) / 2)
+                            if prev_green < float(brightness_values[1]):
+                                prev_green += 1
+                                green.ChangeDutyCycle(float(prev_green) / 2)
+                            if prev_blue < float(brightness_values[2]):
+                                prev_blue += 1
+                                blue.ChangeDutyCycle(float(prev_blue) / 2)
+                            time.sleep(0.005)
+                    finally:
+                        light_mutex.release()
+                elif prev_red > float(brightness_values[0]) and prev_green < float(brightness_values[1]) and prev_blue > float(brightness_values[2]):
+                    light_mutex.acquire()
+                    try:
+                        while prev_red > float(brightness_values[0]) or prev_green < float(brightness_values[1]) or prev_blue > float(brightness_values[2]):
+                            if prev_red > float(brightness_values[0]):
+                                prev_red -= 1
+                                red.ChangeDutyCycle(float(prev_red) / 2)
+                            if prev_green < float(brightness_values[1]):
+                                prev_green += 1
+                                green.ChangeDutyCycle(float(prev_green) / 2)
+                            if prev_blue > float(brightness_values[2]):
+                                prev_blue -= 1
+                                blue.ChangeDutyCycle(float(prev_blue) / 2)
+                            time.sleep(0.005)
+                    finally:
+                        light_mutex.release()
+                elif prev_red > float(brightness_values[0]) and prev_green > float(brightness_values[1]) and prev_blue < float(brightness_values[2]):
+                    light_mutex.acquire()
+                    try:
+                        while prev_red > float(brightness_values[0]) or prev_green > float(brightness_values[1]) or prev_blue < float(brightness_values[2]):
+                            if prev_red > float(brightness_values[0]):
+                                prev_red -= 1
+                                red.ChangeDutyCycle(float(prev_red) / 2)
+                            if prev_green > float(brightness_values[1]):
+                                prev_green -= 1
+                                green.ChangeDutyCycle(float(prev_green) / 2)
+                            if prev_blue < float(brightness_values[2]):
+                                prev_blue += 1
+                                blue.ChangeDutyCycle(float(prev_blue) / 2)
+                            time.sleep(0.005)
+                    finally:
+                        light_mutex.release()
+                elif prev_red > float(brightness_values[0]) or prev_green > float(brightness_values[1]) or prev_blue > float(brightness_values[2]):
+                    light_mutex.acquire()
+                    try:
+                        while prev_red > float(brightness_values[0]) or prev_green > float(brightness_values[1]) or prev_blue > float(brightness_values[2]):
+                            if prev_red > float(brightness_values[0]):
+                                prev_red -= 1
+                                red.ChangeDutyCycle(float(prev_red) / 2)
+                            if prev_green > float(brightness_values[1]):
+                                prev_green -= 1
+                                green.ChangeDutyCycle(float(prev_green) / 2)
+                            if prev_blue > float(brightness_values[2]):
+                                prev_blue -= 1
+                                blue.ChangeDutyCycle(float(prev_blue) / 2)
+                            time.sleep(0.005)
+                    finally:
+                        light_mutex.release()
+                else:
+                    light_mutex.acquire()
+                    try:
+                        #GPIO.output(pinRelay, GPIO.HIGH)
+                        # brightness_values = light_intensity.split('|')
+                        red.ChangeDutyCycle(float(brightness_values[0]) / 2)
+                        green.ChangeDutyCycle(float(brightness_values[1]) / 2)
+                        blue.ChangeDutyCycle(float(brightness_values[2]) / 2)
+                    finally:
+                        light_mutex.release()
             lighting_lightCmd_svr_sock_connection.close()
     except KeyboardInterrupt:
         keyboard_Event.clear()
