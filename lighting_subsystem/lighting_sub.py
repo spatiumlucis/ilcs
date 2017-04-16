@@ -17,33 +17,25 @@ pinRelayS = 5
 
 wiringpi.wiringPiSetupGpio()
 GPIO.setmode(GPIO.BCM) #choose BCM or BOARD numbering schemes
-GPIO.setup(17, GPIO.OUT) #set GIPO 17 as red led
-GPIO.setup(27, GPIO.OUT) #set GIPO 27 as green led
-GPIO.setup(22, GPIO.OUT) #set GIPO 22 as blue led
+
 GPIO.setup(pinRelay, GPIO.OUT)
 
-red = GPIO.PWM(17, 100) #create object red for PWM on port 17 at 100Hz
-green = GPIO.PWM(27, 100) #create object red for PWM on port 27 at 100Hz
-blue = GPIO.PWM(22, 100) #create object red for PWM on port 22 at 100Hz
+wiringpi.pinMode(17, 17) #Red on pin 17
+wiringpi.softPwmCreate(17,0,100) #Red PWM with 100Hz
+wiringpi.pinMode(27, 27) #Green
+wiringpi.softPwmCreate(27,0,100)
+wiringpi.pinMode(22, 22) #Blue
+wiringpi.softPwmCreate(22,0,100)
 
-red.start(0)
-green.start(0)
-blue.start(0)
-
-GPIO.setup(29, GPIO.OUT) #set GIPO 17 as red led
-GPIO.setup(31, GPIO.OUT) #set GIPO 27 as green led
-GPIO.setup(33, GPIO.OUT) #set GIPO 22 as blue led
 GPIO.setup(pinRelayS, GPIO.OUT) #secondary relay
 
-redS = GPIO.PWM(29, 100) #create object red for PWM on port 17 at 100Hz
-greenS = GPIO.PWM(31, 100) #create object red for PWM on port 27 at 100Hz
-blueS = GPIO.PWM(33, 100) #create object red for PWM on port 22 at 100Hz
 
-redS.start(0)
-greenS.start(0)
-blueS.start(0)
-
-#GPIO.output(pinRelay, GPIO.LOW)
+wiringpi.pinMode(6, 6) #RedS on pin 29
+wiringpi.softPwmCreate(6,0,100) #Red PWM with 100Hz
+wiringpi.pinMode(13, 13) #GreenS
+wiringpi.softPwmCreate(13,0,100)
+wiringpi.pinMode(26, 26) #BlueS
+wiringpi.softPwmCreate(26,0,100)
 
 pause_time = 0.02
 
@@ -51,14 +43,9 @@ THREADS = []
 
 keyboard_Event_mutex = threading.Lock()
 delete_Event_mutex = threading.Lock()
-#red_mutex = threading.Lock()
-#green_mutex = threading.Lock()
-#blue_mutex = threading.Lock()
+
 light_mutex = threading.Lock()
 secondary_mutex = threading.Lock()
-#redS_mutex = threading.Lock()
-#greenS_mutex = threading.Lock()
-#blueS_mutex = threading.Lock()
 
 comp_Event_mutex = threading.Lock()
 
@@ -87,14 +74,14 @@ def boot_up():
     # get local ip
     local_ip = get_ip()
     sql = """SELECT * FROM lighting_ip WHERE ip = %s"""
-    cursor.execute(sql, (local_ip))
+    cursor.execute(sql, ([local_ip]))
     temp = cursor.fetchall()
     if len(temp) == 0:
         print "empty tuple"
         #insert into DB
-        sql = """INSERT INTO lighting_ip(ip) VALUES(%s)"""
+        sql = """INSERT INTO lighting_ip(ip, is_paired) VALUES(%s, 0)"""
         try:
-            cursor.execute(sql, (local_ip))
+            cursor.execute(sql, ([local_ip]))
             db.commit()
         except:
             db.rollback()
@@ -136,9 +123,6 @@ def begin_threading():
 def delete_cmd(delete_Event):
     global pinRelay
     global pinRelayS
-    global red
-    global blue
-    global green
 
     lighting_del_svr_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)  # * Create a socket object
     lighting_del_svr_sock_host = ''  # * Get local machine name
@@ -165,13 +149,13 @@ def delete_cmd(delete_Event):
         while end_red > 0 or end_green > 0 or end_blue > 0:
             if end_red > 0:
                 end_red -= 1
-                red.ChangeDutyCycle(end_red / 2)
+                wiringpi.softPwmWrite(17, int(float(end_red)/2))
             if end_green > 0:
                 end_green -= 1
-                green.ChangeDutyCycle(end_green / 2)
+                wiringpi.softPwmWrite(27, int(float(end_green) / 2))
             if end_blue > 0:
                 end_blue -= 1
-                blue.ChangeDutyCycle(end_blue / 2)
+                wiringpi.softPwmWrite(22, int(float(end_blue) / 2))
             time.sleep(0.005)
         GPIO.output(pinRelay, GPIO.LOW)
         GPIO.output(pinRelayS, GPIO.LOW)
@@ -182,12 +166,6 @@ def delete_cmd(delete_Event):
     os.kill(pid, signal.SIGKILL)
 
 def comp_cmd(comp_Event, delete_Event):
-    global red
-    global redS
-    global green
-    global greenS
-    global blue
-    global blueS
 
     lighting_comp_svr_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)  # * Create a socket object
     lighting_comp_svr_sock_host = ''  # * Get local machine name
@@ -216,18 +194,424 @@ def comp_cmd(comp_Event, delete_Event):
             delete_Event.wait()
         light_mutex.acquire()
         try:
-            if cmd[0] != "N":
-                red.ChangeDutyCycle(float(cmd[0]) / 2)
-            if cmd[1] != "N":
-                redS.ChangeDutyCycle(float(cmd[1]) / 2)
-            if cmd[2] != "N":
-                green.ChangeDutyCycle(float(cmd[2]) / 2)
-            if cmd[3] != "N":
-                greenS.ChangeDutyCycle(float(cmd[3]) / 2)
-            if cmd[4] != "N":
-                blue.ChangeDutyCycle(float(cmd[4]) / 2)
-            if cmd[5] != "N":
-                blueS.ChangeDutyCycle(float(cmd[5]) / 2)
+            # if cmd[0] != "N":
+            #     wiringpi.softPwmWrite(17, int(float(cmd[0]) / 2))
+            # if cmd[1] != "N":
+            #     wiringpi.softPwmWrite(29, int(float(cmd[1]) / 2))
+            # if cmd[2] != "N":
+            #     wiringpi.softPwmWrite(27, int(float(cmd[2]) / 2))
+            # if cmd[3] != "N":
+            #     wiringpi.softPwmWrite(31, int(float(cmd[3]) / 2))
+            # if cmd[4] != "N":
+            #     wiringpi.softPwmWrite(22, int(float(cmd[4]) / 2))
+            # if cmd[5] != "N":
+            #     wiringpi.softPwmWrite(33, int(float(cmd[5]) / 2))
+            """
+            Primary Lights first
+            """
+            if cmd[1] != "N" and cmd[5] != "N" and cmd[9] != "N":
+                prev_red = int(float(cmd[0]))
+                prev_green = int(float(cmd[4]))
+                prev_blue = int(float(cmd[8]))
+
+                if prev_red < float(cmd[1]) and prev_green < float(cmd[5]) and prev_blue < float(cmd[9]):
+                    light_mutex.acquire()
+                    try:
+                        while prev_red < float(cmd[1]) or prev_green < float(cmd[5]) or prev_blue < float(cmd[9]):
+                            if prev_red < float(cmd[1]):
+                                prev_red += 1
+                                wiringpi.softPwmWrite(17, int(float(prev_red) / 2))
+                            if prev_green < float(cmd[5]):
+                                prev_green += 1
+                                wiringpi.softPwmWrite(27, int(float(prev_green) / 2))
+                            if prev_blue < float(cmd[9]):
+                                prev_blue += 1
+                                wiringpi.softPwmWrite(22, int(float(prev_blue) / 2))
+                            time.sleep(0.005)
+                    finally:
+                        light_mutex.release()
+                elif prev_red < float(cmd[1]) and prev_green < float(cmd[5]) and prev_blue > float(cmd[9]):
+                    light_mutex.acquire()
+                    try:
+                        while prev_red < float(cmd[1]) or prev_green < float(cmd[5]) or prev_blue > float(cmd[9]):
+                            if prev_red < float(cmd[1]):
+                                prev_red += 1
+                                wiringpi.softPwmWrite(17, int(float(prev_red) / 2))
+                            if prev_green < float(cmd[5]):
+                                prev_green += 1
+                                wiringpi.softPwmWrite(27, int(float(prev_green) / 2))
+                            if prev_blue > float(cmd[9]):
+                                prev_blue -= 1
+                                wiringpi.softPwmWrite(22, int(float(prev_blue) / 2))
+                            time.sleep(0.005)
+                    finally:
+                        light_mutex.release()
+                elif prev_red < float(cmd[1]) and prev_green > float(cmd[5]) and prev_blue < float(cmd[9]):
+                    light_mutex.acquire()
+                    try:
+                        while prev_red < float(cmd[1]) or prev_green > float(cmd[5]) or prev_blue < float(cmd[9]):
+                            if prev_red < float(cmd[1]):
+                                prev_red += 1
+                                wiringpi.softPwmWrite(17, int(float(prev_red) / 2))
+                            if prev_green > float(cmd[5]):
+                                prev_green -= 1
+                                wiringpi.softPwmWrite(27, int(float(prev_green) / 2))
+                            if prev_blue < float(cmd[9]):
+                                prev_blue += 1
+                                wiringpi.softPwmWrite(22, int(float(prev_blue) / 2))
+                            time.sleep(0.005)
+                    finally:
+                        light_mutex.release()
+                elif prev_red < float(cmd[1]) and prev_green > float(cmd[5]) and prev_blue > float(cmd[9]):
+                    light_mutex.acquire()
+                    try:
+                        while prev_red < float(cmd[1]) or prev_green > float(cmd[5]) or prev_blue > float(cmd[9]):
+                            if prev_red < float(cmd[1]):
+                                prev_red += 1
+                                wiringpi.softPwmWrite(17, int(float(prev_red) / 2))
+                            if prev_green > float(cmd[5]):
+                                prev_green -= 1
+                                wiringpi.softPwmWrite(27, int(float(prev_green) / 2))
+                            if prev_blue > float(cmd[9]):
+                                prev_blue -= 1
+                                wiringpi.softPwmWrite(22, int(float(prev_blue) / 2))
+                            time.sleep(0.005)
+                    finally:
+                        light_mutex.release()
+                elif prev_red > float(cmd[1]) and prev_green < float(cmd[5]) and prev_blue < float(cmd[9]):
+                    light_mutex.acquire()
+                    try:
+                        while prev_red > float(cmd[1]) or prev_green < float(cmd[5]) or prev_blue < float(cmd[9]):
+                            if prev_red > float(cmd[1]):
+                                prev_red -= 1
+                                wiringpi.softPwmWrite(17, int(float(prev_red) / 2))
+                            if prev_green < float(cmd[5]):
+                                prev_green += 1
+                                wiringpi.softPwmWrite(27, int(float(prev_green) / 2))
+                            if prev_blue < float(cmd[9]):
+                                prev_blue += 1
+                                wiringpi.softPwmWrite(22, int(float(prev_blue) / 2))
+                            time.sleep(0.005)
+                    finally:
+                        light_mutex.release()
+                elif prev_red > float(cmd[1]) and prev_green < float(cmd[5]) and prev_blue > float(cmd[9]):
+                    light_mutex.acquire()
+                    try:
+                        while prev_red > float(cmd[1]) or prev_green < float(cmd[5]) or prev_blue > float(cmd[9]):
+                            if prev_red > float(cmd[1]):
+                                prev_red -= 1
+                                wiringpi.softPwmWrite(17, int(float(prev_red) / 2))
+                            if prev_green < float(cmd[5]):
+                                prev_green += 1
+                                wiringpi.softPwmWrite(27, int(float(prev_green) / 2))
+                            if prev_blue > float(cmd[9]):
+                                prev_blue -= 1
+                                wiringpi.softPwmWrite(22, int(float(prev_blue) / 2))
+                            time.sleep(0.005)
+                    finally:
+                        light_mutex.release()
+                elif prev_red > float(cmd[1]) and prev_green > float(cmd[5]) and prev_blue < float(cmd[9]):
+                    light_mutex.acquire()
+                    try:
+                        while prev_red > float(cmd[1]) or prev_green > float(cmd[5]) or prev_blue < float(cmd[9]):
+                            if prev_red > float(cmd[1]):
+                                prev_red -= 1
+                                wiringpi.softPwmWrite(17, int(float(prev_red) / 2))
+                            if prev_green > float(cmd[5]):
+                                prev_green -= 1
+                                wiringpi.softPwmWrite(27, int(float(prev_green) / 2))
+                            if prev_blue < float(cmd[9]):
+                                prev_blue += 1
+                                wiringpi.softPwmWrite(22, int(float(prev_blue) / 2))
+                            time.sleep(0.005)
+                    finally:
+                        light_mutex.release()
+                elif prev_red > float(cmd[1]) and prev_green > float(cmd[5]) and prev_blue > float(cmd[9]):
+                    light_mutex.acquire()
+                    try:
+                        while prev_red > float(cmd[1]) or prev_green > float(cmd[5]) or prev_blue > float(cmd[9]):
+                            if prev_red > float(cmd[1]):
+                                prev_red -= 1
+                                wiringpi.softPwmWrite(17, int(float(prev_red) / 2))
+                            if prev_green > float(cmd[5]):
+                                prev_green -= 1
+                                wiringpi.softPwmWrite(27, int(float(prev_green) / 2))
+                            if prev_blue > float(cmd[9]):
+                                prev_blue -= 1
+                                wiringpi.softPwmWrite(22, int(float(prev_blue) / 2))
+                            time.sleep(0.005)
+                    finally:
+                        light_mutex.release()
+
+            elif cmd[1] != "N" and cmd[5] != "N" and cmd[9] == "N":
+                prev_red = int(float(cmd[0]))
+                prev_green = int(float(cmd[4]))
+                prev_blue = int(float(cmd[8]))
+
+                if prev_red < float(cmd[1]) and prev_green < float(cmd[5]):
+                    light_mutex.acquire()
+                    try:
+                        while prev_red < float(cmd[1]) or prev_green < float(cmd[5]):
+                            if prev_red < float(cmd[1]):
+                                prev_red += 1
+                                wiringpi.softPwmWrite(17, int(float(prev_red) / 2))
+                            if prev_green < float(cmd[5]):
+                                prev_green += 1
+                                wiringpi.softPwmWrite(27, int(float(prev_green) / 2))
+                            time.sleep(0.005)
+                    finally:
+                        light_mutex.release()
+                elif prev_red < float(cmd[1]) and prev_green > float(cmd[5]):
+                    light_mutex.acquire()
+                    try:
+                        while prev_red < float(cmd[1]) or prev_green > float(cmd[5]):
+                            if prev_red < float(cmd[1]):
+                                prev_red += 1
+                                wiringpi.softPwmWrite(17, int(float(prev_red) / 2))
+                            if prev_green > float(cmd[5]):
+                                prev_green -= 1
+                                wiringpi.softPwmWrite(27, int(float(prev_green) / 2))
+                            time.sleep(0.005)
+                    finally:
+                        light_mutex.release()
+                elif prev_red > float(cmd[1]) and prev_green < float(cmd[5]):
+                    light_mutex.acquire()
+                    try:
+                        while prev_red > float(cmd[1]) or prev_green < float(cmd[5]):
+                            if prev_red > float(cmd[1]):
+                                prev_red -= 1
+                                wiringpi.softPwmWrite(17, int(float(prev_red) / 2))
+                            if prev_green < float(cmd[5]):
+                                prev_green += 1
+                                wiringpi.softPwmWrite(27, int(float(prev_green) / 2))
+                            time.sleep(0.005)
+                    finally:
+                        light_mutex.release()
+                elif prev_red > float(cmd[1]) and prev_green > float(cmd[5]):
+                    light_mutex.acquire()
+                    try:
+                        while prev_red > float(cmd[1]) or prev_green > float(cmd[5]):
+                            if prev_red > float(cmd[1]):
+                                prev_red -= 1
+                                wiringpi.softPwmWrite(17, int(float(prev_red) / 2))
+                            if prev_green > float(cmd[5]):
+                                prev_green -= 1
+                                wiringpi.softPwmWrite(27, int(float(prev_green) / 2))
+                            time.sleep(0.005)
+                    finally:
+                        light_mutex.release()
+
+
+            elif cmd[1] != "N" and cmd[5] == "N" and cmd[9] != "N":
+                prev_red = int(float(cmd[0]))
+                prev_green = int(float(cmd[4]))
+                prev_blue = int(float(cmd[8]))
+
+                if prev_red < float(cmd[1]) and prev_blue < float(cmd[9]):
+                    light_mutex.acquire()
+                    try:
+                        while prev_red < float(cmd[1]) or prev_blue < float(cmd[9]):
+                            if prev_red < float(cmd[1]):
+                                prev_red += 1
+                                wiringpi.softPwmWrite(17, int(float(prev_red) / 2))
+                            if prev_blue < float(cmd[9]):
+                                prev_blue += 1
+                                wiringpi.softPwmWrite(22, int(float(prev_blue) / 2))
+                            time.sleep(0.005)
+                    finally:
+                        light_mutex.release()
+                elif prev_red < float(cmd[1]) and prev_blue > float(cmd[9]):
+                    light_mutex.acquire()
+                    try:
+                        while prev_red < float(cmd[1]) or prev_blue > float(cmd[9]):
+                            if prev_red < float(cmd[1]):
+                                prev_red += 1
+                                wiringpi.softPwmWrite(17, int(float(prev_red) / 2))
+                            if prev_blue > float(cmd[9]):
+                                prev_blue -= 1
+                                wiringpi.softPwmWrite(22, int(float(prev_blue) / 2))
+                            time.sleep(0.005)
+                    finally:
+                        light_mutex.release()
+                elif prev_red > float(cmd[1]) and prev_blue < float(cmd[9]):
+                    light_mutex.acquire()
+                    try:
+                        while prev_red > float(cmd[1]) or prev_blue < float(cmd[9]):
+                            if prev_red > float(cmd[1]):
+                                prev_red -= 1
+                                wiringpi.softPwmWrite(17, int(float(prev_red) / 2))
+                            if prev_blue < float(cmd[9]):
+                                prev_blue += 1
+                                wiringpi.softPwmWrite(22, int(float(prev_blue) / 2))
+                            time.sleep(0.005)
+                    finally:
+                        light_mutex.release()
+                elif prev_red > float(cmd[1]) and prev_blue > float(cmd[9]):
+                    light_mutex.acquire()
+                    try:
+                        while prev_red > float(cmd[1]) or prev_blue > float(cmd[9]):
+                            if prev_red > float(cmd[1]):
+                                prev_red -= 1
+                                wiringpi.softPwmWrite(17, int(float(prev_red) / 2))
+                            if prev_blue > float(cmd[9]):
+                                prev_blue -= 1
+                                wiringpi.softPwmWrite(22, int(float(prev_blue) / 2))
+                            time.sleep(0.005)
+                    finally:
+                        light_mutex.release()
+            elif cmd[1] != "N" and cmd[5] == "N" and cmd[9] == "N":
+                prev_red = int(float(cmd[0]))
+                prev_green = int(float(cmd[4]))
+                prev_blue = int(float(cmd[8]))
+
+                if prev_red < float(cmd[1]):
+                    light_mutex.acquire()
+                    try:
+                        while prev_red < float(cmd[1]):
+                            if prev_red < float(cmd[1]):
+                                prev_red += 1
+                                wiringpi.softPwmWrite(17, int(float(prev_red) / 2))
+                            time.sleep(0.005)
+                    finally:
+                        light_mutex.release()
+                elif prev_red > float(cmd[1]):
+                    light_mutex.acquire()
+                    try:
+                        while prev_red > float(cmd[1]):
+                            if prev_red > float(cmd[1]):
+                                prev_red -= 1
+                                wiringpi.softPwmWrite(17, int(float(prev_red) / 2))
+                            time.sleep(0.005)
+                    finally:
+                        light_mutex.release()
+            elif cmd[1] == "N" and cmd[5] != "N" and cmd[9] != "N":
+                prev_red = int(float(cmd[0]))
+                prev_green = int(float(cmd[4]))
+                prev_blue = int(float(cmd[8]))
+
+                if prev_green < float(cmd[5]) and prev_blue < float(cmd[9]):
+                    light_mutex.acquire()
+                    try:
+                        while prev_green < float(cmd[5]) or prev_blue < float(cmd[9]):
+                            if prev_green < float(cmd[5]):
+                                prev_green += 1
+                                wiringpi.softPwmWrite(27, int(float(prev_green) / 2))
+                            if prev_blue < float(cmd[9]):
+                                prev_blue += 1
+                                wiringpi.softPwmWrite(22, int(float(prev_blue) / 2))
+                            time.sleep(0.005)
+                    finally:
+                        light_mutex.release()
+                elif prev_green < float(cmd[5]) and prev_blue > float(cmd[9]):
+                    light_mutex.acquire()
+                    try:
+                        while prev_green < float(cmd[5]) or prev_blue > float(cmd[9]):
+                            if prev_green < float(cmd[5]):
+                                prev_green += 1
+                                wiringpi.softPwmWrite(27, int(float(prev_green) / 2))
+                            if prev_blue > float(cmd[9]):
+                                prev_blue -= 1
+                                wiringpi.softPwmWrite(22, int(float(prev_blue) / 2))
+                            time.sleep(0.005)
+                    finally:
+                        light_mutex.release()
+                elif prev_green > float(cmd[5]) and prev_blue < float(cmd[9]):
+                    light_mutex.acquire()
+                    try:
+                        while prev_green > float(cmd[5]) or prev_blue < float(cmd[9]):
+                            if prev_green > float(cmd[5]):
+                                prev_green -= 1
+                                wiringpi.softPwmWrite(27, int(float(prev_green) / 2))
+                            if prev_blue < float(cmd[9]):
+                                prev_blue += 1
+                                wiringpi.softPwmWrite(22, int(float(prev_blue) / 2))
+                            time.sleep(0.005)
+                    finally:
+                        light_mutex.release()
+                elif prev_green > float(cmd[5]) and prev_blue > float(cmd[9]):
+                    light_mutex.acquire()
+                    try:
+                        while prev_green > float(cmd[5]) or prev_blue > float(cmd[9]):
+                            if prev_green > float(cmd[5]):
+                                prev_green -= 1
+                                wiringpi.softPwmWrite(27, int(float(prev_green) / 2))
+                            if prev_blue > float(cmd[9]):
+                                prev_blue -= 1
+                                wiringpi.softPwmWrite(22, int(float(prev_blue) / 2))
+                            time.sleep(0.005)
+                    finally:
+                        light_mutex.release()
+            elif cmd[1] == "N" and cmd[5] != "N" and cmd[9] == "N":
+                prev_red = int(float(cmd[0]))
+                prev_green = int(float(cmd[4]))
+                prev_blue = int(float(cmd[8]))
+
+                if prev_green < float(cmd[5]):
+                    light_mutex.acquire()
+                    try:
+                        while prev_green < float(cmd[5]):
+                            if prev_green < float(cmd[5]):
+                                prev_green += 1
+                                wiringpi.softPwmWrite(27, int(float(prev_green) / 2))
+                            time.sleep(0.005)
+                    finally:
+                        light_mutex.release()
+                elif prev_green > float(cmd[5]):
+                    light_mutex.acquire()
+                    try:
+                        while prev_green > float(cmd[5]):
+                            if prev_green > float(cmd[5]):
+                                prev_green -= 1
+                                wiringpi.softPwmWrite(27, int(float(prev_green) / 2))
+                            time.sleep(0.005)
+                    finally:
+                        light_mutex.release()
+            elif cmd[1] == "N" and cmd[5] == "N" and cmd[9] != "N":
+                prev_red = int(float(cmd[0]))
+                prev_green = int(float(cmd[4]))
+                prev_blue = int(float(cmd[8]))
+
+                if prev_blue < float(cmd[9]):
+                    light_mutex.acquire()
+                    try:
+                        while prev_blue < float(cmd[9]):
+                            if prev_blue < float(cmd[9]):
+                                prev_blue += 1
+                                wiringpi.softPwmWrite(22, int(float(prev_blue) / 2))
+                            time.sleep(0.005)
+                    finally:
+                        light_mutex.release()
+                elif prev_blue > float(cmd[9]):
+                    light_mutex.acquire()
+                    try:
+                        while prev_blue > float(cmd[9]):
+                            if prev_blue > float(cmd[9]):
+                                prev_blue -= 1
+                                wiringpi.softPwmWrite(22, int(float(prev_blue) / 2))
+                            time.sleep(0.005)
+                    finally:
+                        light_mutex.release()
+
+            """
+            Secondary Lights
+            """
+            if cmd[3] != "N" and cmd[7] != "N" and cmd[11] != "N":
+                pass
+            elif cmd[3] != "N" and cmd[7] != "N" and cmd[11] == "N":
+                pass
+            elif cmd[3] != "N" and cmd[7] == "N" and cmd[11] != "N":
+                pass
+            elif cmd[3] != "N" and cmd[7] == "N" and cmd[11] == "N":
+                pass
+            elif cmd[3] == "N" and cmd[7] != "N" and cmd[11] != "N":
+                pass
+            elif cmd[3] == "N" and cmd[7] != "N" and cmd[11] == "N":
+                pass
+            elif cmd[3] == "N" and cmd[7] == "N" and cmd[11] != "N":
+                pass
+            else:
+                pass
+
         finally:
             light_mutex.release()
 
@@ -239,9 +623,9 @@ def comp_cmd(comp_Event, delete_Event):
         lighting_comp_svr_sock_connection.close()
 
 def PIR_cmd(keyboard_Event, comp_Event, delete_Event):
-    global red
-    global green
-    global blue
+    #global red
+    #global green
+    #global blue
     global pinRelay
     global pinRelayS
     global local_ip
@@ -283,13 +667,16 @@ def PIR_cmd(keyboard_Event, comp_Event, delete_Event):
             while end_red > 0 or end_green > 0 or end_blue > 0:
                 if end_red > 0:
                     end_red -= 1
-                    red.ChangeDutyCycle(end_red / 2)
+                    #red.ChangeDutyCycle(end_red / 2)
+                    wiringpi.softPwmWrite(17, int(float(end_red)/ 2))
                 if end_green > 0:
                     end_green -= 1
-                    green.ChangeDutyCycle(end_green / 2)
+                    #green.ChangeDutyCycle(end_green / 2)
+                    wiringpi.softPwmWrite(27, int(float(end_green) / 2))
                 if end_blue > 0:
                     end_blue -= 1
-                    blue.ChangeDutyCycle(end_blue / 2)
+                    #blue.ChangeDutyCycle(end_blue / 2)
+                    wiringpi.softPwmWrite(22, int(float(end_blue) / 2))
                 time.sleep(0.005)
             GPIO.output(pinRelay, GPIO.LOW)
         finally:
@@ -297,12 +684,12 @@ def PIR_cmd(keyboard_Event, comp_Event, delete_Event):
         lighting_pir_svr_sock_connection.close()
 
 def light_cmd(keyboard_Event, comp_Event, delete_Event):
-    global red
-    global green
-    global blue
-    global redS
-    global greenS
-    global blueS
+    #global red
+    #global green
+    #global blue
+    #global redS
+    #global greenS
+    #global blueS
     global pinRelay
     global pinRelayS
     global THREADS
@@ -345,13 +732,16 @@ def light_cmd(keyboard_Event, comp_Event, delete_Event):
                     while prev_red > 0 or prev_green > 0 or prev_blue > 0:
                         if prev_red > 0:
                             prev_red -= 1
-                            red.ChangeDutyCycle(prev_red / 2)
+                            #red.ChangeDutyCycle(prev_red / 2)
+                            wiringpi.softPwmWrite(17, int(float(prev_red) / 2))
                         if prev_green > 0:
                             prev_green -= 1
-                            green.ChangeDutyCycle(prev_green / 2)
+                            #green.ChangeDutyCycle(prev_green / 2)
+                            wiringpi.softPwmWrite(27, int(float(prev_green) / 2))
                         if prev_blue > 0:
                             prev_blue -= 1
-                            blue.ChangeDutyCycle(prev_blue / 2)
+                            #blue.ChangeDutyCycle(prev_blue / 2)
+                            wiringpi.softPwmWrite(22, int(float(prev_blue) / 2))
                         time.sleep(0.005)
                     GPIO.output(pinRelay, GPIO.LOW)
                 finally:
@@ -380,16 +770,16 @@ def light_cmd(keyboard_Event, comp_Event, delete_Event):
                         while prev_red < float(brightness_values[0]) or prev_green < float(brightness_values[1]) or prev_blue < float(brightness_values[2]):
                             if prev_red < float(brightness_values[0]):
                                 prev_red += 1
-                                #print "prev_red is:",prev_red
-                                red.ChangeDutyCycle(float(prev_red) / 2)
+
+                                wiringpi.softPwmWrite(17, int(float(prev_red) / 2))
                             if prev_green < float(brightness_values[1]):
                                 prev_green += 1
-                                #print "prev_green is:", prev_green
-                                green.ChangeDutyCycle(float(prev_green) / 2)
+
+                                wiringpi.softPwmWrite(27, int(float(prev_green) / 2))
                             if prev_blue < float(brightness_values[2]):
                                 prev_blue += 1
-                                #print "prev_blue is:", prev_blue
-                                blue.ChangeDutyCycle(float(prev_blue) / 2)
+
+                                wiringpi.softPwmWrite(22, int(float(prev_blue) / 2))
                             time.sleep(0.005)
                     finally:
                         light_mutex.release()
@@ -399,13 +789,13 @@ def light_cmd(keyboard_Event, comp_Event, delete_Event):
                         while prev_red < float(brightness_values[0]) or prev_green < float(brightness_values[1]) or prev_blue > float(brightness_values[2]):
                             if prev_red < float(brightness_values[0]):
                                 prev_red += 1
-                                red.ChangeDutyCycle(float(prev_red) / 2)
+                                wiringpi.softPwmWrite(17, int(float(prev_red) / 2))
                             if prev_green < float(brightness_values[1]):
                                 prev_green += 1
-                                green.ChangeDutyCycle(float(prev_green) / 2)
+                                wiringpi.softPwmWrite(27, int(float(prev_green) / 2))
                             if prev_blue > float(brightness_values[2]):
                                 prev_blue -= 1
-                                blue.ChangeDutyCycle(float(prev_blue) / 2)
+                                wiringpi.softPwmWrite(22, int(float(prev_blue) / 2))
                             time.sleep(0.005)
                     finally:
                         light_mutex.release()
@@ -415,13 +805,13 @@ def light_cmd(keyboard_Event, comp_Event, delete_Event):
                         while prev_red < float(brightness_values[0]) or prev_green > float(brightness_values[1]) or prev_blue < float(brightness_values[2]):
                             if prev_red < float(brightness_values[0]):
                                 prev_red += 1
-                                red.ChangeDutyCycle(float(prev_red) / 2)
+                                wiringpi.softPwmWrite(17, int(float(prev_red) / 2))
                             if prev_green > float(brightness_values[1]):
                                 prev_green -= 1
-                                green.ChangeDutyCycle(float(prev_green) / 2)
+                                wiringpi.softPwmWrite(27, int(float(prev_green) / 2))
                             if prev_blue < float(brightness_values[2]):
                                 prev_blue += 1
-                                blue.ChangeDutyCycle(float(prev_blue) / 2)
+                                wiringpi.softPwmWrite(22, int(float(prev_blue) / 2))
                             time.sleep(0.005)
                     finally:
                         light_mutex.release()
@@ -431,13 +821,13 @@ def light_cmd(keyboard_Event, comp_Event, delete_Event):
                         while prev_red < float(brightness_values[0]) or prev_green > float(brightness_values[1]) or prev_blue > float(brightness_values[2]):
                             if prev_red < float(brightness_values[0]):
                                 prev_red += 1
-                                red.ChangeDutyCycle(float(prev_red) / 2)
+                                wiringpi.softPwmWrite(17, int(float(prev_red) / 2))
                             if prev_green > float(brightness_values[1]):
                                 prev_green -= 1
-                                green.ChangeDutyCycle(float(prev_green) / 2)
+                                wiringpi.softPwmWrite(27, int(float(prev_green) / 2))
                             if prev_blue > float(brightness_values[2]):
                                 prev_blue -= 1
-                                blue.ChangeDutyCycle(float(prev_blue) / 2)
+                                wiringpi.softPwmWrite(22, int(float(prev_blue) / 2))
                             time.sleep(0.005)
                     finally:
                         light_mutex.release()
@@ -447,13 +837,13 @@ def light_cmd(keyboard_Event, comp_Event, delete_Event):
                         while prev_red > float(brightness_values[0]) or prev_green < float(brightness_values[1]) or prev_blue < float(brightness_values[2]):
                             if prev_red > float(brightness_values[0]):
                                 prev_red -= 1
-                                red.ChangeDutyCycle(float(prev_red) / 2)
+                                wiringpi.softPwmWrite(17, int(float(prev_red) / 2))
                             if prev_green < float(brightness_values[1]):
                                 prev_green += 1
-                                green.ChangeDutyCycle(float(prev_green) / 2)
+                                wiringpi.softPwmWrite(27, int(float(prev_green) / 2))
                             if prev_blue < float(brightness_values[2]):
                                 prev_blue += 1
-                                blue.ChangeDutyCycle(float(prev_blue) / 2)
+                                wiringpi.softPwmWrite(22, int(float(prev_blue) / 2))
                             time.sleep(0.005)
                     finally:
                         light_mutex.release()
@@ -463,13 +853,13 @@ def light_cmd(keyboard_Event, comp_Event, delete_Event):
                         while prev_red > float(brightness_values[0]) or prev_green < float(brightness_values[1]) or prev_blue > float(brightness_values[2]):
                             if prev_red > float(brightness_values[0]):
                                 prev_red -= 1
-                                red.ChangeDutyCycle(float(prev_red) / 2)
+                                wiringpi.softPwmWrite(17, int(float(prev_red) / 2))
                             if prev_green < float(brightness_values[1]):
                                 prev_green += 1
-                                green.ChangeDutyCycle(float(prev_green) / 2)
+                                wiringpi.softPwmWrite(27, int(float(prev_green) / 2))
                             if prev_blue > float(brightness_values[2]):
                                 prev_blue -= 1
-                                blue.ChangeDutyCycle(float(prev_blue) / 2)
+                                wiringpi.softPwmWrite(22, int(float(prev_blue) / 2))
                             time.sleep(0.005)
                     finally:
                         light_mutex.release()
@@ -479,13 +869,13 @@ def light_cmd(keyboard_Event, comp_Event, delete_Event):
                         while prev_red > float(brightness_values[0]) or prev_green > float(brightness_values[1]) or prev_blue < float(brightness_values[2]):
                             if prev_red > float(brightness_values[0]):
                                 prev_red -= 1
-                                red.ChangeDutyCycle(float(prev_red) / 2)
+                                wiringpi.softPwmWrite(17, int(float(prev_red) / 2))
                             if prev_green > float(brightness_values[1]):
                                 prev_green -= 1
-                                green.ChangeDutyCycle(float(prev_green) / 2)
+                                wiringpi.softPwmWrite(27, int(float(prev_green) / 2))
                             if prev_blue < float(brightness_values[2]):
                                 prev_blue += 1
-                                blue.ChangeDutyCycle(float(prev_blue) / 2)
+                                wiringpi.softPwmWrite(22, int(float(prev_blue) / 2))
                             time.sleep(0.005)
                     finally:
                         light_mutex.release()
@@ -495,13 +885,13 @@ def light_cmd(keyboard_Event, comp_Event, delete_Event):
                         while prev_red > float(brightness_values[0]) or prev_green > float(brightness_values[1]) or prev_blue > float(brightness_values[2]):
                             if prev_red > float(brightness_values[0]):
                                 prev_red -= 1
-                                red.ChangeDutyCycle(float(prev_red) / 2)
+                                wiringpi.softPwmWrite(17, int(float(prev_red) / 2))
                             if prev_green > float(brightness_values[1]):
                                 prev_green -= 1
-                                green.ChangeDutyCycle(float(prev_green) / 2)
+                                wiringpi.softPwmWrite(27, int(float(prev_green) / 2))
                             if prev_blue > float(brightness_values[2]):
                                 prev_blue -= 1
-                                blue.ChangeDutyCycle(float(prev_blue) / 2)
+                                wiringpi.softPwmWrite(22, int(float(prev_blue) / 2))
                             time.sleep(0.005)
                     finally:
                         light_mutex.release()
@@ -510,11 +900,15 @@ def light_cmd(keyboard_Event, comp_Event, delete_Event):
                     try:
                         #GPIO.output(pinRelay, GPIO.HIGH)
                         # brightness_values = light_intensity.split('|')
-                        red.ChangeDutyCycle(float(brightness_values[0]) / 2)
-                        green.ChangeDutyCycle(float(brightness_values[1]) / 2)
-                        blue.ChangeDutyCycle(float(brightness_values[2]) / 2)
+                        # red.ChangeDutyCycle(float(brightness_values[0]) / 2)
+                        # green.ChangeDutyCycle(float(brightness_values[1]) / 2)
+                        # blue.ChangeDutyCycle(float(brightness_values[2]) / 2)
+                        wiringpi.softPwmWrite(17, int(float(brightness_values[0]) / 2))
+                        wiringpi.softPwmWrite(27, int(float(brightness_values[1]) / 2))
+                        wiringpi.softPwmWrite(22, int(float(brightness_values[2]) / 2))
                     finally:
                         light_mutex.release()
+            wiringpi.delay(10)
             lighting_lightCmd_svr_sock_connection.close()
     except KeyboardInterrupt:
         keyboard_Event.clear()
