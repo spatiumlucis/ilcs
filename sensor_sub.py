@@ -257,62 +257,12 @@ def boot_up():
         cursor.execute(sql, ([local_ip]))
         temp = cursor.fetchall()
         is_sensor_service = temp[0][11]
-        is_being_serviced = temp[0][12]
         is_red_deg = temp[0][5]
         is_green_deg = temp[0][6]
         is_blue_deg = temp[0][7]
-        sql = """UPDATE sensor_status SET distance = 8 WHERE ip = %s"""
-        try:
-            cursor.execute(sql, ([local_ip]))
-            db.commit()
-        except (AttributeError, MySQLdb.OperationalError):
-            """
-            If the DB connection was lost
-            """
-            print "Trying to reconnect to database in PIR thread..."
-            db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis",
-                                 db="ilcs")
-            print "Database connection re-established in PIR thread."
-            cursor = db.cursor()
-
-            try:
-                """
-                Try to update DB again
-                """
-                cursor.execute(sql, ([local_ip]))
-                db.commit()
-            except:
-                db.rollback()
-        except:
-            db.rollback()
         print "Deg values: %s %s %s %s" % (is_sensor_service, is_red_deg, is_green_deg, is_blue_deg)
         if is_sensor_service:
             sql = """UPDATE sensor_status SET service = 0 WHERE ip = %s"""
-            try:
-                cursor.execute(sql, ([local_ip]))
-                db.commit()
-            except (AttributeError, MySQLdb.OperationalError):
-                """
-                If the DB connection was lost
-                """
-                print "Trying to reconnect to database in PIR thread..."
-                db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis",
-                                     db="ilcs")
-                print "Database connection re-established in PIR thread."
-                cursor = db.cursor()
-
-                try:
-                    """
-                    Try to update DB again
-                    """
-                    cursor.execute(sql, ([local_ip]))
-                    db.commit()
-                except:
-                    db.rollback()
-            except:
-                db.rollback()
-        if is_being_serviced:
-            sql = """UPDATE sensor_status SET being_serviced = 0 WHERE ip = %s"""
             try:
                 cursor.execute(sql, ([local_ip]))
                 db.commit()
@@ -432,7 +382,7 @@ def boot_up():
         print '\nGot connection from', sensor_add_svr_sock_connection_addr, "\n"
         sensor_add_svr_sock_connection.close()
 
-        sql = """INSERT INTO sensor_status(ip, red, green, blue, lumens, red_degraded, green_degraded, blue_degraded, lumens_degraded, sleep_mode_status, distance, service, being_serviced) VALUEs(%s, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)"""
+        sql = """INSERT INTO sensor_status(ip, red, green, blue, lumens, red_degraded, green_degraded, blue_degraded, lumens_degraded, sleep_mode_status, distance, service) VALUEs(%s, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)"""
         try:
             cursor.execute(sql, ([local_ip]))
             db.commit()
@@ -2771,7 +2721,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                     """
                     sql = """UPDATE sensor_status SET red = %s WHERE ip = %s"""
                     try:
-                        if red2 > circadian_red:
+                        if red2 > 100:
                             red2 = circadian_red
                             sql = """UPDATE sensor_status SET red = %s WHERE ip = %s"""
                             cursor.execute(sql, ([red2, local_ip]))
@@ -2791,7 +2741,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                         cursor = db.cursor()
 
                         try:
-                            if red2 > circadian_red:
+                            if red2 > 100:
                                 red2 = circadian_red
                                 sql = """UPDATE sensor_status SET red = %s WHERE ip = %s"""
                                 cursor.execute(sql, ([red2, local_ip]))
@@ -2812,7 +2762,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                     """
                     sql = """UPDATE sensor_status SET green = %s WHERE ip = %s"""
                     try:
-                        if green2 > circadian_green:
+                        if green2 > 100:
                             green2 = circadian_green
                             sql = """UPDATE sensor_status SET green = %s WHERE ip = %s"""
                             cursor.execute(sql, ([green2, local_ip]))
@@ -2831,7 +2781,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                         print "Database connection re-established in RGB thread."
                         cursor = db.cursor()
                         try:
-                            if green2 > circadian_green:
+                            if green2 > 100:
                                 green2 = circadian_green
                                 sql = """UPDATE sensor_status SET green = %s WHERE ip = %s"""
                                 cursor.execute(sql, ([green2, local_ip]))
@@ -2851,7 +2801,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                     """
                     sql = """UPDATE sensor_status SET blue = %s WHERE ip = %s"""
                     try:
-                        if blue2 > circadian_blue:
+                        if blue2 > 100:
                             blue2 = circadian_blue
                             sql = """UPDATE sensor_status SET blue = %s WHERE ip = %s"""
                             cursor.execute(sql, ([blue2, local_ip]))
@@ -2870,7 +2820,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                         print "Database connection re-established in RGB thread."
                         cursor = db.cursor()
                         try:
-                            if blue2 > circadian_blue:
+                            if blue2 > 100:
                                 blue2 = circadian_blue
                                 sql = """UPDATE sensor_status SET blue = %s WHERE ip = %s"""
                                 cursor.execute(sql, ([blue2, local_ip]))
@@ -2948,7 +2898,7 @@ def USR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
         print "Database connection re-established in USR thread."
         cursor = db.cursor()
         try:
-            cursor.execute(sql, ([local_ip]))
+            cursor.execute(sql, ([distInFt, local_ip]))
             db.commit()
         except:
             db.rollback()
@@ -3269,23 +3219,8 @@ def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_E
                         circadian_cmd += str(USER_CIRCADIAN_TABLE[current_minute][2]) + "|"
                         circadian_cmd += str(0) + "|"
 
-                circadian_cmd += (str(PREV_COLORS[0]) + "|") #+ str(PREV_COLORS[1]) + "|" + str(PREV_COLORS[2]) + "|")
-                #+ str(PREV_COLORS[4]) + "|" + str(PREV_COLORS[5]) + "|"
-                if deg_red_handle:
-                    circadian_cmd += str(0) + "|"
-                else:
-                    circadian_cmd += str(PREV_COLORS[3]) + "|"
-                circadian_cmd += (str(PREV_COLORS[1]) + "|")
-                if deg_green_handle:
-                    circadian_cmd += str(0) + "|"
-                else:
-                    circadian_cmd += str(PREV_COLORS[4]) + "|"
-                circadian_cmd += (str(PREV_COLORS[2]) + "|")
-                if deg_green_handle:
-                    circadian_cmd += str(0) + "|"
-                else:
-                    circadian_cmd += str(PREV_COLORS[5]) + "|"
-
+                circadian_cmd += (str(PREV_COLORS[0]) + "|" + str(PREV_COLORS[1]) + "|" + str(PREV_COLORS[2]) + "|")
+                circadian_cmd += (str(PREV_COLORS[3]) + "|" + str(PREV_COLORS[4]) + "|" + str(PREV_COLORS[5]) + "|")
 
 
             finally:

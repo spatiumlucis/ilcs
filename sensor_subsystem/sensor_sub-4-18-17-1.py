@@ -3269,18 +3269,16 @@ def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_E
                         circadian_cmd += str(USER_CIRCADIAN_TABLE[current_minute][2]) + "|"
                         circadian_cmd += str(0) + "|"
 
-                circadian_cmd += (str(PREV_COLORS[0]) + "|") #+ str(PREV_COLORS[1]) + "|" + str(PREV_COLORS[2]) + "|")
+                circadian_cmd += (str(PREV_COLORS[0]) + "|" + str(PREV_COLORS[1]) + "|" + str(PREV_COLORS[2]) + "|")
                 #+ str(PREV_COLORS[4]) + "|" + str(PREV_COLORS[5]) + "|"
                 if deg_red_handle:
                     circadian_cmd += str(0) + "|"
                 else:
                     circadian_cmd += str(PREV_COLORS[3]) + "|"
-                circadian_cmd += (str(PREV_COLORS[1]) + "|")
                 if deg_green_handle:
                     circadian_cmd += str(0) + "|"
                 else:
                     circadian_cmd += str(PREV_COLORS[4]) + "|"
-                circadian_cmd += (str(PREV_COLORS[2]) + "|")
                 if deg_green_handle:
                     circadian_cmd += str(0) + "|"
                 else:
