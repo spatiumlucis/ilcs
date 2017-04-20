@@ -1684,15 +1684,15 @@ def begin_threading():
     """
     Try to create the threads and add them to the THREADS list.
     """
-    try:
-        print "Starting PIR thread..."
-        pir_thread = threading.Thread(name='pir_thread', target=PIR_sensor, args=(
-            pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event,
-            keyboard_Event,))
-        pir_thread.start()
-        THREADS.append(pir_thread)
-    except:
-        print "Error: unable to start pir thread"
+    # try:
+    #     print "Starting PIR thread..."
+    #     pir_thread = threading.Thread(name='pir_thread', target=PIR_sensor, args=(
+    #         pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event,
+    #         keyboard_Event,))
+    #     pir_thread.start()
+    #     THREADS.append(pir_thread)
+    # except:
+    #     print "Error: unable to start pir thread"
     try:
         print "Starting RGB thread..."
         rgb_thread = threading.Thread(name='rgb_thread', target=RGB_sensor, args=(
@@ -1821,8 +1821,8 @@ def PIR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
         trigger2 = 0
         
     while True and keyboard_Event.isSet():
-        if timer == 10 or trigger:
-            print "turning off lights^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+        if timer == 60 or trigger:
+            print "turning off lights"
             """
             1 Min of no motion. Create client socket to lighting sub
             and issue sleep command.
@@ -1835,7 +1835,7 @@ def PIR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                     (sensor_to_lighting_cli_sock_host, sensor_to_lighting_cli_sock_port))
             except:
                 print "Could not connect to lighting subsystem"
-            #sensor_to_lighting_cli_sock.send("0|0|0|")
+            sensor_to_lighting_cli_sock.send("0|0|0|")
             current_minute = time.localtime()[3] * 60 + time.localtime()[4]
             user_ct_mutex.acquire()
             try:
@@ -2012,7 +2012,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
     Set the rgb_DB_Event and wait for other DB connections to finish
     """
     rgb_DB_Event.set()
-    pir_DB_Event.wait()
+    #pir_DB_Event.wait()
     usr_DB_Event.wait()
     cmd_DB_Event.wait()
 
@@ -2825,14 +2825,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                         """
                         comp_cli_sock.connect((comp_cli_sock_host, comp_cli_sock_port))
                         if change_par == False:
-                            time.sleep(1)
-                            sleep_mutex.acquire()
-                            try:
-                                sleep_mode = sleep_mode_Event.isSet()
-                            finally:
-                                sleep_mutex.release()
-                            if not sleep_mode:
-                                comp_cli_sock.send(comp_cmd)
+                            comp_cli_sock.send(comp_cmd)
                         comp_cli_sock.close()
                         time.sleep(1)
                         comp_cmd = ""
@@ -3062,7 +3055,7 @@ def USR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
     Set the usr_DB_event and wait for other connections to finish
     """
     usr_DB_Event.set()
-    pir_DB_Event.wait()
+    #pir_DB_Event.wait()
     rgb_DB_Event.wait()
     cmd_DB_Event.wait()
     local_ip = get_ip()
@@ -3231,7 +3224,7 @@ def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_E
     Wait for DB connections to finish
     """
     usr_DB_Event.wait()
-    pir_DB_Event.wait()
+    #pir_DB_Event.wait()
     rgb_DB_Event.wait()
     cmd_DB_Event.wait()
     #local_ip = get_ip()
@@ -3677,7 +3670,7 @@ def wait_for_cmd(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, cha
     """
     cmd_DB_Event.set()
     usr_DB_Event.wait()
-    pir_DB_Event.wait()
+    #pir_DB_Event.wait()
     rgb_DB_Event.wait()
     local_ip = get_ip()
     """

@@ -248,1430 +248,1432 @@ def comp_cmd(comp_Event, delete_Event):
         finally:
             secondary_mutex.release()
 
-        if cmd[1] != "N" and cmd[5] != "N" and cmd[9] != "N" and cmd[3] != "N" and cmd[7] != "N" and cmd[11] != "N":
-            prev_red = int(float(cmd[0]))
-            prev_green = int(float(cmd[4]))
-            prev_blue = int(float(cmd[8]))
-            prev_redS = int(float(cmd[2]))
-            prev_greenS = int(float(cmd[6]))
-            prev_blueS = int(float(cmd[10]))
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red,int(float(cmd[1])),))
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[3])),))
+        if cmd[0] != "":
+            if cmd[1] != "N" and cmd[5] != "N" and cmd[9] != "N" and cmd[3] != "N" and cmd[7] != "N" and cmd[11] != "N":
+                prev_red = int(float(cmd[0]))
+                prev_green = int(float(cmd[4]))
+                prev_blue = int(float(cmd[8]))
+                prev_redS = int(float(cmd[2]))
+                prev_greenS = int(float(cmd[6]))
+                prev_blueS = int(float(cmd[10]))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[5])),))
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[7])),))
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red,int(float(cmd[1])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[3])),))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[9])),))
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[11])),))
-
-            h_p_r_thread.start()
-            h_s_r_thread.start()
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[5])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[7])),))
 
-            h_p_g_thread.start()
-            h_s_g_thread.start()
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[9])),))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[11])),))
 
-            h_p_b_thread.start()
-            h_s_b_thread.start()
+                h_p_r_thread.start()
+                h_s_r_thread.start()
 
-        elif cmd[1] != "N" and cmd[5] != "N" and cmd[9] != "N" and cmd[3] != "N" and cmd[7] != "N" and cmd[11] == "N":
-            prev_red = int(float(cmd[0]))
-            prev_green = int(float(cmd[4]))
-            prev_blue = int(float(cmd[8]))
-            prev_redS = int(float(cmd[2]))
-            prev_greenS = int(float(cmd[6]))
+                h_p_g_thread.start()
+                h_s_g_thread.start()
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[1])),))
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[3])),))
+                h_p_b_thread.start()
+                h_s_b_thread.start()
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[5])),))
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[7])),))
+            elif cmd[1] != "N" and cmd[5] != "N" and cmd[9] != "N" and cmd[3] != "N" and cmd[7] != "N" and cmd[11] == "N":
+                prev_red = int(float(cmd[0]))
+                prev_green = int(float(cmd[4]))
+                prev_blue = int(float(cmd[8]))
+                prev_redS = int(float(cmd[2]))
+                prev_greenS = int(float(cmd[6]))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[9])),))
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[1])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[3])),))
 
-            h_p_r_thread.start()
-            h_s_r_thread.start()
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[5])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[7])),))
 
-            h_p_g_thread.start()
-            h_s_g_thread.start()
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[9])),))
 
-            h_p_b_thread.start()
+                h_p_r_thread.start()
+                h_s_r_thread.start()
 
+                h_p_g_thread.start()
+                h_s_g_thread.start()
 
-        elif cmd[1] != "N" and cmd[5] != "N" and cmd[9] != "N" and cmd[3] != "N" and cmd[7] == "N" and cmd[11] != "N":
-            prev_red = int(float(cmd[0]))
-            prev_green = int(float(cmd[4]))
-            prev_blue = int(float(cmd[8]))
-            prev_redS = int(float(cmd[2]))
-            prev_blueS = int(float(cmd[10]))
+                h_p_b_thread.start()
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[1])),))
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[3])),))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[5])),))
+            elif cmd[1] != "N" and cmd[5] != "N" and cmd[9] != "N" and cmd[3] != "N" and cmd[7] == "N" and cmd[11] != "N":
+                prev_red = int(float(cmd[0]))
+                prev_green = int(float(cmd[4]))
+                prev_blue = int(float(cmd[8]))
+                prev_redS = int(float(cmd[2]))
+                prev_blueS = int(float(cmd[10]))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[9])),))
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[11])),))
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[1])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[3])),))
 
-            h_p_r_thread.start()
-            h_s_r_thread.start()
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[5])),))
 
-            h_p_g_thread.start()
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[9])),))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[11])),))
 
-            h_p_b_thread.start()
-            h_s_b_thread.start()
+                h_p_r_thread.start()
+                h_s_r_thread.start()
 
-        elif cmd[1] != "N" and cmd[5] != "N" and cmd[9] != "N" and cmd[3] != "N" and cmd[7] == "N" and cmd[11] == "N":
-            prev_red = int(float(cmd[0]))
-            prev_green = int(float(cmd[4]))
-            prev_blue = int(float(cmd[8]))
-            prev_redS = int(float(cmd[2]))
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[1])),))
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[3])),))
+                h_p_g_thread.start()
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[5])),))
+                h_p_b_thread.start()
+                h_s_b_thread.start()
 
+            elif cmd[1] != "N" and cmd[5] != "N" and cmd[9] != "N" and cmd[3] != "N" and cmd[7] == "N" and cmd[11] == "N":
+                prev_red = int(float(cmd[0]))
+                prev_green = int(float(cmd[4]))
+                prev_blue = int(float(cmd[8]))
+                prev_redS = int(float(cmd[2]))
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[1])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[3])),))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[9])),))
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[5])),))
 
 
-            h_p_r_thread.start()
-            h_s_r_thread.start()
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[9])),))
 
-            h_p_g_thread.start()
 
-            h_p_b_thread.start()
+                h_p_r_thread.start()
+                h_s_r_thread.start()
 
-        elif cmd[1] != "N" and cmd[5] != "N" and cmd[9] != "N" and cmd[3] == "N" and cmd[7] != "N" and cmd[11] != "N":
-            prev_red = int(float(cmd[0]))
-            prev_green = int(float(cmd[4]))
-            prev_blue = int(float(cmd[8]))
-            prev_greenS = int(float(cmd[6]))
-            prev_blueS = int(float(cmd[10]))
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[1])),))
+                h_p_g_thread.start()
 
+                h_p_b_thread.start()
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[5])),))
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[7])),))
+            elif cmd[1] != "N" and cmd[5] != "N" and cmd[9] != "N" and cmd[3] == "N" and cmd[7] != "N" and cmd[11] != "N":
+                prev_red = int(float(cmd[0]))
+                prev_green = int(float(cmd[4]))
+                prev_blue = int(float(cmd[8]))
+                prev_greenS = int(float(cmd[6]))
+                prev_blueS = int(float(cmd[10]))
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[1])),))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[9])),))
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[11])),))
 
-            h_p_r_thread.start()
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[5])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[7])),))
 
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[9])),))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[11])),))
 
-            h_p_g_thread.start()
-            h_s_g_thread.start()
+                h_p_r_thread.start()
 
-            h_p_b_thread.start()
-            h_s_b_thread.start()
 
+                h_p_g_thread.start()
+                h_s_g_thread.start()
 
-        elif cmd[1] != "N" and cmd[5] != "N" and cmd[9] != "N" and cmd[3] == "N" and cmd[7] != "N" and cmd[11] == "N":
-            prev_red = int(float(cmd[0]))
-            prev_green = int(float(cmd[4]))
-            prev_blue = int(float(cmd[8]))
+                h_p_b_thread.start()
+                h_s_b_thread.start()
 
-            prev_greenS = int(float(cmd[6]))
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[1])),))
 
+            elif cmd[1] != "N" and cmd[5] != "N" and cmd[9] != "N" and cmd[3] == "N" and cmd[7] != "N" and cmd[11] == "N":
+                prev_red = int(float(cmd[0]))
+                prev_green = int(float(cmd[4]))
+                prev_blue = int(float(cmd[8]))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[5])),))
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[7])),))
+                prev_greenS = int(float(cmd[6]))
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[1])),))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[9])),))
 
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[5])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[7])),))
 
-            h_p_r_thread.start()
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[9])),))
 
 
-            h_p_g_thread.start()
-            h_s_g_thread.start()
+                h_p_r_thread.start()
 
-            h_p_b_thread.start()
 
+                h_p_g_thread.start()
+                h_s_g_thread.start()
 
-        elif cmd[1] != "N" and cmd[5] != "N" and cmd[9] != "N" and cmd[3] == "N" and cmd[7] == "N" and cmd[11] != "N":
-            prev_red = int(float(cmd[0]))
-            prev_green = int(float(cmd[4]))
-            prev_blue = int(float(cmd[8]))
+                h_p_b_thread.start()
 
-            prev_blueS = int(float(cmd[10]))
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[1])),))
 
+            elif cmd[1] != "N" and cmd[5] != "N" and cmd[9] != "N" and cmd[3] == "N" and cmd[7] == "N" and cmd[11] != "N":
+                prev_red = int(float(cmd[0]))
+                prev_green = int(float(cmd[4]))
+                prev_blue = int(float(cmd[8]))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[5])),))
+                prev_blueS = int(float(cmd[10]))
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[1])),))
 
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[9])),))
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[11])),))
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[5])),))
 
-            h_p_r_thread.start()
 
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[9])),))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[11])),))
 
-            h_p_g_thread.start()
+                h_p_r_thread.start()
 
-            h_p_b_thread.start()
-            h_s_b_thread.start()
 
+                h_p_g_thread.start()
 
+                h_p_b_thread.start()
+                h_s_b_thread.start()
 
-        elif cmd[1] != "N" and cmd[5] != "N" and cmd[9] != "N" and cmd[3] == "N" and cmd[7] == "N" and cmd[11] == "N":
-            prev_red = int(float(cmd[0]))
-            prev_green = int(float(cmd[4]))
-            prev_blue = int(float(cmd[8]))
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[1])),))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[5])),))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[9])),))
+            elif cmd[1] != "N" and cmd[5] != "N" and cmd[9] != "N" and cmd[3] == "N" and cmd[7] == "N" and cmd[11] == "N":
+                prev_red = int(float(cmd[0]))
+                prev_green = int(float(cmd[4]))
+                prev_blue = int(float(cmd[8]))
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[1])),))
 
-            h_p_r_thread.start()
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[5])),))
 
-            h_p_g_thread.start()
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[9])),))
 
-            h_p_b_thread.start()
+                h_p_r_thread.start()
 
+                h_p_g_thread.start()
 
-        elif cmd[1] != "N" and cmd[5] != "N" and cmd[9] == "N" and cmd[3] != "N" and cmd[7] != "N" and cmd[11] != "N":
-            prev_red = int(float(cmd[0]))
-            prev_green = int(float(cmd[4]))
-            prev_redS = int(float(cmd[2]))
-            prev_greenS = int(float(cmd[6]))
-            prev_blueS = int(float(cmd[10]))
+                h_p_b_thread.start()
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[1])),))
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[3])),))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[5])),))
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[7])),))
+            elif cmd[1] != "N" and cmd[5] != "N" and cmd[9] == "N" and cmd[3] != "N" and cmd[7] != "N" and cmd[11] != "N":
+                prev_red = int(float(cmd[0]))
+                prev_green = int(float(cmd[4]))
+                prev_redS = int(float(cmd[2]))
+                prev_greenS = int(float(cmd[6]))
+                prev_blueS = int(float(cmd[10]))
 
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[1])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[3])),))
 
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[11])),))
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[5])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[7])),))
 
-            h_p_r_thread.start()
-            h_s_r_thread.start()
 
-            h_p_g_thread.start()
-            h_s_g_thread.start()
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[11])),))
 
-            h_s_b_thread.start()
+                h_p_r_thread.start()
+                h_s_r_thread.start()
 
+                h_p_g_thread.start()
+                h_s_g_thread.start()
 
+                h_s_b_thread.start()
 
-        elif cmd[1] != "N" and cmd[5] != "N" and cmd[9] == "N" and cmd[3] != "N" and cmd[7] != "N" and cmd[11] == "N":
-            prev_red = int(float(cmd[0]))
-            prev_green = int(float(cmd[4]))
-            prev_redS = int(float(cmd[2]))
-            prev_greenS = int(float(cmd[6]))
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[1])),))
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[3])),))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[5])),))
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[7])),))
 
-            h_p_r_thread.start()
-            h_s_r_thread.start()
+            elif cmd[1] != "N" and cmd[5] != "N" and cmd[9] == "N" and cmd[3] != "N" and cmd[7] != "N" and cmd[11] == "N":
+                prev_red = int(float(cmd[0]))
+                prev_green = int(float(cmd[4]))
+                prev_redS = int(float(cmd[2]))
+                prev_greenS = int(float(cmd[6]))
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[1])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[3])),))
 
-            h_p_g_thread.start()
-            h_s_g_thread.start()
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[5])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[7])),))
 
+                h_p_r_thread.start()
+                h_s_r_thread.start()
 
-        elif cmd[1] != "N" and cmd[5] != "N" and cmd[9] == "N" and cmd[3] != "N" and cmd[7] == "N" and cmd[11] != "N":
-            prev_red = int(float(cmd[0]))
-            prev_green = int(float(cmd[4]))
-            #prev_blue = int(float(cmd[8]))
-            prev_redS = int(float(cmd[2]))
-            #prev_greenS = int(float(cmd[6]))
-            prev_blueS = int(float(cmd[10]))
+                h_p_g_thread.start()
+                h_s_g_thread.start()
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[1])),))
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[3])),))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[5])),))
+            elif cmd[1] != "N" and cmd[5] != "N" and cmd[9] == "N" and cmd[3] != "N" and cmd[7] == "N" and cmd[11] != "N":
+                prev_red = int(float(cmd[0]))
+                prev_green = int(float(cmd[4]))
+                #prev_blue = int(float(cmd[8]))
+                prev_redS = int(float(cmd[2]))
+                #prev_greenS = int(float(cmd[6]))
+                prev_blueS = int(float(cmd[10]))
 
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[1])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[3])),))
 
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[11])),))
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[5])),))
 
-            h_p_r_thread.start()
-            h_s_r_thread.start()
 
-            h_p_g_thread.start()
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[11])),))
 
-            h_s_b_thread.start()
-        elif cmd[1] != "N" and cmd[5] != "N" and cmd[9] == "N" and cmd[3] != "N" and cmd[7] == "N" and cmd[11] == "N":
-            prev_red = int(float(cmd[0]))
-            prev_green = int(float(cmd[4]))
-            #prev_blue = int(float(cmd[8]))
-            prev_redS = int(float(cmd[2]))
-            #prev_greenS = int(float(cmd[6]))
-            #prev_blueS = int(float(cmd[10]))
+                h_p_r_thread.start()
+                h_s_r_thread.start()
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[1])),))
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[3])),))
+                h_p_g_thread.start()
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[5])),))
+                h_s_b_thread.start()
+            elif cmd[1] != "N" and cmd[5] != "N" and cmd[9] == "N" and cmd[3] != "N" and cmd[7] == "N" and cmd[11] == "N":
+                prev_red = int(float(cmd[0]))
+                prev_green = int(float(cmd[4]))
+                #prev_blue = int(float(cmd[8]))
+                prev_redS = int(float(cmd[2]))
+                #prev_greenS = int(float(cmd[6]))
+                #prev_blueS = int(float(cmd[10]))
 
-            h_p_r_thread.start()
-            h_s_r_thread.start()
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[1])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[3])),))
 
-            h_p_g_thread.start()
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[5])),))
 
-        elif cmd[1] != "N" and cmd[5] != "N" and cmd[9] == "N" and cmd[3] == "N" and cmd[7] != "N" and cmd[11] != "N":
-            prev_red = int(float(cmd[0]))
-            prev_green = int(float(cmd[4]))
-            #prev_blue = int(float(cmd[8]))
-            #prev_redS = int(float(cmd[2]))
-            prev_greenS = int(float(cmd[6]))
-            prev_blueS = int(float(cmd[10]))
+                h_p_r_thread.start()
+                h_s_r_thread.start()
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[1])),))
+                h_p_g_thread.start()
 
+            elif cmd[1] != "N" and cmd[5] != "N" and cmd[9] == "N" and cmd[3] == "N" and cmd[7] != "N" and cmd[11] != "N":
+                prev_red = int(float(cmd[0]))
+                prev_green = int(float(cmd[4]))
+                #prev_blue = int(float(cmd[8]))
+                #prev_redS = int(float(cmd[2]))
+                prev_greenS = int(float(cmd[6]))
+                prev_blueS = int(float(cmd[10]))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[5])),))
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[7])),))
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[1])),))
 
 
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[11])),))
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[5])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[7])),))
 
-            h_p_r_thread.start()
 
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[11])),))
 
-            h_p_g_thread.start()
-            h_s_g_thread.start()
+                h_p_r_thread.start()
 
-            h_s_b_thread.start()
-        elif cmd[1] != "N" and cmd[5] != "N" and cmd[9] == "N" and cmd[3] == "N" and cmd[7] != "N" and cmd[11] == "N":
-            prev_red = int(float(cmd[0]))
-            prev_green = int(float(cmd[4]))
-            #prev_blue = int(float(cmd[8]))
-            #prev_redS = int(float(cmd[2]))
-            prev_greenS = int(float(cmd[6]))
-            #prev_blueS = int(float(cmd[10]))
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[1])),))
+                h_p_g_thread.start()
+                h_s_g_thread.start()
 
+                h_s_b_thread.start()
+            elif cmd[1] != "N" and cmd[5] != "N" and cmd[9] == "N" and cmd[3] == "N" and cmd[7] != "N" and cmd[11] == "N":
+                prev_red = int(float(cmd[0]))
+                prev_green = int(float(cmd[4]))
+                #prev_blue = int(float(cmd[8]))
+                #prev_redS = int(float(cmd[2]))
+                prev_greenS = int(float(cmd[6]))
+                #prev_blueS = int(float(cmd[10]))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[5])),))
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[7])),))
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[1])),))
 
 
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[5])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[7])),))
 
-            h_p_r_thread.start()
 
-            h_p_g_thread.start()
-            h_s_g_thread.start()
 
+                h_p_r_thread.start()
 
-        elif cmd[1] != "N" and cmd[5] != "N" and cmd[9] == "N" and cmd[3] == "N" and cmd[7] == "N" and cmd[11] != "N":
-            prev_red = int(float(cmd[0]))
-            prev_green = int(float(cmd[4]))
-            #prev_blue = int(float(cmd[8]))
-            #prev_redS = int(float(cmd[2]))
-            #prev_greenS = int(float(cmd[6]))
-            prev_blueS = int(float(cmd[10]))
+                h_p_g_thread.start()
+                h_s_g_thread.start()
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[1])),))
 
+            elif cmd[1] != "N" and cmd[5] != "N" and cmd[9] == "N" and cmd[3] == "N" and cmd[7] == "N" and cmd[11] != "N":
+                prev_red = int(float(cmd[0]))
+                prev_green = int(float(cmd[4]))
+                #prev_blue = int(float(cmd[8]))
+                #prev_redS = int(float(cmd[2]))
+                #prev_greenS = int(float(cmd[6]))
+                prev_blueS = int(float(cmd[10]))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[5])),))
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[1])),))
 
 
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[5])),))
 
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[11])),))
 
-            h_p_r_thread.start()
 
-            h_p_g_thread.start()
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[11])),))
 
-            h_s_b_thread.start()
-        elif cmd[1] != "N" and cmd[5] != "N" and cmd[9] == "N" and cmd[3] == "N" and cmd[7] == "N" and cmd[11] == "N":
-            prev_red = int(float(cmd[0]))
-            prev_green = int(float(cmd[4]))
-            #prev_blue = int(float(cmd[8]))
-            #prev_redS = int(float(cmd[2]))
-            #prev_greenS = int(float(cmd[6]))
-            #prev_blueS = int(float(cmd[10]))
+                h_p_r_thread.start()
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[1])),))
+                h_p_g_thread.start()
 
+                h_s_b_thread.start()
+            elif cmd[1] != "N" and cmd[5] != "N" and cmd[9] == "N" and cmd[3] == "N" and cmd[7] == "N" and cmd[11] == "N":
+                prev_red = int(float(cmd[0]))
+                prev_green = int(float(cmd[4]))
+                #prev_blue = int(float(cmd[8]))
+                #prev_redS = int(float(cmd[2]))
+                #prev_greenS = int(float(cmd[6]))
+                #prev_blueS = int(float(cmd[10]))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[5])),))
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[1])),))
 
 
-            h_p_r_thread.start()
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[5])),))
 
 
-            h_p_g_thread.start()
+                h_p_r_thread.start()
 
-        elif cmd[1] != "N" and cmd[5] == "N" and cmd[9] != "N" and cmd[3] != "N" and cmd[7] != "N" and cmd[11] != "N":
-            prev_red = int(float(cmd[0]))
-            #prev_green = int(float(cmd[4]))
-            prev_blue = int(float(cmd[8]))
-            prev_redS = int(float(cmd[2]))
-            prev_greenS = int(float(cmd[6]))
-            prev_blueS = int(float(cmd[10]))
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[1])),))
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[3])),))
+                h_p_g_thread.start()
 
+            elif cmd[1] != "N" and cmd[5] == "N" and cmd[9] != "N" and cmd[3] != "N" and cmd[7] != "N" and cmd[11] != "N":
+                prev_red = int(float(cmd[0]))
+                #prev_green = int(float(cmd[4]))
+                prev_blue = int(float(cmd[8]))
+                prev_redS = int(float(cmd[2]))
+                prev_greenS = int(float(cmd[6]))
+                prev_blueS = int(float(cmd[10]))
 
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[7])),))
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[1])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[3])),))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[9])),))
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[11])),))
 
-            h_p_r_thread.start()
-            h_s_r_thread.start()
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[7])),))
 
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[9])),))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[11])),))
 
-            h_s_g_thread.start()
+                h_p_r_thread.start()
+                h_s_r_thread.start()
 
-            h_p_b_thread.start()
-            h_s_b_thread.start()
-        elif cmd[1] != "N" and cmd[5] == "N" and cmd[9] != "N" and cmd[3] != "N" and cmd[7] != "N" and cmd[11] == "N":
-            prev_red = int(float(cmd[0]))
-            #prev_green = int(float(cmd[4]))
-            prev_blue = int(float(cmd[8]))
-            prev_redS = int(float(cmd[2]))
-            prev_greenS = int(float(cmd[6]))
-            #prev_blueS = int(float(cmd[10]))
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[1])),))
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[3])),))
+                h_s_g_thread.start()
 
+                h_p_b_thread.start()
+                h_s_b_thread.start()
+            elif cmd[1] != "N" and cmd[5] == "N" and cmd[9] != "N" and cmd[3] != "N" and cmd[7] != "N" and cmd[11] == "N":
+                prev_red = int(float(cmd[0]))
+                #prev_green = int(float(cmd[4]))
+                prev_blue = int(float(cmd[8]))
+                prev_redS = int(float(cmd[2]))
+                prev_greenS = int(float(cmd[6]))
+                #prev_blueS = int(float(cmd[10]))
 
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[7])),))
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[1])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[3])),))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[9])),))
 
-            h_p_r_thread.start()
-            h_s_r_thread.start()
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[7])),))
 
-            h_s_g_thread.start()
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[9])),))
 
-            h_p_b_thread.start()
+                h_p_r_thread.start()
+                h_s_r_thread.start()
 
-        elif cmd[1] != "N" and cmd[5] == "N" and cmd[9] != "N" and cmd[3] != "N" and cmd[7] == "N" and cmd[11] != "N":
-            prev_red = int(float(cmd[0]))
-            #prev_green = int(float(cmd[4]))
-            prev_blue = int(float(cmd[8]))
-            prev_redS = int(float(cmd[2]))
-            #prev_greenS = int(float(cmd[6]))
-            prev_blueS = int(float(cmd[10]))
+                h_s_g_thread.start()
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[1])),))
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[3])),))
+                h_p_b_thread.start()
 
+            elif cmd[1] != "N" and cmd[5] == "N" and cmd[9] != "N" and cmd[3] != "N" and cmd[7] == "N" and cmd[11] != "N":
+                prev_red = int(float(cmd[0]))
+                #prev_green = int(float(cmd[4]))
+                prev_blue = int(float(cmd[8]))
+                prev_redS = int(float(cmd[2]))
+                #prev_greenS = int(float(cmd[6]))
+                prev_blueS = int(float(cmd[10]))
 
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[1])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[3])),))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[9])),))
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[11])),))
 
-            h_p_r_thread.start()
-            h_s_r_thread.start()
 
-            h_p_b_thread.start()
-            h_s_b_thread.start()
-        elif cmd[1] != "N" and cmd[5] == "N" and cmd[9] != "N" and cmd[3] != "N" and cmd[7] == "N" and cmd[11] == "N":
-            prev_red = int(float(cmd[0]))
-            #prev_green = int(float(cmd[4]))
-            prev_blue = int(float(cmd[8]))
-            prev_redS = int(float(cmd[2]))
-            #prev_greenS = int(float(cmd[6]))
-            #prev_blueS = int(float(cmd[10]))
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[9])),))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[11])),))
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[1])),))
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[3])),))
+                h_p_r_thread.start()
+                h_s_r_thread.start()
 
+                h_p_b_thread.start()
+                h_s_b_thread.start()
+            elif cmd[1] != "N" and cmd[5] == "N" and cmd[9] != "N" and cmd[3] != "N" and cmd[7] == "N" and cmd[11] == "N":
+                prev_red = int(float(cmd[0]))
+                #prev_green = int(float(cmd[4]))
+                prev_blue = int(float(cmd[8]))
+                prev_redS = int(float(cmd[2]))
+                #prev_greenS = int(float(cmd[6]))
+                #prev_blueS = int(float(cmd[10]))
 
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[1])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[3])),))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[9])),))
 
 
-            h_p_r_thread.start()
-            h_s_r_thread.start()
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[9])),))
 
 
-            h_p_b_thread.start()
+                h_p_r_thread.start()
+                h_s_r_thread.start()
 
-        elif cmd[1] != "N" and cmd[5] == "N" and cmd[9] != "N" and cmd[3] == "N" and cmd[7] != "N" and cmd[11] != "N":
-            prev_red = int(float(cmd[0]))
-            #prev_green = int(float(cmd[4]))
-            prev_blue = int(float(cmd[8]))
-            #prev_redS = int(float(cmd[2]))
-            prev_greenS = int(float(cmd[6]))
-            prev_blueS = int(float(cmd[10]))
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[1])),))
+                h_p_b_thread.start()
 
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[7])),))
+            elif cmd[1] != "N" and cmd[5] == "N" and cmd[9] != "N" and cmd[3] == "N" and cmd[7] != "N" and cmd[11] != "N":
+                prev_red = int(float(cmd[0]))
+                #prev_green = int(float(cmd[4]))
+                prev_blue = int(float(cmd[8]))
+                #prev_redS = int(float(cmd[2]))
+                prev_greenS = int(float(cmd[6]))
+                prev_blueS = int(float(cmd[10]))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[9])),))
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[11])),))
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[1])),))
 
-            h_p_r_thread.start()
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[7])),))
 
-            h_s_g_thread.start()
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[9])),))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[11])),))
 
-            h_p_b_thread.start()
-            h_s_b_thread.start()
-        elif cmd[1] != "N" and cmd[5] == "N" and cmd[9] != "N" and cmd[3] == "N" and cmd[7] != "N" and cmd[11] == "N":
-            prev_red = int(float(cmd[0]))
-            #prev_green = int(float(cmd[4]))
-            prev_blue = int(float(cmd[8]))
-            #prev_redS = int(float(cmd[2]))
-            prev_greenS = int(float(cmd[6]))
-            #prev_blueS = int(float(cmd[10]))
+                h_p_r_thread.start()
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[1])),))
+                h_s_g_thread.start()
 
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[7])),))
+                h_p_b_thread.start()
+                h_s_b_thread.start()
+            elif cmd[1] != "N" and cmd[5] == "N" and cmd[9] != "N" and cmd[3] == "N" and cmd[7] != "N" and cmd[11] == "N":
+                prev_red = int(float(cmd[0]))
+                #prev_green = int(float(cmd[4]))
+                prev_blue = int(float(cmd[8]))
+                #prev_redS = int(float(cmd[2]))
+                prev_greenS = int(float(cmd[6]))
+                #prev_blueS = int(float(cmd[10]))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[9])),))
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[1])),))
 
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[7])),))
 
-            h_p_r_thread.start()
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[9])),))
 
-            h_s_g_thread.start()
 
-            h_p_b_thread.start()
+                h_p_r_thread.start()
 
-        elif cmd[1] != "N" and cmd[5] == "N" and cmd[9] != "N" and cmd[3] == "N" and cmd[7] == "N" and cmd[11] != "N":
-            prev_red = int(float(cmd[0]))
-            #prev_green = int(float(cmd[4]))
-            prev_blue = int(float(cmd[8]))
-            #prev_redS = int(float(cmd[2]))
-            #prev_greenS = int(float(cmd[6]))
-            prev_blueS = int(float(cmd[10]))
+                h_s_g_thread.start()
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[1])),))
+                h_p_b_thread.start()
 
+            elif cmd[1] != "N" and cmd[5] == "N" and cmd[9] != "N" and cmd[3] == "N" and cmd[7] == "N" and cmd[11] != "N":
+                prev_red = int(float(cmd[0]))
+                #prev_green = int(float(cmd[4]))
+                prev_blue = int(float(cmd[8]))
+                #prev_redS = int(float(cmd[2]))
+                #prev_greenS = int(float(cmd[6]))
+                prev_blueS = int(float(cmd[10]))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[9])),))
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[11])),))
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[1])),))
 
-            h_p_r_thread.start()
 
-            h_p_b_thread.start()
-            h_s_b_thread.start()
-        elif cmd[1] != "N" and cmd[5] == "N" and cmd[9] != "N" and cmd[3] == "N" and cmd[7] == "N" and cmd[11] == "N":
-            prev_red = int(float(cmd[0]))
-            #prev_green = int(float(cmd[4]))
-            prev_blue = int(float(cmd[8]))
-            #prev_redS = int(float(cmd[2]))
-            #prev_greenS = int(float(cmd[6]))
-            #prev_blueS = int(float(cmd[10]))
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[9])),))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[11])),))
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[1])),))
+                h_p_r_thread.start()
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[9])),))
+                h_p_b_thread.start()
+                h_s_b_thread.start()
+            elif cmd[1] != "N" and cmd[5] == "N" and cmd[9] != "N" and cmd[3] == "N" and cmd[7] == "N" and cmd[11] == "N":
+                prev_red = int(float(cmd[0]))
+                #prev_green = int(float(cmd[4]))
+                prev_blue = int(float(cmd[8]))
+                #prev_redS = int(float(cmd[2]))
+                #prev_greenS = int(float(cmd[6]))
+                #prev_blueS = int(float(cmd[10]))
 
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[1])),))
 
-            h_p_r_thread.start()
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[9])),))
 
 
-            h_p_b_thread.start()
+                h_p_r_thread.start()
 
-        elif cmd[1] != "N" and cmd[5] == "N" and cmd[9] == "N" and cmd[3] != "N" and cmd[7] != "N" and cmd[11] != "N":
-            prev_red = int(float(cmd[0]))
-            #prev_green = int(float(cmd[4]))
-            #prev_blue = int(float(cmd[8]))
-            prev_redS = int(float(cmd[2]))
-            prev_greenS = int(float(cmd[6]))
-            prev_blueS = int(float(cmd[10]))
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[1])),))
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[3])),))
+                h_p_b_thread.start()
 
+            elif cmd[1] != "N" and cmd[5] == "N" and cmd[9] == "N" and cmd[3] != "N" and cmd[7] != "N" and cmd[11] != "N":
+                prev_red = int(float(cmd[0]))
+                #prev_green = int(float(cmd[4]))
+                #prev_blue = int(float(cmd[8]))
+                prev_redS = int(float(cmd[2]))
+                prev_greenS = int(float(cmd[6]))
+                prev_blueS = int(float(cmd[10]))
 
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[7])),))
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[1])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[3])),))
 
 
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[11])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[7])),))
 
-            h_p_r_thread.start()
-            h_s_r_thread.start()
 
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[11])),))
 
-            h_s_g_thread.start()
+                h_p_r_thread.start()
+                h_s_r_thread.start()
 
-            h_s_b_thread.start()
-        elif cmd[1] != "N" and cmd[5] == "N" and cmd[9] == "N" and cmd[3] != "N" and cmd[7] != "N" and cmd[11] == "N":
-            prev_red = int(float(cmd[0]))
-            #prev_green = int(float(cmd[4]))
-            #prev_blue = int(float(cmd[8]))
-            prev_redS = int(float(cmd[2]))
-            prev_greenS = int(float(cmd[6]))
-            #prev_blueS = int(float(cmd[10]))
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[1])),))
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[3])),))
+                h_s_g_thread.start()
 
+                h_s_b_thread.start()
+            elif cmd[1] != "N" and cmd[5] == "N" and cmd[9] == "N" and cmd[3] != "N" and cmd[7] != "N" and cmd[11] == "N":
+                prev_red = int(float(cmd[0]))
+                #prev_green = int(float(cmd[4]))
+                #prev_blue = int(float(cmd[8]))
+                prev_redS = int(float(cmd[2]))
+                prev_greenS = int(float(cmd[6]))
+                #prev_blueS = int(float(cmd[10]))
 
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[7])),))
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[1])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[3])),))
 
-            h_p_r_thread.start()
-            h_s_r_thread.start()
-            h_s_g_thread.start()
 
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[7])),))
 
-        elif cmd[1] != "N" and cmd[5] == "N" and cmd[9] == "N" and cmd[3] != "N" and cmd[7] == "N" and cmd[11] != "N":
-            prev_red = int(float(cmd[0]))
-            #prev_green = int(float(cmd[4]))
-            #prev_blue = int(float(cmd[8]))
-            prev_redS = int(float(cmd[2]))
-            #prev_greenS = int(float(cmd[6]))
-            prev_blueS = int(float(cmd[10]))
+                h_p_r_thread.start()
+                h_s_r_thread.start()
+                h_s_g_thread.start()
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[1])),))
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[3])),))
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[11])),))
 
-            h_p_r_thread.start()
-            h_s_r_thread.start()
+            elif cmd[1] != "N" and cmd[5] == "N" and cmd[9] == "N" and cmd[3] != "N" and cmd[7] == "N" and cmd[11] != "N":
+                prev_red = int(float(cmd[0]))
+                #prev_green = int(float(cmd[4]))
+                #prev_blue = int(float(cmd[8]))
+                prev_redS = int(float(cmd[2]))
+                #prev_greenS = int(float(cmd[6]))
+                prev_blueS = int(float(cmd[10]))
 
-            h_s_b_thread.start()
-        elif cmd[1] != "N" and cmd[5] == "N" and cmd[9] == "N" and cmd[3] != "N" and cmd[7] == "N" and cmd[11] == "N":
-            prev_red = int(float(cmd[0]))
-            #prev_green = int(float(cmd[4]))
-            #prev_blue = int(float(cmd[8]))
-            prev_redS = int(float(cmd[2]))
-            #prev_greenS = int(float(cmd[6]))
-            #prev_blueS = int(float(cmd[10]))
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[1])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[3])),))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[11])),))
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[1])),))
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[3])),))
+                h_p_r_thread.start()
+                h_s_r_thread.start()
 
+                h_s_b_thread.start()
+            elif cmd[1] != "N" and cmd[5] == "N" and cmd[9] == "N" and cmd[3] != "N" and cmd[7] == "N" and cmd[11] == "N":
+                prev_red = int(float(cmd[0]))
+                #prev_green = int(float(cmd[4]))
+                #prev_blue = int(float(cmd[8]))
+                prev_redS = int(float(cmd[2]))
+                #prev_greenS = int(float(cmd[6]))
+                #prev_blueS = int(float(cmd[10]))
 
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[1])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[3])),))
 
-            h_p_r_thread.start()
-            h_s_r_thread.start()
 
-        elif cmd[1] != "N" and cmd[5] == "N" and cmd[9] == "N" and cmd[3] == "N" and cmd[7] != "N" and cmd[11] != "N":
-            prev_red = int(float(cmd[0]))
-            #prev_green = int(float(cmd[4]))
-            #prev_blue = int(float(cmd[8]))
-            #prev_redS = int(float(cmd[2]))
-            prev_greenS = int(float(cmd[6]))
-            prev_blueS = int(float(cmd[10]))
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[1])),))
+                h_p_r_thread.start()
+                h_s_r_thread.start()
 
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[7])),))
+            elif cmd[1] != "N" and cmd[5] == "N" and cmd[9] == "N" and cmd[3] == "N" and cmd[7] != "N" and cmd[11] != "N":
+                prev_red = int(float(cmd[0]))
+                #prev_green = int(float(cmd[4]))
+                #prev_blue = int(float(cmd[8]))
+                #prev_redS = int(float(cmd[2]))
+                prev_greenS = int(float(cmd[6]))
+                prev_blueS = int(float(cmd[10]))
 
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[1])),))
 
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[11])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[7])),))
 
-            h_p_r_thread.start()
 
-            h_s_g_thread.start()
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[11])),))
 
-            h_s_b_thread.start()
-        elif cmd[1] != "N" and cmd[5] == "N" and cmd[9] == "N" and cmd[3] == "N" and cmd[7] != "N" and cmd[11] == "N":
-            prev_red = int(float(cmd[0]))
-            #prev_green = int(float(cmd[4]))
-            #prev_blue = int(float(cmd[8]))
-            #prev_redS = int(float(cmd[2]))
-            prev_greenS = int(float(cmd[6]))
-            #prev_blueS = int(float(cmd[10]))
+                h_p_r_thread.start()
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[1])),))
+                h_s_g_thread.start()
 
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[7])),))
+                h_s_b_thread.start()
+            elif cmd[1] != "N" and cmd[5] == "N" and cmd[9] == "N" and cmd[3] == "N" and cmd[7] != "N" and cmd[11] == "N":
+                prev_red = int(float(cmd[0]))
+                #prev_green = int(float(cmd[4]))
+                #prev_blue = int(float(cmd[8]))
+                #prev_redS = int(float(cmd[2]))
+                prev_greenS = int(float(cmd[6]))
+                #prev_blueS = int(float(cmd[10]))
 
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[1])),))
 
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[7])),))
 
-            h_p_r_thread.start()
 
-            h_s_g_thread.start()
 
-        elif cmd[1] != "N" and cmd[5] == "N" and cmd[9] == "N" and cmd[3] == "N" and cmd[7] == "N" and cmd[11] != "N":
-            prev_red = int(float(cmd[0]))
-            #prev_green = int(float(cmd[4]))
-            #prev_blue = int(float(cmd[8]))
-            #prev_redS = int(float(cmd[2]))
-            #prev_greenS = int(float(cmd[6]))
-            prev_blueS = int(float(cmd[10]))
+                h_p_r_thread.start()
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[1])),))
+                h_s_g_thread.start()
 
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[11])),))
+            elif cmd[1] != "N" and cmd[5] == "N" and cmd[9] == "N" and cmd[3] == "N" and cmd[7] == "N" and cmd[11] != "N":
+                prev_red = int(float(cmd[0]))
+                #prev_green = int(float(cmd[4]))
+                #prev_blue = int(float(cmd[8]))
+                #prev_redS = int(float(cmd[2]))
+                #prev_greenS = int(float(cmd[6]))
+                prev_blueS = int(float(cmd[10]))
 
-            h_p_r_thread.start()
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[1])),))
 
-            h_s_b_thread.start()
-        elif cmd[1] != "N" and cmd[5] == "N" and cmd[9] == "N" and cmd[3] == "N" and cmd[7] == "N" and cmd[11] == "N":
-            prev_red = int(float(cmd[0]))
-            #prev_green = int(float(cmd[4]))
-            #prev_blue = int(float(cmd[8]))
-            #prev_redS = int(float(cmd[2]))
-            #prev_greenS = int(float(cmd[6]))
-            #prev_blueS = int(float(cmd[10]))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[11])),))
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[1])),))
+                h_p_r_thread.start()
 
+                h_s_b_thread.start()
+            elif cmd[1] != "N" and cmd[5] == "N" and cmd[9] == "N" and cmd[3] == "N" and cmd[7] == "N" and cmd[11] == "N":
+                prev_red = int(float(cmd[0]))
+                #prev_green = int(float(cmd[4]))
+                #prev_blue = int(float(cmd[8]))
+                #prev_redS = int(float(cmd[2]))
+                #prev_greenS = int(float(cmd[6]))
+                #prev_blueS = int(float(cmd[10]))
 
-            h_p_r_thread.start()
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[1])),))
 
-        elif cmd[1] == "N" and cmd[5] != "N" and cmd[9] != "N" and cmd[3] != "N" and cmd[7] != "N" and cmd[11] != "N":
-            #prev_red = int(float(cmd[0]))
-            prev_green = int(float(cmd[4]))
-            prev_blue = int(float(cmd[8]))
-            prev_redS = int(float(cmd[2]))
-            prev_greenS = int(float(cmd[6]))
-            prev_blueS = int(float(cmd[10]))
 
+                h_p_r_thread.start()
 
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[3])),))
+            elif cmd[1] == "N" and cmd[5] != "N" and cmd[9] != "N" and cmd[3] != "N" and cmd[7] != "N" and cmd[11] != "N":
+                #prev_red = int(float(cmd[0]))
+                prev_green = int(float(cmd[4]))
+                prev_blue = int(float(cmd[8]))
+                prev_redS = int(float(cmd[2]))
+                prev_greenS = int(float(cmd[6]))
+                prev_blueS = int(float(cmd[10]))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[5])),))
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[7])),))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[9])),))
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[11])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[3])),))
 
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[5])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[7])),))
 
-            h_s_r_thread.start()
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[9])),))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[11])),))
 
-            h_p_g_thread.start()
-            h_s_g_thread.start()
 
-            h_p_b_thread.start()
-            h_s_b_thread.start()
-        elif cmd[1] == "N" and cmd[5] != "N" and cmd[9] != "N" and cmd[3] != "N" and cmd[7] != "N" and cmd[11] == "N":
-            #prev_red = int(float(cmd[0]))
-            prev_green = int(float(cmd[4]))
-            prev_blue = int(float(cmd[8]))
-            prev_redS = int(float(cmd[2]))
-            prev_greenS = int(float(cmd[6]))
-            #prev_blueS = int(float(cmd[10]))
+                h_s_r_thread.start()
 
+                h_p_g_thread.start()
+                h_s_g_thread.start()
 
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[3])),))
+                h_p_b_thread.start()
+                h_s_b_thread.start()
+            elif cmd[1] == "N" and cmd[5] != "N" and cmd[9] != "N" and cmd[3] != "N" and cmd[7] != "N" and cmd[11] == "N":
+                #prev_red = int(float(cmd[0]))
+                prev_green = int(float(cmd[4]))
+                prev_blue = int(float(cmd[8]))
+                prev_redS = int(float(cmd[2]))
+                prev_greenS = int(float(cmd[6]))
+                #prev_blueS = int(float(cmd[10]))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[5])),))
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[7])),))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[9])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[3])),))
 
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[5])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[7])),))
 
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[9])),))
 
-            h_s_r_thread.start()
 
-            h_p_g_thread.start()
-            h_s_g_thread.start()
 
-            h_p_b_thread.start()
+                h_s_r_thread.start()
 
-        elif cmd[1] == "N" and cmd[5] != "N" and cmd[9] != "N" and cmd[3] != "N" and cmd[7] == "N" and cmd[11] != "N":
-            #prev_red = int(float(cmd[0]))
-            prev_green = int(float(cmd[4]))
-            prev_blue = int(float(cmd[8]))
-            prev_redS = int(float(cmd[2]))
-            #prev_greenS = int(float(cmd[6]))
-            prev_blueS = int(float(cmd[10]))
+                h_p_g_thread.start()
+                h_s_g_thread.start()
 
+                h_p_b_thread.start()
 
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[3])),))
+            elif cmd[1] == "N" and cmd[5] != "N" and cmd[9] != "N" and cmd[3] != "N" and cmd[7] == "N" and cmd[11] != "N":
+                #prev_red = int(float(cmd[0]))
+                prev_green = int(float(cmd[4]))
+                prev_blue = int(float(cmd[8]))
+                prev_redS = int(float(cmd[2]))
+                #prev_greenS = int(float(cmd[6]))
+                prev_blueS = int(float(cmd[10]))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[5])),))
 
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[3])),))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[9])),))
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[11])),))
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[5])),))
 
 
-            h_s_r_thread.start()
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[9])),))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[11])),))
 
-            h_p_g_thread.start()
 
-            h_p_b_thread.start()
-            h_s_b_thread.start()
-        elif cmd[1] == "N" and cmd[5] != "N" and cmd[9] != "N" and cmd[3] != "N" and cmd[7] == "N" and cmd[11] == "N":
-            #prev_red = int(float(cmd[0]))
-            prev_green = int(float(cmd[4]))
-            prev_blue = int(float(cmd[8]))
-            prev_redS = int(float(cmd[2]))
-            #prev_greenS = int(float(cmd[6]))
-            #prev_blueS = int(float(cmd[10]))
+                h_s_r_thread.start()
 
+                h_p_g_thread.start()
 
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[3])),))
+                h_p_b_thread.start()
+                h_s_b_thread.start()
+            elif cmd[1] == "N" and cmd[5] != "N" and cmd[9] != "N" and cmd[3] != "N" and cmd[7] == "N" and cmd[11] == "N":
+                #prev_red = int(float(cmd[0]))
+                prev_green = int(float(cmd[4]))
+                prev_blue = int(float(cmd[8]))
+                prev_redS = int(float(cmd[2]))
+                #prev_greenS = int(float(cmd[6]))
+                #prev_blueS = int(float(cmd[10]))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[5])),))
 
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[3])),))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[9])),))
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[5])),))
 
 
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[9])),))
 
-            h_s_r_thread.start()
 
-            h_p_g_thread.start()
 
-            h_p_b_thread.start()
+                h_s_r_thread.start()
 
-        elif cmd[1] == "N" and cmd[5] != "N" and cmd[9] != "N" and cmd[3] == "N" and cmd[7] != "N" and cmd[11] != "N":
-            #prev_red = int(float(cmd[0]))
-            prev_green = int(float(cmd[4]))
-            prev_blue = int(float(cmd[8]))
-            #prev_redS = int(float(cmd[2]))
-            prev_greenS = int(float(cmd[6]))
-            prev_blueS = int(float(cmd[10]))
+                h_p_g_thread.start()
 
+                h_p_b_thread.start()
 
+            elif cmd[1] == "N" and cmd[5] != "N" and cmd[9] != "N" and cmd[3] == "N" and cmd[7] != "N" and cmd[11] != "N":
+                #prev_red = int(float(cmd[0]))
+                prev_green = int(float(cmd[4]))
+                prev_blue = int(float(cmd[8]))
+                #prev_redS = int(float(cmd[2]))
+                prev_greenS = int(float(cmd[6]))
+                prev_blueS = int(float(cmd[10]))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[5])),))
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[7])),))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[9])),))
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[11])),))
 
-            h_p_g_thread.start()
-            h_s_g_thread.start()
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[5])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[7])),))
 
-            h_p_b_thread.start()
-            h_s_b_thread.start()
-        elif cmd[1] == "N" and cmd[5] != "N" and cmd[9] != "N" and cmd[3] == "N" and cmd[7] != "N" and cmd[11] == "N":
-            #prev_red = int(float(cmd[0]))
-            prev_green = int(float(cmd[4]))
-            prev_blue = int(float(cmd[8]))
-            #prev_redS = int(float(cmd[2]))
-            prev_greenS = int(float(cmd[6]))
-            #prev_blueS = int(float(cmd[10]))
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[9])),))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[11])),))
 
+                h_p_g_thread.start()
+                h_s_g_thread.start()
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[5])),))
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[7])),))
+                h_p_b_thread.start()
+                h_s_b_thread.start()
+            elif cmd[1] == "N" and cmd[5] != "N" and cmd[9] != "N" and cmd[3] == "N" and cmd[7] != "N" and cmd[11] == "N":
+                #prev_red = int(float(cmd[0]))
+                prev_green = int(float(cmd[4]))
+                prev_blue = int(float(cmd[8]))
+                #prev_redS = int(float(cmd[2]))
+                prev_greenS = int(float(cmd[6]))
+                #prev_blueS = int(float(cmd[10]))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[9])),))
 
-            h_p_g_thread.start()
-            h_s_g_thread.start()
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[5])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[7])),))
 
-            h_p_b_thread.start()
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[9])),))
 
-        elif cmd[1] == "N" and cmd[5] != "N" and cmd[9] != "N" and cmd[3] == "N" and cmd[7] == "N" and cmd[11] != "N":
-            #prev_red = int(float(cmd[0]))
-            prev_green = int(float(cmd[4]))
-            prev_blue = int(float(cmd[8]))
-            #prev_redS = int(float(cmd[2]))
-            #prev_greenS = int(float(cmd[6]))
-            prev_blueS = int(float(cmd[10]))
+                h_p_g_thread.start()
+                h_s_g_thread.start()
 
+                h_p_b_thread.start()
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[5])),))
+            elif cmd[1] == "N" and cmd[5] != "N" and cmd[9] != "N" and cmd[3] == "N" and cmd[7] == "N" and cmd[11] != "N":
+                #prev_red = int(float(cmd[0]))
+                prev_green = int(float(cmd[4]))
+                prev_blue = int(float(cmd[8]))
+                #prev_redS = int(float(cmd[2]))
+                #prev_greenS = int(float(cmd[6]))
+                prev_blueS = int(float(cmd[10]))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[9])),))
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[11])),))
 
-            h_p_g_thread.start()
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[5])),))
 
-            h_p_b_thread.start()
-            h_s_b_thread.start()
-        elif cmd[1] == "N" and cmd[5] != "N" and cmd[9] != "N" and cmd[3] == "N" and cmd[7] == "N" and cmd[11] == "N":
-            #prev_red = int(float(cmd[0]))
-            prev_green = int(float(cmd[4]))
-            prev_blue = int(float(cmd[8]))
-            #prev_redS = int(float(cmd[2]))
-            #prev_greenS = int(float(cmd[6]))
-            #prev_blueS = int(float(cmd[10]))
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[9])),))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[11])),))
 
+                h_p_g_thread.start()
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[5])),))
+                h_p_b_thread.start()
+                h_s_b_thread.start()
+            elif cmd[1] == "N" and cmd[5] != "N" and cmd[9] != "N" and cmd[3] == "N" and cmd[7] == "N" and cmd[11] == "N":
+                #prev_red = int(float(cmd[0]))
+                prev_green = int(float(cmd[4]))
+                prev_blue = int(float(cmd[8]))
+                #prev_redS = int(float(cmd[2]))
+                #prev_greenS = int(float(cmd[6]))
+                #prev_blueS = int(float(cmd[10]))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[9])),))
 
-            h_p_g_thread.start()
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[5])),))
 
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[9])),))
 
-            h_p_b_thread.start()
+                h_p_g_thread.start()
 
-        elif cmd[1] == "N" and cmd[5] != "N" and cmd[9] == "N" and cmd[3] != "N" and cmd[7] != "N" and cmd[11] != "N":
-            #prev_red = int(float(cmd[0]))
-            prev_green = int(float(cmd[4]))
-            #prev_blue = int(float(cmd[8]))
-            prev_redS = int(float(cmd[2]))
-            prev_greenS = int(float(cmd[6]))
-            prev_blueS = int(float(cmd[10]))
 
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[3])),))
+                h_p_b_thread.start()
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[5])),))
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[7])),))
+            elif cmd[1] == "N" and cmd[5] != "N" and cmd[9] == "N" and cmd[3] != "N" and cmd[7] != "N" and cmd[11] != "N":
+                #prev_red = int(float(cmd[0]))
+                prev_green = int(float(cmd[4]))
+                #prev_blue = int(float(cmd[8]))
+                prev_redS = int(float(cmd[2]))
+                prev_greenS = int(float(cmd[6]))
+                prev_blueS = int(float(cmd[10]))
 
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[11])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[3])),))
 
-            h_s_r_thread.start()
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[5])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[7])),))
 
-            h_p_g_thread.start()
-            h_s_g_thread.start()
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[11])),))
 
-            h_s_b_thread.start()
-        elif cmd[1] == "N" and cmd[5] != "N" and cmd[9] == "N" and cmd[3] != "N" and cmd[7] != "N" and cmd[11] == "N":
-            #prev_red = int(float(cmd[0]))
-            prev_green = int(float(cmd[4]))
-            #prev_blue = int(float(cmd[8]))
-            prev_redS = int(float(cmd[2]))
-            prev_greenS = int(float(cmd[6]))
-            #prev_blueS = int(float(cmd[10]))
+                h_s_r_thread.start()
 
+                h_p_g_thread.start()
+                h_s_g_thread.start()
 
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[3])),))
+                h_s_b_thread.start()
+            elif cmd[1] == "N" and cmd[5] != "N" and cmd[9] == "N" and cmd[3] != "N" and cmd[7] != "N" and cmd[11] == "N":
+                #prev_red = int(float(cmd[0]))
+                prev_green = int(float(cmd[4]))
+                #prev_blue = int(float(cmd[8]))
+                prev_redS = int(float(cmd[2]))
+                prev_greenS = int(float(cmd[6]))
+                #prev_blueS = int(float(cmd[10]))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[5])),))
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[7])),))
 
-            h_s_r_thread.start()
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[3])),))
 
-            h_p_g_thread.start()
-            h_s_g_thread.start()
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[5])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[7])),))
 
-        elif cmd[1] == "N" and cmd[5] != "N" and cmd[9] == "N" and cmd[3] != "N" and cmd[7] == "N" and cmd[11] != "N":
-            #prev_red = int(float(cmd[0]))
-            prev_green = int(float(cmd[4]))
-            #prev_blue = int(float(cmd[8]))
-            prev_redS = int(float(cmd[2]))
-            #prev_greenS = int(float(cmd[6]))
-            prev_blueS = int(float(cmd[10]))
+                h_s_r_thread.start()
 
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[3])),))
+                h_p_g_thread.start()
+                h_s_g_thread.start()
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[5])),))
+            elif cmd[1] == "N" and cmd[5] != "N" and cmd[9] == "N" and cmd[3] != "N" and cmd[7] == "N" and cmd[11] != "N":
+                #prev_red = int(float(cmd[0]))
+                prev_green = int(float(cmd[4]))
+                #prev_blue = int(float(cmd[8]))
+                prev_redS = int(float(cmd[2]))
+                #prev_greenS = int(float(cmd[6]))
+                prev_blueS = int(float(cmd[10]))
 
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[11])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[3])),))
 
-            h_s_r_thread.start()
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[5])),))
 
-            h_p_g_thread.start()
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[11])),))
 
-            h_s_b_thread.start()
-        elif cmd[1] == "N" and cmd[5] != "N" and cmd[9] == "N" and cmd[3] != "N" and cmd[7] == "N" and cmd[11] == "N":
-            #prev_red = int(float(cmd[0]))
-            prev_green = int(float(cmd[4]))
-            #prev_blue = int(float(cmd[8]))
-            prev_redS = int(float(cmd[2]))
-            #prev_greenS = int(float(cmd[6]))
-            #prev_blueS = int(float(cmd[10]))
+                h_s_r_thread.start()
 
+                h_p_g_thread.start()
 
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[3])),))
+                h_s_b_thread.start()
+            elif cmd[1] == "N" and cmd[5] != "N" and cmd[9] == "N" and cmd[3] != "N" and cmd[7] == "N" and cmd[11] == "N":
+                #prev_red = int(float(cmd[0]))
+                prev_green = int(float(cmd[4]))
+                #prev_blue = int(float(cmd[8]))
+                prev_redS = int(float(cmd[2]))
+                #prev_greenS = int(float(cmd[6]))
+                #prev_blueS = int(float(cmd[10]))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[5])),))
 
-            h_s_r_thread.start()
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[3])),))
 
-            h_p_g_thread.start()
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[5])),))
 
-        elif cmd[1] == "N" and cmd[5] != "N" and cmd[9] == "N" and cmd[3] == "N" and cmd[7] != "N" and cmd[11] != "N":
-            #prev_red = int(float(cmd[0]))
-            prev_green = int(float(cmd[4]))
-            #prev_blue = int(float(cmd[8]))
-            #prev_redS = int(float(cmd[2]))
-            prev_greenS = int(float(cmd[6]))
-            prev_blueS = int(float(cmd[10]))
+                h_s_r_thread.start()
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[5])),))
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[7])),))
+                h_p_g_thread.start()
 
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[11])),))
+            elif cmd[1] == "N" and cmd[5] != "N" and cmd[9] == "N" and cmd[3] == "N" and cmd[7] != "N" and cmd[11] != "N":
+                #prev_red = int(float(cmd[0]))
+                prev_green = int(float(cmd[4]))
+                #prev_blue = int(float(cmd[8]))
+                #prev_redS = int(float(cmd[2]))
+                prev_greenS = int(float(cmd[6]))
+                prev_blueS = int(float(cmd[10]))
 
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[5])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[7])),))
 
-            h_p_g_thread.start()
-            h_s_g_thread.start()
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[11])),))
 
-            h_s_b_thread.start()
-        elif cmd[1] == "N" and cmd[5] != "N" and cmd[9] == "N" and cmd[3] == "N" and cmd[7] != "N" and cmd[11] == "N":
-            #prev_red = int(float(cmd[0]))
-            prev_green = int(float(cmd[4]))
-            #prev_blue = int(float(cmd[8]))
-            #prev_redS = int(float(cmd[2]))
-            prev_greenS = int(float(cmd[6]))
-            #prev_blueS = int(float(cmd[10]))
 
+                h_p_g_thread.start()
+                h_s_g_thread.start()
 
+                h_s_b_thread.start()
+            elif cmd[1] == "N" and cmd[5] != "N" and cmd[9] == "N" and cmd[3] == "N" and cmd[7] != "N" and cmd[11] == "N":
+                #prev_red = int(float(cmd[0]))
+                prev_green = int(float(cmd[4]))
+                #prev_blue = int(float(cmd[8]))
+                #prev_redS = int(float(cmd[2]))
+                prev_greenS = int(float(cmd[6]))
+                #prev_blueS = int(float(cmd[10]))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[5])),))
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[7])),))
 
-            h_p_g_thread.start()
-            h_s_g_thread.start()
 
-        elif cmd[1] == "N" and cmd[5] != "N" and cmd[9] == "N" and cmd[3] == "N" and cmd[7] == "N" and cmd[11] != "N":
-            #prev_red = int(float(cmd[0]))
-            prev_green = int(float(cmd[4]))
-            #prev_blue = int(float(cmd[8]))
-            #prev_redS = int(float(cmd[2]))
-            #prev_greenS = int(float(cmd[6]))
-            prev_blueS = int(float(cmd[10]))
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[5])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[7])),))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[5])),))
+                h_p_g_thread.start()
+                h_s_g_thread.start()
 
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[11])),))
+            elif cmd[1] == "N" and cmd[5] != "N" and cmd[9] == "N" and cmd[3] == "N" and cmd[7] == "N" and cmd[11] != "N":
+                #prev_red = int(float(cmd[0]))
+                prev_green = int(float(cmd[4]))
+                #prev_blue = int(float(cmd[8]))
+                #prev_redS = int(float(cmd[2]))
+                #prev_greenS = int(float(cmd[6]))
+                prev_blueS = int(float(cmd[10]))
 
-            h_p_g_thread.start()
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[5])),))
 
-            h_s_b_thread.start()
-        elif cmd[1] == "N" and cmd[5] != "N" and cmd[9] == "N" and cmd[3] == "N" and cmd[7] == "N" and cmd[11] == "N":
-            #prev_red = int(float(cmd[0]))
-            prev_green = int(float(cmd[4]))
-            #prev_blue = int(float(cmd[8]))
-            #prev_redS = int(float(cmd[2]))
-            #prev_greenS = int(float(cmd[6]))
-            #prev_blueS = int(float(cmd[10]))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[11])),))
 
+                h_p_g_thread.start()
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[5])),))
+                h_s_b_thread.start()
+            elif cmd[1] == "N" and cmd[5] != "N" and cmd[9] == "N" and cmd[3] == "N" and cmd[7] == "N" and cmd[11] == "N":
+                #prev_red = int(float(cmd[0]))
+                prev_green = int(float(cmd[4]))
+                #prev_blue = int(float(cmd[8]))
+                #prev_redS = int(float(cmd[2]))
+                #prev_greenS = int(float(cmd[6]))
+                #prev_blueS = int(float(cmd[10]))
 
-            h_p_g_thread.start()
 
-        elif cmd[1] == "N" and cmd[5] == "N" and cmd[9] != "N" and cmd[3] != "N" and cmd[7] != "N" and cmd[11] != "N":
-            #prev_red = int(float(cmd[0]))
-            #prev_green = int(float(cmd[4]))
-            prev_blue = int(float(cmd[8]))
-            prev_redS = int(float(cmd[2]))
-            prev_greenS = int(float(cmd[6]))
-            prev_blueS = int(float(cmd[10]))
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[5])),))
 
+                h_p_g_thread.start()
 
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[3])),))
+            elif cmd[1] == "N" and cmd[5] == "N" and cmd[9] != "N" and cmd[3] != "N" and cmd[7] != "N" and cmd[11] != "N":
+                #prev_red = int(float(cmd[0]))
+                #prev_green = int(float(cmd[4]))
+                prev_blue = int(float(cmd[8]))
+                prev_redS = int(float(cmd[2]))
+                prev_greenS = int(float(cmd[6]))
+                prev_blueS = int(float(cmd[10]))
 
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[7])),))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[9])),))
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[11])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[3])),))
 
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[7])),))
 
-            h_s_r_thread.start()
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[9])),))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[11])),))
 
-            h_s_g_thread.start()
 
-            h_p_b_thread.start()
-            h_s_b_thread.start()
-        elif cmd[1] == "N" and cmd[5] == "N" and cmd[9] != "N" and cmd[3] != "N" and cmd[7] != "N" and cmd[11] == "N":
-            #prev_red = int(float(cmd[0]))
-            #prev_green = int(float(cmd[4]))
-            prev_blue = int(float(cmd[8]))
-            prev_redS = int(float(cmd[2]))
-            prev_greenS = int(float(cmd[6]))
-            #prev_blueS = int(float(cmd[10]))
+                h_s_r_thread.start()
 
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[3])),))
+                h_s_g_thread.start()
 
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[7])),))
+                h_p_b_thread.start()
+                h_s_b_thread.start()
+            elif cmd[1] == "N" and cmd[5] == "N" and cmd[9] != "N" and cmd[3] != "N" and cmd[7] != "N" and cmd[11] == "N":
+                #prev_red = int(float(cmd[0]))
+                #prev_green = int(float(cmd[4]))
+                prev_blue = int(float(cmd[8]))
+                prev_redS = int(float(cmd[2]))
+                prev_greenS = int(float(cmd[6]))
+                #prev_blueS = int(float(cmd[10]))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[9])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[3])),))
 
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[7])),))
 
-            h_s_r_thread.start()
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[9])),))
 
-            h_s_g_thread.start()
 
-            h_p_b_thread.start()
+                h_s_r_thread.start()
 
-        elif cmd[1] == "N" and cmd[5] == "N" and cmd[9] != "N" and cmd[3] != "N" and cmd[7] == "N" and cmd[11] != "N":
-            #prev_red = int(float(cmd[0]))
-            #prev_green = int(float(cmd[4]))
-            prev_blue = int(float(cmd[8]))
-            prev_redS = int(float(cmd[2]))
-            #prev_greenS = int(float(cmd[6]))
-            prev_blueS = int(float(cmd[10]))
+                h_s_g_thread.start()
 
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[3])),))
+                h_p_b_thread.start()
 
+            elif cmd[1] == "N" and cmd[5] == "N" and cmd[9] != "N" and cmd[3] != "N" and cmd[7] == "N" and cmd[11] != "N":
+                #prev_red = int(float(cmd[0]))
+                #prev_green = int(float(cmd[4]))
+                prev_blue = int(float(cmd[8]))
+                prev_redS = int(float(cmd[2]))
+                #prev_greenS = int(float(cmd[6]))
+                prev_blueS = int(float(cmd[10]))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[9])),))
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[11])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[3])),))
 
-            h_s_r_thread.start()
 
-            h_p_b_thread.start()
-            h_s_b_thread.start()
-        elif cmd[1] == "N" and cmd[5] == "N" and cmd[9] != "N" and cmd[3] != "N" and cmd[7] == "N" and cmd[11] == "N":
-            #prev_red = int(float(cmd[0]))
-            #prev_green = int(float(cmd[4]))
-            prev_blue = int(float(cmd[8]))
-            prev_redS = int(float(cmd[2]))
-            #prev_greenS = int(float(cmd[6]))
-            #prev_blueS = int(float(cmd[10]))
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[9])),))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[11])),))
 
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[3])),))
+                h_s_r_thread.start()
 
+                h_p_b_thread.start()
+                h_s_b_thread.start()
+            elif cmd[1] == "N" and cmd[5] == "N" and cmd[9] != "N" and cmd[3] != "N" and cmd[7] == "N" and cmd[11] == "N":
+                #prev_red = int(float(cmd[0]))
+                #prev_green = int(float(cmd[4]))
+                prev_blue = int(float(cmd[8]))
+                prev_redS = int(float(cmd[2]))
+                #prev_greenS = int(float(cmd[6]))
+                #prev_blueS = int(float(cmd[10]))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[9])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[3])),))
 
 
-            h_s_r_thread.start()
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[9])),))
 
-            h_p_b_thread.start()
 
-        elif cmd[1] == "N" and cmd[5] == "N" and cmd[9] != "N" and cmd[3] == "N" and cmd[7] != "N" and cmd[11] != "N":
-            #prev_red = int(float(cmd[0]))
-            #prev_green = int(float(cmd[4]))
-            prev_blue = int(float(cmd[8]))
-            #prev_redS = int(float(cmd[2]))
-            prev_greenS = int(float(cmd[6]))
-            prev_blueS = int(float(cmd[10]))
+                h_s_r_thread.start()
 
+                h_p_b_thread.start()
 
+            elif cmd[1] == "N" and cmd[5] == "N" and cmd[9] != "N" and cmd[3] == "N" and cmd[7] != "N" and cmd[11] != "N":
+                #prev_red = int(float(cmd[0]))
+                #prev_green = int(float(cmd[4]))
+                prev_blue = int(float(cmd[8]))
+                #prev_redS = int(float(cmd[2]))
+                prev_greenS = int(float(cmd[6]))
+                prev_blueS = int(float(cmd[10]))
 
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[7])),))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[9])),))
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[11])),))
 
-            h_s_g_thread.start()
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[7])),))
 
-            h_p_b_thread.start()
-            h_s_b_thread.start()
-        elif cmd[1] == "N" and cmd[5] == "N" and cmd[9] != "N" and cmd[3] == "N" and cmd[7] != "N" and cmd[11] == "N":
-            #prev_red = int(float(cmd[0]))
-            #prev_green = int(float(cmd[4]))
-            prev_blue = int(float(cmd[8]))
-            #prev_redS = int(float(cmd[2]))
-            prev_greenS = int(float(cmd[6]))
-            #prev_blueS = int(float(cmd[10]))
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[9])),))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[11])),))
 
+                h_s_g_thread.start()
 
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[7])),))
+                h_p_b_thread.start()
+                h_s_b_thread.start()
+            elif cmd[1] == "N" and cmd[5] == "N" and cmd[9] != "N" and cmd[3] == "N" and cmd[7] != "N" and cmd[11] == "N":
+                #prev_red = int(float(cmd[0]))
+                #prev_green = int(float(cmd[4]))
+                prev_blue = int(float(cmd[8]))
+                #prev_redS = int(float(cmd[2]))
+                prev_greenS = int(float(cmd[6]))
+                #prev_blueS = int(float(cmd[10]))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[9])),))
 
-            h_s_g_thread.start()
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[7])),))
 
-            h_p_b_thread.start()
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[9])),))
 
-        elif cmd[1] == "N" and cmd[5] == "N" and cmd[9] != "N" and cmd[3] == "N" and cmd[7] == "N" and cmd[11] != "N":
-            #prev_red = int(float(cmd[0]))
-            #prev_green = int(float(cmd[4]))
-            prev_blue = int(float(cmd[8]))
-            #prev_redS = int(float(cmd[2]))
-            #prev_greenS = int(float(cmd[6]))
-            prev_blueS = int(float(cmd[10]))
+                h_s_g_thread.start()
 
+                h_p_b_thread.start()
 
+            elif cmd[1] == "N" and cmd[5] == "N" and cmd[9] != "N" and cmd[3] == "N" and cmd[7] == "N" and cmd[11] != "N":
+                #prev_red = int(float(cmd[0]))
+                #prev_green = int(float(cmd[4]))
+                prev_blue = int(float(cmd[8]))
+                #prev_redS = int(float(cmd[2]))
+                #prev_greenS = int(float(cmd[6]))
+                prev_blueS = int(float(cmd[10]))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[9])),))
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[11])),))
 
-            h_p_b_thread.start()
-            h_s_b_thread.start()
-        elif cmd[1] == "N" and cmd[5] == "N" and cmd[9] != "N" and cmd[3] == "N" and cmd[7] == "N" and cmd[11] == "N":
-            #prev_red = int(float(cmd[0]))
-            #prev_green = int(float(cmd[4]))
-            prev_blue = int(float(cmd[8]))
-            #prev_redS = int(float(cmd[2]))
-            #prev_greenS = int(float(cmd[6]))
-            #prev_blueS = int(float(cmd[10]))
 
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[9])),))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[11])),))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[9])),))
+                h_p_b_thread.start()
+                h_s_b_thread.start()
+            elif cmd[1] == "N" and cmd[5] == "N" and cmd[9] != "N" and cmd[3] == "N" and cmd[7] == "N" and cmd[11] == "N":
+                #prev_red = int(float(cmd[0]))
+                #prev_green = int(float(cmd[4]))
+                prev_blue = int(float(cmd[8]))
+                #prev_redS = int(float(cmd[2]))
+                #prev_greenS = int(float(cmd[6]))
+                #prev_blueS = int(float(cmd[10]))
 
-            h_p_b_thread.start()
 
-        elif cmd[1] == "N" and cmd[5] == "N" and cmd[9] == "N" and cmd[3] != "N" and cmd[7] != "N" and cmd[11] != "N":
-            #prev_red = int(float(cmd[0]))
-            #prev_green = int(float(cmd[4]))
-            #prev_blue = int(float(cmd[8]))
-            prev_redS = int(float(cmd[2]))
-            prev_greenS = int(float(cmd[6]))
-            prev_blueS = int(float(cmd[10]))
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[9])),))
 
+                h_p_b_thread.start()
 
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[3])),))
+            elif cmd[1] == "N" and cmd[5] == "N" and cmd[9] == "N" and cmd[3] != "N" and cmd[7] != "N" and cmd[11] != "N":
+                #prev_red = int(float(cmd[0]))
+                #prev_green = int(float(cmd[4]))
+                #prev_blue = int(float(cmd[8]))
+                prev_redS = int(float(cmd[2]))
+                prev_greenS = int(float(cmd[6]))
+                prev_blueS = int(float(cmd[10]))
 
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[7])),))
 
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[11])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[3])),))
 
-            h_s_r_thread.start()
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[7])),))
 
-            h_s_g_thread.start()
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[11])),))
 
-            h_s_b_thread.start()
-        elif cmd[1] == "N" and cmd[5] == "N" and cmd[9] == "N" and cmd[3] != "N" and cmd[7] != "N" and cmd[11] == "N":
-            #prev_red = int(float(cmd[0]))
-            #prev_green = int(float(cmd[4]))
-            #prev_blue = int(float(cmd[8]))
-            prev_redS = int(float(cmd[2]))
-            prev_greenS = int(float(cmd[6]))
-            #prev_blueS = int(float(cmd[10]))
+                h_s_r_thread.start()
 
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[3])),))
+                h_s_g_thread.start()
 
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[7])),))
+                h_s_b_thread.start()
+            elif cmd[1] == "N" and cmd[5] == "N" and cmd[9] == "N" and cmd[3] != "N" and cmd[7] != "N" and cmd[11] == "N":
+                #prev_red = int(float(cmd[0]))
+                #prev_green = int(float(cmd[4]))
+                #prev_blue = int(float(cmd[8]))
+                prev_redS = int(float(cmd[2]))
+                prev_greenS = int(float(cmd[6]))
+                #prev_blueS = int(float(cmd[10]))
 
-            h_s_r_thread.start()
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[3])),))
 
-            h_s_g_thread.start()
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[7])),))
 
-        elif cmd[1] == "N" and cmd[5] == "N" and cmd[9] == "N" and cmd[3] != "N" and cmd[7] == "N" and cmd[11] != "N":
-            #prev_red = int(float(cmd[0]))
-            #prev_green = int(float(cmd[4]))
-            #prev_blue = int(float(cmd[8]))
-            prev_redS = int(float(cmd[2]))
-            #prev_greenS = int(float(cmd[6]))
-            prev_blueS = int(float(cmd[10]))
+                h_s_r_thread.start()
 
+                h_s_g_thread.start()
 
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[3])),))
+            elif cmd[1] == "N" and cmd[5] == "N" and cmd[9] == "N" and cmd[3] != "N" and cmd[7] == "N" and cmd[11] != "N":
+                #prev_red = int(float(cmd[0]))
+                #prev_green = int(float(cmd[4]))
+                #prev_blue = int(float(cmd[8]))
+                prev_redS = int(float(cmd[2]))
+                #prev_greenS = int(float(cmd[6]))
+                prev_blueS = int(float(cmd[10]))
 
 
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[11])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[3])),))
 
-            h_s_r_thread.start()
 
-            h_s_b_thread.start()
-        elif cmd[1] == "N" and cmd[5] == "N" and cmd[9] == "N" and cmd[3] != "N" and cmd[7] == "N" and cmd[11] == "N":
-            #prev_red = int(float(cmd[0]))
-            #prev_green = int(float(cmd[4]))
-            #prev_blue = int(float(cmd[8]))
-            prev_redS = int(float(cmd[2]))
-            #prev_greenS = int(float(cmd[6]))
-            #prev_blueS = int(float(cmd[10]))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[11])),))
 
+                h_s_r_thread.start()
 
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[3])),))
+                h_s_b_thread.start()
+            elif cmd[1] == "N" and cmd[5] == "N" and cmd[9] == "N" and cmd[3] != "N" and cmd[7] == "N" and cmd[11] == "N":
+                #prev_red = int(float(cmd[0]))
+                #prev_green = int(float(cmd[4]))
+                #prev_blue = int(float(cmd[8]))
+                prev_redS = int(float(cmd[2]))
+                #prev_greenS = int(float(cmd[6]))
+                #prev_blueS = int(float(cmd[10]))
 
-            h_s_r_thread.start()
 
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[3])),))
 
-        elif cmd[1] == "N" and cmd[5] == "N" and cmd[9] == "N" and cmd[3] == "N" and cmd[7] != "N" and cmd[11] != "N":
-            #prev_red = int(float(cmd[0]))
-            #prev_green = int(float(cmd[4]))
-            #prev_blue = int(float(cmd[8]))
-            #prev_redS = int(float(cmd[2]))
-            prev_greenS = int(float(cmd[6]))
-            prev_blueS = int(float(cmd[10]))
+                h_s_r_thread.start()
 
 
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[7])),))
+            elif cmd[1] == "N" and cmd[5] == "N" and cmd[9] == "N" and cmd[3] == "N" and cmd[7] != "N" and cmd[11] != "N":
+                #prev_red = int(float(cmd[0]))
+                #prev_green = int(float(cmd[4]))
+                #prev_blue = int(float(cmd[8]))
+                #prev_redS = int(float(cmd[2]))
+                prev_greenS = int(float(cmd[6]))
+                prev_blueS = int(float(cmd[10]))
 
 
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[11])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[7])),))
 
 
-            h_s_g_thread.start()
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[11])),))
 
-            h_s_b_thread.start()
-        elif cmd[1] == "N" and cmd[5] == "N" and cmd[9] == "N" and cmd[3] == "N" and cmd[7] != "N" and cmd[11] == "N":
-            #prev_red = int(float(cmd[0]))
-            #prev_green = int(float(cmd[4]))
-            #prev_blue = int(float(cmd[8]))
-            #prev_redS = int(float(cmd[2]))
-            prev_greenS = int(float(cmd[6]))
-            #prev_blueS = int(float(cmd[10]))
 
+                h_s_g_thread.start()
 
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[7])),))
+                h_s_b_thread.start()
+            elif cmd[1] == "N" and cmd[5] == "N" and cmd[9] == "N" and cmd[3] == "N" and cmd[7] != "N" and cmd[11] == "N":
+                #prev_red = int(float(cmd[0]))
+                #prev_green = int(float(cmd[4]))
+                #prev_blue = int(float(cmd[8]))
+                #prev_redS = int(float(cmd[2]))
+                prev_greenS = int(float(cmd[6]))
+                #prev_blueS = int(float(cmd[10]))
 
-            h_s_g_thread.start()
 
-        elif cmd[1] == "N" and cmd[5] == "N" and cmd[9] == "N" and cmd[3] == "N" and cmd[7] == "N" and cmd[11] != "N":
-            #prev_red = int(float(cmd[0]))
-            #prev_green = int(float(cmd[4]))
-            #prev_blue = int(float(cmd[8]))
-            #prev_redS = int(float(cmd[2]))
-            #prev_greenS = int(float(cmd[6]))
-            prev_blueS = int(float(cmd[10]))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[7])),))
 
+                h_s_g_thread.start()
 
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[11])),))
+            elif cmd[1] == "N" and cmd[5] == "N" and cmd[9] == "N" and cmd[3] == "N" and cmd[7] == "N" and cmd[11] != "N":
+                #prev_red = int(float(cmd[0]))
+                #prev_green = int(float(cmd[4]))
+                #prev_blue = int(float(cmd[8]))
+                #prev_redS = int(float(cmd[2]))
+                #prev_greenS = int(float(cmd[6]))
+                prev_blueS = int(float(cmd[10]))
 
-            h_s_b_thread.start()
+
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[11])),))
+
+                h_s_b_thread.start()
 
         comp_Event_mutex.acquire()
         try:
@@ -1709,6 +1711,7 @@ def handle_primary_red(start, end):
             light_mutex.release()
 
 def handle_secondary_red(start, end):
+    global PREV_SEC_RED
     if start < end:
         light_mutex.acquire()
         try:
@@ -1735,6 +1738,11 @@ def handle_secondary_red(start, end):
             wiringpi.softPwmWrite(6, int(float(start) / 2))
         finally:
             light_mutex.release()
+    secondary_mutex.acquire()
+    try:
+        PREV_SEC_RED = int(end)
+    finally:
+        secondary_mutex.release()
 
 def handle_primary_green(start, end):
     if start < end:
@@ -1765,6 +1773,7 @@ def handle_primary_green(start, end):
             light_mutex.release()
 
 def handle_secondary_green(start, end):
+    global PREV_SEC_GREEN
     if start < end:
         light_mutex.acquire()
         try:
@@ -1791,6 +1800,11 @@ def handle_secondary_green(start, end):
             wiringpi.softPwmWrite(13, int(float(start) / 2))
         finally:
             light_mutex.release()
+    secondary_mutex.acquire()
+    try:
+        PREV_SEC_GREEN = int(end)
+    finally:
+        secondary_mutex.release()
 
 def handle_primary_blue(start, end):
     if start < end:
@@ -1821,6 +1835,7 @@ def handle_primary_blue(start, end):
             light_mutex.release()
 
 def handle_secondary_blue(start, end):
+    global PREV_SEC_BLUE
     if start < end:
         light_mutex.acquire()
         try:
@@ -1847,6 +1862,11 @@ def handle_secondary_blue(start, end):
             wiringpi.softPwmWrite(26, int(float(start) / 2))
         finally:
             light_mutex.release()
+    secondary_mutex.acquire()
+    try:
+        PREV_SEC_BLUE = int(end)
+    finally:
+        secondary_mutex.release()
 
 def PIR_cmd(keyboard_Event, comp_Event, delete_Event):
     #global red
@@ -1857,6 +1877,9 @@ def PIR_cmd(keyboard_Event, comp_Event, delete_Event):
     global local_ip
     global cursor
     global db
+    global PREV_SEC_RED
+    global PREV_SEC_GREEN
+    global PREV_SEC_BLUE
     # *establish server socket for Control subsystem to connect to for LI send
     lighting_pir_svr_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)  # * Create a socket object
     lighting_pir_svr_sock_host = ''  # * Get local machine name
@@ -1884,29 +1907,77 @@ def PIR_cmd(keyboard_Event, comp_Event, delete_Event):
         cmd = lighting_pir_svr_sock_connection.recv(1024)
         cmd = cmd.split('|')
         print "GOT on pir_cmd thread: ", cmd
-        end_red = int(float(cmd[2]))
+        print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        end_red = int(float(cmd[0]))
         end_green = int(float(cmd[1]))
         end_blue = int(float(cmd[2]))
+
         print "Values at delete: %s %s %s" % (end_red, end_green, end_blue)
-        light_mutex.acquire()
+        secondary_mutex.acquire()
         try:
-            while end_red > 0 or end_green > 0 or end_blue > 0:
+            end_red_s = PREV_SEC_RED
+            end_green_s = PREV_SEC_GREEN
+            end_blue_s = PREV_SEC_BLUE
+        finally:
+            secondary_mutex.release()
+        light_mutex.acquire()
+        #print "gotcha"
+        try:
+            print "about to sleep"
+            while end_red > 0 or end_green > 0 or end_blue > 0 or end_red_s > 0 or end_green_s > 0 or end_blue_s > 0:
                 if end_red > 0:
+                    "red"
                     end_red -= 1
-                    #red.ChangeDutyCycle(end_red / 2)
-                    wiringpi.softPwmWrite(17, int(float(end_red)/ 2))
+                    wiringpi.softPwmWrite(17, int(float(end_red) / 2))
                 if end_green > 0:
+                    "green"
                     end_green -= 1
-                    #green.ChangeDutyCycle(end_green / 2)
                     wiringpi.softPwmWrite(27, int(float(end_green) / 2))
                 if end_blue > 0:
+                    "blue"
                     end_blue -= 1
-                    #blue.ChangeDutyCycle(end_blue / 2)
                     wiringpi.softPwmWrite(22, int(float(end_blue) / 2))
+                if end_red_s > 0:
+                    "red"
+                    end_red_s -= 1
+                    wiringpi.softPwmWrite(6, int(float(end_red_s) / 2))
+                if end_green_s > 0:
+                    "green"
+                    end_green_s -= 1
+                    wiringpi.softPwmWrite(13, int(float(end_green_s) / 2))
+                if end_blue_s > 0:
+                    "blue"
+                    end_blue_s -= 1
+                    wiringpi.softPwmWrite(26, int(float(end_blue_s) / 2))
                 time.sleep(0.005)
-            GPIO.output(pinRelay, GPIO.LOW)
+            #GPIO.output(pinRelay, GPIO.LOW)
+            #GPIO.output(pinRelayS, GPIO.LOW)
         finally:
+            print "releasing mutex"
             light_mutex.release()
+        # end_red = int(float(cmd[2]))
+        # end_green = int(float(cmd[1]))
+        # end_blue = int(float(cmd[2]))
+        # print "Values at delete: %s %s %s" % (end_red, end_green, end_blue)
+        # light_mutex.acquire()
+        # try:
+        #     while end_red > 0 or end_green > 0 or end_blue > 0:
+        #         if end_red > 0:
+        #             end_red -= 1
+        #             #red.ChangeDutyCycle(end_red / 2)
+        #             wiringpi.softPwmWrite(17, int(float(end_red)/ 2))
+        #         if end_green > 0:
+        #             end_green -= 1
+        #             #green.ChangeDutyCycle(end_green / 2)
+        #             wiringpi.softPwmWrite(27, int(float(end_green) / 2))
+        #         if end_blue > 0:
+        #             end_blue -= 1
+        #             #blue.ChangeDutyCycle(end_blue / 2)
+        #             wiringpi.softPwmWrite(22, int(float(end_blue) / 2))
+        #         time.sleep(0.005)
+        #     GPIO.output(pinRelay, GPIO.LOW)
+        # finally:
+        #     light_mutex.release()
         lighting_pir_svr_sock_connection.close()
 
 def light_cmd(keyboard_Event, comp_Event, delete_Event):
@@ -1961,1352 +2032,1352 @@ def light_cmd(keyboard_Event, comp_Event, delete_Event):
                 PRIMARY_RELAY_HIGH = True
         finally:
             secondary_mutex.release()
+        if cmd[0] != "":
+            if cmd[0] != "N" and cmd[2] != "N" and cmd[4] != "N" and cmd[1] != "N" and cmd[3] != "N" and cmd[5] != "N":
+                prev_red = int(float(cmd[6]))
+                prev_green = int(float(cmd[8]))
+                prev_blue = int(float(cmd[10]))
+                prev_redS = int(float(cmd[7]))
+                prev_greenS = int(float(cmd[9]))
+                prev_blueS = int(float(cmd[11]))
+
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[0])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[1])),))
+
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[2])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[3])),))
+
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[4])),))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[5])),))
+
+                h_p_r_thread.start()
+                h_s_r_thread.start()
+
+                h_p_g_thread.start()
+                h_s_g_thread.start()
+
+                h_p_b_thread.start()
+                h_s_b_thread.start()
+
+            elif cmd[0] != "N" and cmd[2] != "N" and cmd[4] != "N" and cmd[1] != "N" and cmd[3] != "N" and cmd[5] == "N":
+                prev_red = int(float(cmd[6]))
+                prev_green = int(float(cmd[8]))
+                prev_blue = int(float(cmd[10]))
+                prev_redS = int(float(cmd[7]))
+                prev_greenS = int(float(cmd[9]))
+
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[0])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[1])),))
+
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[2])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[3])),))
+
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[4])),))
+
+                h_p_r_thread.start()
+                h_s_r_thread.start()
+
+                h_p_g_thread.start()
+                h_s_g_thread.start()
+
+                h_p_b_thread.start()
 
-        if cmd[0] != "N" and cmd[2] != "N" and cmd[4] != "N" and cmd[1] != "N" and cmd[3] != "N" and cmd[5] != "N":
-            prev_red = int(float(cmd[6]))
-            prev_green = int(float(cmd[8]))
-            prev_blue = int(float(cmd[10]))
-            prev_redS = int(float(cmd[7]))
-            prev_greenS = int(float(cmd[9]))
-            prev_blueS = int(float(cmd[11]))
-
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[0])),))
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[1])),))
+
+            elif cmd[0] != "N" and cmd[2] != "N" and cmd[4] != "N" and cmd[1] != "N" and cmd[3] == "N" and cmd[5] != "N":
+                prev_red = int(float(cmd[6]))
+                prev_green = int(float(cmd[8]))
+                prev_blue = int(float(cmd[10]))
+                prev_redS = int(float(cmd[7]))
+                prev_blueS = int(float(cmd[11]))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[2])),))
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[3])),))
-
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[4])),))
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[5])),))
-
-            h_p_r_thread.start()
-            h_s_r_thread.start()
-
-            h_p_g_thread.start()
-            h_s_g_thread.start()
-
-            h_p_b_thread.start()
-            h_s_b_thread.start()
-
-        elif cmd[0] != "N" and cmd[2] != "N" and cmd[4] != "N" and cmd[1] != "N" and cmd[3] != "N" and cmd[5] == "N":
-            prev_red = int(float(cmd[6]))
-            prev_green = int(float(cmd[8]))
-            prev_blue = int(float(cmd[10]))
-            prev_redS = int(float(cmd[7]))
-            prev_greenS = int(float(cmd[9]))
-
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[0])),))
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[1])),))
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[0])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[1])),))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[2])),))
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[3])),))
-
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[4])),))
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[2])),))
 
-            h_p_r_thread.start()
-            h_s_r_thread.start()
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[4])),))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[5])),))
 
-            h_p_g_thread.start()
-            h_s_g_thread.start()
+                h_p_r_thread.start()
+                h_s_r_thread.start()
 
-            h_p_b_thread.start()
+                h_p_g_thread.start()
 
+                h_p_b_thread.start()
+                h_s_b_thread.start()
 
-        elif cmd[0] != "N" and cmd[2] != "N" and cmd[4] != "N" and cmd[1] != "N" and cmd[3] == "N" and cmd[5] != "N":
-            prev_red = int(float(cmd[6]))
-            prev_green = int(float(cmd[8]))
-            prev_blue = int(float(cmd[10]))
-            prev_redS = int(float(cmd[7]))
-            prev_blueS = int(float(cmd[11]))
+            elif cmd[0] != "N" and cmd[2] != "N" and cmd[4] != "N" and cmd[1] != "N" and cmd[3] == "N" and cmd[5] == "N":
+                prev_red = int(float(cmd[6]))
+                prev_green = int(float(cmd[8]))
+                prev_blue = int(float(cmd[10]))
+                prev_redS = int(float(cmd[7]))
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[0])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[1])),))
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[0])),))
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[1])),))
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[2])),))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[2])),))
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[4])),))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[4])),))
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[5])),))
+                h_p_r_thread.start()
+                h_s_r_thread.start()
 
-            h_p_r_thread.start()
-            h_s_r_thread.start()
+                h_p_g_thread.start()
 
-            h_p_g_thread.start()
+                h_p_b_thread.start()
 
-            h_p_b_thread.start()
-            h_s_b_thread.start()
+            elif cmd[0] != "N" and cmd[2] != "N" and cmd[4] != "N" and cmd[1] == "N" and cmd[3] != "N" and cmd[5] != "N":
+                prev_red = int(float(cmd[6]))
+                prev_green = int(float(cmd[8]))
+                prev_blue = int(float(cmd[10]))
+                prev_greenS = int(float(cmd[9]))
+                prev_blueS = int(float(cmd[11]))
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[0])),))
 
-        elif cmd[0] != "N" and cmd[2] != "N" and cmd[4] != "N" and cmd[1] != "N" and cmd[3] == "N" and cmd[5] == "N":
-            prev_red = int(float(cmd[6]))
-            prev_green = int(float(cmd[8]))
-            prev_blue = int(float(cmd[10]))
-            prev_redS = int(float(cmd[7]))
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[0])),))
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[1])),))
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[2])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[3])),))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[2])),))
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[4])),))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[5])),))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[4])),))
+                h_p_r_thread.start()
 
-            h_p_r_thread.start()
-            h_s_r_thread.start()
+                h_p_g_thread.start()
+                h_s_g_thread.start()
 
-            h_p_g_thread.start()
+                h_p_b_thread.start()
+                h_s_b_thread.start()
 
-            h_p_b_thread.start()
 
-        elif cmd[0] != "N" and cmd[2] != "N" and cmd[4] != "N" and cmd[1] == "N" and cmd[3] != "N" and cmd[5] != "N":
-            prev_red = int(float(cmd[6]))
-            prev_green = int(float(cmd[8]))
-            prev_blue = int(float(cmd[10]))
-            prev_greenS = int(float(cmd[9]))
-            prev_blueS = int(float(cmd[11]))
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[0])),))
+            elif cmd[0] != "N" and cmd[2] != "N" and cmd[4] != "N" and cmd[1] == "N" and cmd[3] != "N" and cmd[5] == "N":
+                prev_red = int(float(cmd[6]))
+                prev_green = int(float(cmd[8]))
+                prev_blue = int(float(cmd[10]))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[2])),))
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[3])),))
+                prev_greenS = int(float(cmd[9]))
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[0])),))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[4])),))
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[5])),))
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[2])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[3])),))
 
-            h_p_r_thread.start()
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[4])),))
 
-            h_p_g_thread.start()
-            h_s_g_thread.start()
+                h_p_r_thread.start()
 
-            h_p_b_thread.start()
-            h_s_b_thread.start()
+                h_p_g_thread.start()
+                h_s_g_thread.start()
 
+                h_p_b_thread.start()
 
-        elif cmd[0] != "N" and cmd[2] != "N" and cmd[4] != "N" and cmd[1] == "N" and cmd[3] != "N" and cmd[5] == "N":
-            prev_red = int(float(cmd[6]))
-            prev_green = int(float(cmd[8]))
-            prev_blue = int(float(cmd[10]))
 
-            prev_greenS = int(float(cmd[9]))
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[0])),))
+            elif cmd[0] != "N" and cmd[2] != "N" and cmd[4] != "N" and cmd[1] == "N" and cmd[3] == "N" and cmd[5] != "N":
+                prev_red = int(float(cmd[6]))
+                prev_green = int(float(cmd[8]))
+                prev_blue = int(float(cmd[10]))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[2])),))
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[3])),))
+                prev_blueS = int(float(cmd[11]))
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[0])),))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[4])),))
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[2])),))
 
-            h_p_r_thread.start()
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[4])),))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[5])),))
 
-            h_p_g_thread.start()
-            h_s_g_thread.start()
+                h_p_r_thread.start()
 
-            h_p_b_thread.start()
+                h_p_g_thread.start()
 
+                h_p_b_thread.start()
+                h_s_b_thread.start()
 
-        elif cmd[0] != "N" and cmd[2] != "N" and cmd[4] != "N" and cmd[1] == "N" and cmd[3] == "N" and cmd[5] != "N":
-            prev_red = int(float(cmd[6]))
-            prev_green = int(float(cmd[8]))
-            prev_blue = int(float(cmd[10]))
 
-            prev_blueS = int(float(cmd[11]))
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[0])),))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[2])),))
+            elif cmd[0] != "N" and cmd[2] != "N" and cmd[4] != "N" and cmd[1] == "N" and cmd[3] == "N" and cmd[5] == "N":
+                prev_red = int(float(cmd[6]))
+                prev_green = int(float(cmd[8]))
+                prev_blue = int(float(cmd[10]))
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[0])),))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[4])),))
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[5])),))
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[2])),))
 
-            h_p_r_thread.start()
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[4])),))
 
-            h_p_g_thread.start()
+                h_p_r_thread.start()
 
-            h_p_b_thread.start()
-            h_s_b_thread.start()
+                h_p_g_thread.start()
 
+                h_p_b_thread.start()
 
 
-        elif cmd[0] != "N" and cmd[2] != "N" and cmd[4] != "N" and cmd[1] == "N" and cmd[3] == "N" and cmd[5] == "N":
-            prev_red = int(float(cmd[6]))
-            prev_green = int(float(cmd[8]))
-            prev_blue = int(float(cmd[10]))
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[0])),))
+            elif cmd[0] != "N" and cmd[2] != "N" and cmd[4] == "N" and cmd[1] != "N" and cmd[3] != "N" and cmd[5] != "N":
+                prev_red = int(float(cmd[6]))
+                prev_green = int(float(cmd[8]))
+                prev_redS = int(float(cmd[7]))
+                prev_greenS = int(float(cmd[9]))
+                prev_blueS = int(float(cmd[11]))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[2])),))
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[0])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[1])),))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[4])),))
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[2])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[3])),))
 
-            h_p_r_thread.start()
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[5])),))
 
-            h_p_g_thread.start()
+                h_p_r_thread.start()
+                h_s_r_thread.start()
 
-            h_p_b_thread.start()
+                h_p_g_thread.start()
+                h_s_g_thread.start()
 
+                h_s_b_thread.start()
 
-        elif cmd[0] != "N" and cmd[2] != "N" and cmd[4] == "N" and cmd[1] != "N" and cmd[3] != "N" and cmd[5] != "N":
-            prev_red = int(float(cmd[6]))
-            prev_green = int(float(cmd[8]))
-            prev_redS = int(float(cmd[7]))
-            prev_greenS = int(float(cmd[9]))
-            prev_blueS = int(float(cmd[11]))
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[0])),))
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[1])),))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[2])),))
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[3])),))
+            elif cmd[0] != "N" and cmd[2] != "N" and cmd[4] == "N" and cmd[1] != "N" and cmd[3] != "N" and cmd[5] == "N":
+                prev_red = int(float(cmd[6]))
+                prev_green = int(float(cmd[8]))
+                prev_redS = int(float(cmd[7]))
+                prev_greenS = int(float(cmd[9]))
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[0])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[1])),))
 
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[5])),))
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[2])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[3])),))
 
-            h_p_r_thread.start()
-            h_s_r_thread.start()
+                h_p_r_thread.start()
+                h_s_r_thread.start()
 
-            h_p_g_thread.start()
-            h_s_g_thread.start()
+                h_p_g_thread.start()
+                h_s_g_thread.start()
 
-            h_s_b_thread.start()
 
+            elif cmd[0] != "N" and cmd[2] != "N" and cmd[4] == "N" and cmd[1] != "N" and cmd[3] == "N" and cmd[5] != "N":
+                prev_red = int(float(cmd[6]))
+                prev_green = int(float(cmd[8]))
+                # prev_blue = int(float(cmd[10]))
+                prev_redS = int(float(cmd[7]))
+                # prev_greenS = int(float(cmd[9]))
+                prev_blueS = int(float(cmd[11]))
 
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[0])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[1])),))
 
-        elif cmd[0] != "N" and cmd[2] != "N" and cmd[4] == "N" and cmd[1] != "N" and cmd[3] != "N" and cmd[5] == "N":
-            prev_red = int(float(cmd[6]))
-            prev_green = int(float(cmd[8]))
-            prev_redS = int(float(cmd[7]))
-            prev_greenS = int(float(cmd[9]))
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[0])),))
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[1])),))
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[2])),))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[2])),))
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[3])),))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[5])),))
 
-            h_p_r_thread.start()
-            h_s_r_thread.start()
+                h_p_r_thread.start()
+                h_s_r_thread.start()
 
-            h_p_g_thread.start()
-            h_s_g_thread.start()
+                h_p_g_thread.start()
 
+                h_s_b_thread.start()
+            elif cmd[0] != "N" and cmd[2] != "N" and cmd[4] == "N" and cmd[1] != "N" and cmd[3] == "N" and cmd[5] == "N":
+                prev_red = int(float(cmd[6]))
+                prev_green = int(float(cmd[8]))
+                # prev_blue = int(float(cmd[10]))
+                prev_redS = int(float(cmd[7]))
+                # prev_greenS = int(float(cmd[9]))
+                # prev_blueS = int(float(cmd[11]))
 
-        elif cmd[0] != "N" and cmd[2] != "N" and cmd[4] == "N" and cmd[1] != "N" and cmd[3] == "N" and cmd[5] != "N":
-            prev_red = int(float(cmd[6]))
-            prev_green = int(float(cmd[8]))
-            # prev_blue = int(float(cmd[10]))
-            prev_redS = int(float(cmd[7]))
-            # prev_greenS = int(float(cmd[9]))
-            prev_blueS = int(float(cmd[11]))
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[0])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[1])),))
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[0])),))
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[1])),))
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[2])),))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[2])),))
+                h_p_r_thread.start()
+                h_s_r_thread.start()
 
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[5])),))
+                h_p_g_thread.start()
 
-            h_p_r_thread.start()
-            h_s_r_thread.start()
+            elif cmd[0] != "N" and cmd[2] != "N" and cmd[4] == "N" and cmd[1] == "N" and cmd[3] != "N" and cmd[5] != "N":
+                prev_red = int(float(cmd[6]))
+                prev_green = int(float(cmd[8]))
+                # prev_blue = int(float(cmd[10]))
+                # prev_redS = int(float(cmd[7]))
+                prev_greenS = int(float(cmd[9]))
+                prev_blueS = int(float(cmd[11]))
 
-            h_p_g_thread.start()
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[0])),))
 
-            h_s_b_thread.start()
-        elif cmd[0] != "N" and cmd[2] != "N" and cmd[4] == "N" and cmd[1] != "N" and cmd[3] == "N" and cmd[5] == "N":
-            prev_red = int(float(cmd[6]))
-            prev_green = int(float(cmd[8]))
-            # prev_blue = int(float(cmd[10]))
-            prev_redS = int(float(cmd[7]))
-            # prev_greenS = int(float(cmd[9]))
-            # prev_blueS = int(float(cmd[11]))
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[2])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[3])),))
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[0])),))
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[1])),))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[5])),))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[2])),))
+                h_p_r_thread.start()
 
-            h_p_r_thread.start()
-            h_s_r_thread.start()
+                h_p_g_thread.start()
+                h_s_g_thread.start()
 
-            h_p_g_thread.start()
+                h_s_b_thread.start()
+            elif cmd[0] != "N" and cmd[2] != "N" and cmd[4] == "N" and cmd[1] == "N" and cmd[3] != "N" and cmd[5] == "N":
+                prev_red = int(float(cmd[6]))
+                prev_green = int(float(cmd[8]))
+                # prev_blue = int(float(cmd[10]))
+                # prev_redS = int(float(cmd[7]))
+                prev_greenS = int(float(cmd[9]))
+                # prev_blueS = int(float(cmd[11]))
 
-        elif cmd[0] != "N" and cmd[2] != "N" and cmd[4] == "N" and cmd[1] == "N" and cmd[3] != "N" and cmd[5] != "N":
-            prev_red = int(float(cmd[6]))
-            prev_green = int(float(cmd[8]))
-            # prev_blue = int(float(cmd[10]))
-            # prev_redS = int(float(cmd[7]))
-            prev_greenS = int(float(cmd[9]))
-            prev_blueS = int(float(cmd[11]))
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[0])),))
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[0])),))
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[2])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[3])),))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[2])),))
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[3])),))
+                h_p_r_thread.start()
 
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[5])),))
+                h_p_g_thread.start()
+                h_s_g_thread.start()
 
-            h_p_r_thread.start()
 
-            h_p_g_thread.start()
-            h_s_g_thread.start()
+            elif cmd[0] != "N" and cmd[2] != "N" and cmd[4] == "N" and cmd[1] == "N" and cmd[3] == "N" and cmd[5] != "N":
+                prev_red = int(float(cmd[6]))
+                prev_green = int(float(cmd[8]))
+                # prev_blue = int(float(cmd[10]))
+                # prev_redS = int(float(cmd[7]))
+                # prev_greenS = int(float(cmd[9]))
+                prev_blueS = int(float(cmd[11]))
 
-            h_s_b_thread.start()
-        elif cmd[0] != "N" and cmd[2] != "N" and cmd[4] == "N" and cmd[1] == "N" and cmd[3] != "N" and cmd[5] == "N":
-            prev_red = int(float(cmd[6]))
-            prev_green = int(float(cmd[8]))
-            # prev_blue = int(float(cmd[10]))
-            # prev_redS = int(float(cmd[7]))
-            prev_greenS = int(float(cmd[9]))
-            # prev_blueS = int(float(cmd[11]))
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[0])),))
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[0])),))
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[2])),))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[2])),))
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[3])),))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[5])),))
 
-            h_p_r_thread.start()
+                h_p_r_thread.start()
 
-            h_p_g_thread.start()
-            h_s_g_thread.start()
+                h_p_g_thread.start()
 
+                h_s_b_thread.start()
+            elif cmd[0] != "N" and cmd[2] != "N" and cmd[4] == "N" and cmd[1] == "N" and cmd[3] == "N" and cmd[5] == "N":
+                prev_red = int(float(cmd[6]))
+                prev_green = int(float(cmd[8]))
+                # prev_blue = int(float(cmd[10]))
+                # prev_redS = int(float(cmd[7]))
+                # prev_greenS = int(float(cmd[9]))
+                # prev_blueS = int(float(cmd[11]))
 
-        elif cmd[0] != "N" and cmd[2] != "N" and cmd[4] == "N" and cmd[1] == "N" and cmd[3] == "N" and cmd[5] != "N":
-            prev_red = int(float(cmd[6]))
-            prev_green = int(float(cmd[8]))
-            # prev_blue = int(float(cmd[10]))
-            # prev_redS = int(float(cmd[7]))
-            # prev_greenS = int(float(cmd[9]))
-            prev_blueS = int(float(cmd[11]))
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[0])),))
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[0])),))
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[2])),))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[2])),))
+                h_p_r_thread.start()
 
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[5])),))
+                h_p_g_thread.start()
 
-            h_p_r_thread.start()
+            elif cmd[0] != "N" and cmd[2] == "N" and cmd[4] != "N" and cmd[1] != "N" and cmd[3] != "N" and cmd[5] != "N":
+                prev_red = int(float(cmd[6]))
+                # prev_green = int(float(cmd[8]))
+                prev_blue = int(float(cmd[10]))
+                prev_redS = int(float(cmd[7]))
+                prev_greenS = int(float(cmd[9]))
+                prev_blueS = int(float(cmd[11]))
 
-            h_p_g_thread.start()
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[0])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[1])),))
 
-            h_s_b_thread.start()
-        elif cmd[0] != "N" and cmd[2] != "N" and cmd[4] == "N" and cmd[1] == "N" and cmd[3] == "N" and cmd[5] == "N":
-            prev_red = int(float(cmd[6]))
-            prev_green = int(float(cmd[8]))
-            # prev_blue = int(float(cmd[10]))
-            # prev_redS = int(float(cmd[7]))
-            # prev_greenS = int(float(cmd[9]))
-            # prev_blueS = int(float(cmd[11]))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[3])),))
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[0])),))
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[4])),))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[5])),))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[2])),))
+                h_p_r_thread.start()
+                h_s_r_thread.start()
 
-            h_p_r_thread.start()
+                h_s_g_thread.start()
 
-            h_p_g_thread.start()
+                h_p_b_thread.start()
+                h_s_b_thread.start()
+            elif cmd[0] != "N" and cmd[2] == "N" and cmd[4] != "N" and cmd[1] != "N" and cmd[3] != "N" and cmd[5] == "N":
+                prev_red = int(float(cmd[6]))
+                # prev_green = int(float(cmd[8]))
+                prev_blue = int(float(cmd[10]))
+                prev_redS = int(float(cmd[7]))
+                prev_greenS = int(float(cmd[9]))
+                # prev_blueS = int(float(cmd[11]))
 
-        elif cmd[0] != "N" and cmd[2] == "N" and cmd[4] != "N" and cmd[1] != "N" and cmd[3] != "N" and cmd[5] != "N":
-            prev_red = int(float(cmd[6]))
-            # prev_green = int(float(cmd[8]))
-            prev_blue = int(float(cmd[10]))
-            prev_redS = int(float(cmd[7]))
-            prev_greenS = int(float(cmd[9]))
-            prev_blueS = int(float(cmd[11]))
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[0])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[1])),))
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[0])),))
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[1])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[3])),))
 
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[3])),))
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[4])),))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[4])),))
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[5])),))
+                h_p_r_thread.start()
+                h_s_r_thread.start()
 
-            h_p_r_thread.start()
-            h_s_r_thread.start()
+                h_s_g_thread.start()
 
-            h_s_g_thread.start()
+                h_p_b_thread.start()
 
-            h_p_b_thread.start()
-            h_s_b_thread.start()
-        elif cmd[0] != "N" and cmd[2] == "N" and cmd[4] != "N" and cmd[1] != "N" and cmd[3] != "N" and cmd[5] == "N":
-            prev_red = int(float(cmd[6]))
-            # prev_green = int(float(cmd[8]))
-            prev_blue = int(float(cmd[10]))
-            prev_redS = int(float(cmd[7]))
-            prev_greenS = int(float(cmd[9]))
-            # prev_blueS = int(float(cmd[11]))
+            elif cmd[0] != "N" and cmd[2] == "N" and cmd[4] != "N" and cmd[1] != "N" and cmd[3] == "N" and cmd[5] != "N":
+                prev_red = int(float(cmd[6]))
+                # prev_green = int(float(cmd[8]))
+                prev_blue = int(float(cmd[10]))
+                prev_redS = int(float(cmd[7]))
+                # prev_greenS = int(float(cmd[9]))
+                prev_blueS = int(float(cmd[11]))
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[0])),))
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[1])),))
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[0])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[1])),))
 
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[3])),))
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[4])),))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[5])),))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[4])),))
+                h_p_r_thread.start()
+                h_s_r_thread.start()
 
-            h_p_r_thread.start()
-            h_s_r_thread.start()
+                h_p_b_thread.start()
+                h_s_b_thread.start()
+            elif cmd[0] != "N" and cmd[2] == "N" and cmd[4] != "N" and cmd[1] != "N" and cmd[3] == "N" and cmd[5] == "N":
+                prev_red = int(float(cmd[6]))
+                # prev_green = int(float(cmd[8]))
+                prev_blue = int(float(cmd[10]))
+                prev_redS = int(float(cmd[7]))
+                # prev_greenS = int(float(cmd[9]))
+                # prev_blueS = int(float(cmd[11]))
 
-            h_s_g_thread.start()
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[0])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[1])),))
 
-            h_p_b_thread.start()
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[4])),))
 
-        elif cmd[0] != "N" and cmd[2] == "N" and cmd[4] != "N" and cmd[1] != "N" and cmd[3] == "N" and cmd[5] != "N":
-            prev_red = int(float(cmd[6]))
-            # prev_green = int(float(cmd[8]))
-            prev_blue = int(float(cmd[10]))
-            prev_redS = int(float(cmd[7]))
-            # prev_greenS = int(float(cmd[9]))
-            prev_blueS = int(float(cmd[11]))
+                h_p_r_thread.start()
+                h_s_r_thread.start()
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[0])),))
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[1])),))
+                h_p_b_thread.start()
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[4])),))
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[5])),))
+            elif cmd[0] != "N" and cmd[2] == "N" and cmd[4] != "N" and cmd[1] == "N" and cmd[3] != "N" and cmd[5] != "N":
+                prev_red = int(float(cmd[6]))
+                # prev_green = int(float(cmd[8]))
+                prev_blue = int(float(cmd[10]))
+                # prev_redS = int(float(cmd[7]))
+                prev_greenS = int(float(cmd[9]))
+                prev_blueS = int(float(cmd[11]))
 
-            h_p_r_thread.start()
-            h_s_r_thread.start()
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[0])),))
 
-            h_p_b_thread.start()
-            h_s_b_thread.start()
-        elif cmd[0] != "N" and cmd[2] == "N" and cmd[4] != "N" and cmd[1] != "N" and cmd[3] == "N" and cmd[5] == "N":
-            prev_red = int(float(cmd[6]))
-            # prev_green = int(float(cmd[8]))
-            prev_blue = int(float(cmd[10]))
-            prev_redS = int(float(cmd[7]))
-            # prev_greenS = int(float(cmd[9]))
-            # prev_blueS = int(float(cmd[11]))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[3])),))
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[0])),))
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[1])),))
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[4])),))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[5])),))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[4])),))
+                h_p_r_thread.start()
 
-            h_p_r_thread.start()
-            h_s_r_thread.start()
+                h_s_g_thread.start()
 
-            h_p_b_thread.start()
+                h_p_b_thread.start()
+                h_s_b_thread.start()
+            elif cmd[0] != "N" and cmd[2] == "N" and cmd[4] != "N" and cmd[1] == "N" and cmd[3] != "N" and cmd[5] == "N":
+                prev_red = int(float(cmd[6]))
+                # prev_green = int(float(cmd[8]))
+                prev_blue = int(float(cmd[10]))
+                # prev_redS = int(float(cmd[7]))
+                prev_greenS = int(float(cmd[9]))
+                # prev_blueS = int(float(cmd[11]))
 
-        elif cmd[0] != "N" and cmd[2] == "N" and cmd[4] != "N" and cmd[1] == "N" and cmd[3] != "N" and cmd[5] != "N":
-            prev_red = int(float(cmd[6]))
-            # prev_green = int(float(cmd[8]))
-            prev_blue = int(float(cmd[10]))
-            # prev_redS = int(float(cmd[7]))
-            prev_greenS = int(float(cmd[9]))
-            prev_blueS = int(float(cmd[11]))
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[0])),))
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[0])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[3])),))
 
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[3])),))
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[4])),))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[4])),))
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[5])),))
+                h_p_r_thread.start()
 
-            h_p_r_thread.start()
+                h_s_g_thread.start()
 
-            h_s_g_thread.start()
+                h_p_b_thread.start()
 
-            h_p_b_thread.start()
-            h_s_b_thread.start()
-        elif cmd[0] != "N" and cmd[2] == "N" and cmd[4] != "N" and cmd[1] == "N" and cmd[3] != "N" and cmd[5] == "N":
-            prev_red = int(float(cmd[6]))
-            # prev_green = int(float(cmd[8]))
-            prev_blue = int(float(cmd[10]))
-            # prev_redS = int(float(cmd[7]))
-            prev_greenS = int(float(cmd[9]))
-            # prev_blueS = int(float(cmd[11]))
+            elif cmd[0] != "N" and cmd[2] == "N" and cmd[4] != "N" and cmd[1] == "N" and cmd[3] == "N" and cmd[5] != "N":
+                prev_red = int(float(cmd[6]))
+                # prev_green = int(float(cmd[8]))
+                prev_blue = int(float(cmd[10]))
+                # prev_redS = int(float(cmd[7]))
+                # prev_greenS = int(float(cmd[9]))
+                prev_blueS = int(float(cmd[11]))
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[0])),))
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[0])),))
 
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[3])),))
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[4])),))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[5])),))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[4])),))
+                h_p_r_thread.start()
 
-            h_p_r_thread.start()
+                h_p_b_thread.start()
+                h_s_b_thread.start()
+            elif cmd[0] != "N" and cmd[2] == "N" and cmd[4] != "N" and cmd[1] == "N" and cmd[3] == "N" and cmd[5] == "N":
+                prev_red = int(float(cmd[6]))
+                # prev_green = int(float(cmd[8]))
+                prev_blue = int(float(cmd[10]))
+                # prev_redS = int(float(cmd[7]))
+                # prev_greenS = int(float(cmd[9]))
+                # prev_blueS = int(float(cmd[11]))
 
-            h_s_g_thread.start()
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[0])),))
 
-            h_p_b_thread.start()
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[4])),))
 
-        elif cmd[0] != "N" and cmd[2] == "N" and cmd[4] != "N" and cmd[1] == "N" and cmd[3] == "N" and cmd[5] != "N":
-            prev_red = int(float(cmd[6]))
-            # prev_green = int(float(cmd[8]))
-            prev_blue = int(float(cmd[10]))
-            # prev_redS = int(float(cmd[7]))
-            # prev_greenS = int(float(cmd[9]))
-            prev_blueS = int(float(cmd[11]))
+                h_p_r_thread.start()
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[0])),))
+                h_p_b_thread.start()
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[4])),))
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[5])),))
+            elif cmd[0] != "N" and cmd[2] == "N" and cmd[4] == "N" and cmd[1] != "N" and cmd[3] != "N" and cmd[5] != "N":
+                prev_red = int(float(cmd[6]))
+                # prev_green = int(float(cmd[8]))
+                # prev_blue = int(float(cmd[10]))
+                prev_redS = int(float(cmd[7]))
+                prev_greenS = int(float(cmd[9]))
+                prev_blueS = int(float(cmd[11]))
 
-            h_p_r_thread.start()
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[0])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[1])),))
 
-            h_p_b_thread.start()
-            h_s_b_thread.start()
-        elif cmd[0] != "N" and cmd[2] == "N" and cmd[4] != "N" and cmd[1] == "N" and cmd[3] == "N" and cmd[5] == "N":
-            prev_red = int(float(cmd[6]))
-            # prev_green = int(float(cmd[8]))
-            prev_blue = int(float(cmd[10]))
-            # prev_redS = int(float(cmd[7]))
-            # prev_greenS = int(float(cmd[9]))
-            # prev_blueS = int(float(cmd[11]))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[3])),))
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[0])),))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[5])),))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[4])),))
+                h_p_r_thread.start()
+                h_s_r_thread.start()
 
-            h_p_r_thread.start()
+                h_s_g_thread.start()
 
-            h_p_b_thread.start()
+                h_s_b_thread.start()
+            elif cmd[0] != "N" and cmd[2] == "N" and cmd[4] == "N" and cmd[1] != "N" and cmd[3] != "N" and cmd[5] == "N":
+                prev_red = int(float(cmd[6]))
+                # prev_green = int(float(cmd[8]))
+                # prev_blue = int(float(cmd[10]))
+                prev_redS = int(float(cmd[7]))
+                prev_greenS = int(float(cmd[9]))
+                # prev_blueS = int(float(cmd[11]))
 
-        elif cmd[0] != "N" and cmd[2] == "N" and cmd[4] == "N" and cmd[1] != "N" and cmd[3] != "N" and cmd[5] != "N":
-            prev_red = int(float(cmd[6]))
-            # prev_green = int(float(cmd[8]))
-            # prev_blue = int(float(cmd[10]))
-            prev_redS = int(float(cmd[7]))
-            prev_greenS = int(float(cmd[9]))
-            prev_blueS = int(float(cmd[11]))
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[0])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[1])),))
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[0])),))
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[1])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[3])),))
 
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[3])),))
+                h_p_r_thread.start()
+                h_s_r_thread.start()
+                h_s_g_thread.start()
 
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[5])),))
 
-            h_p_r_thread.start()
-            h_s_r_thread.start()
+            elif cmd[0] != "N" and cmd[2] == "N" and cmd[4] == "N" and cmd[1] != "N" and cmd[3] == "N" and cmd[5] != "N":
+                prev_red = int(float(cmd[6]))
+                # prev_green = int(float(cmd[8]))
+                # prev_blue = int(float(cmd[10]))
+                prev_redS = int(float(cmd[7]))
+                # prev_greenS = int(float(cmd[9]))
+                prev_blueS = int(float(cmd[11]))
 
-            h_s_g_thread.start()
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[0])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[1])),))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[5])),))
 
-            h_s_b_thread.start()
-        elif cmd[0] != "N" and cmd[2] == "N" and cmd[4] == "N" and cmd[1] != "N" and cmd[3] != "N" and cmd[5] == "N":
-            prev_red = int(float(cmd[6]))
-            # prev_green = int(float(cmd[8]))
-            # prev_blue = int(float(cmd[10]))
-            prev_redS = int(float(cmd[7]))
-            prev_greenS = int(float(cmd[9]))
-            # prev_blueS = int(float(cmd[11]))
+                h_p_r_thread.start()
+                h_s_r_thread.start()
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[0])),))
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[1])),))
+                h_s_b_thread.start()
+            elif cmd[0] != "N" and cmd[2] == "N" and cmd[4] == "N" and cmd[1] != "N" and cmd[3] == "N" and cmd[5] == "N":
+                prev_red = int(float(cmd[6]))
+                # prev_green = int(float(cmd[8]))
+                # prev_blue = int(float(cmd[10]))
+                prev_redS = int(float(cmd[7]))
+                # prev_greenS = int(float(cmd[9]))
+                # prev_blueS = int(float(cmd[11]))
 
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[3])),))
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[0])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[1])),))
 
-            h_p_r_thread.start()
-            h_s_r_thread.start()
-            h_s_g_thread.start()
+                h_p_r_thread.start()
+                h_s_r_thread.start()
 
+            elif cmd[0] != "N" and cmd[2] == "N" and cmd[4] == "N" and cmd[1] == "N" and cmd[3] != "N" and cmd[5] != "N":
+                prev_red = int(float(cmd[6]))
+                # prev_green = int(float(cmd[8]))
+                # prev_blue = int(float(cmd[10]))
+                # prev_redS = int(float(cmd[7]))
+                prev_greenS = int(float(cmd[9]))
+                prev_blueS = int(float(cmd[11]))
 
-        elif cmd[0] != "N" and cmd[2] == "N" and cmd[4] == "N" and cmd[1] != "N" and cmd[3] == "N" and cmd[5] != "N":
-            prev_red = int(float(cmd[6]))
-            # prev_green = int(float(cmd[8]))
-            # prev_blue = int(float(cmd[10]))
-            prev_redS = int(float(cmd[7]))
-            # prev_greenS = int(float(cmd[9]))
-            prev_blueS = int(float(cmd[11]))
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[0])),))
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[0])),))
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[1])),))
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[5])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[3])),))
 
-            h_p_r_thread.start()
-            h_s_r_thread.start()
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[5])),))
 
-            h_s_b_thread.start()
-        elif cmd[0] != "N" and cmd[2] == "N" and cmd[4] == "N" and cmd[1] != "N" and cmd[3] == "N" and cmd[5] == "N":
-            prev_red = int(float(cmd[6]))
-            # prev_green = int(float(cmd[8]))
-            # prev_blue = int(float(cmd[10]))
-            prev_redS = int(float(cmd[7]))
-            # prev_greenS = int(float(cmd[9]))
-            # prev_blueS = int(float(cmd[11]))
+                h_p_r_thread.start()
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[0])),))
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[1])),))
+                h_s_g_thread.start()
 
-            h_p_r_thread.start()
-            h_s_r_thread.start()
+                h_s_b_thread.start()
+            elif cmd[0] != "N" and cmd[2] == "N" and cmd[4] == "N" and cmd[1] == "N" and cmd[3] != "N" and cmd[5] == "N":
+                prev_red = int(float(cmd[6]))
+                # prev_green = int(float(cmd[8]))
+                # prev_blue = int(float(cmd[10]))
+                # prev_redS = int(float(cmd[7]))
+                prev_greenS = int(float(cmd[9]))
+                # prev_blueS = int(float(cmd[11]))
 
-        elif cmd[0] != "N" and cmd[2] == "N" and cmd[4] == "N" and cmd[1] == "N" and cmd[3] != "N" and cmd[5] != "N":
-            prev_red = int(float(cmd[6]))
-            # prev_green = int(float(cmd[8]))
-            # prev_blue = int(float(cmd[10]))
-            # prev_redS = int(float(cmd[7]))
-            prev_greenS = int(float(cmd[9]))
-            prev_blueS = int(float(cmd[11]))
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[0])),))
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[0])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[3])),))
 
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[3])),))
+                h_p_r_thread.start()
 
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[5])),))
+                h_s_g_thread.start()
 
-            h_p_r_thread.start()
+            elif cmd[0] != "N" and cmd[2] == "N" and cmd[4] == "N" and cmd[1] == "N" and cmd[3] == "N" and cmd[5] != "N":
+                prev_red = int(float(cmd[6]))
+                # prev_green = int(float(cmd[8]))
+                # prev_blue = int(float(cmd[10]))
+                # prev_redS = int(float(cmd[7]))
+                # prev_greenS = int(float(cmd[9]))
+                prev_blueS = int(float(cmd[11]))
 
-            h_s_g_thread.start()
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[0])),))
 
-            h_s_b_thread.start()
-        elif cmd[0] != "N" and cmd[2] == "N" and cmd[4] == "N" and cmd[1] == "N" and cmd[3] != "N" and cmd[5] == "N":
-            prev_red = int(float(cmd[6]))
-            # prev_green = int(float(cmd[8]))
-            # prev_blue = int(float(cmd[10]))
-            # prev_redS = int(float(cmd[7]))
-            prev_greenS = int(float(cmd[9]))
-            # prev_blueS = int(float(cmd[11]))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[5])),))
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[0])),))
+                h_p_r_thread.start()
 
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[3])),))
+                h_s_b_thread.start()
+            elif cmd[0] != "N" and cmd[2] == "N" and cmd[4] == "N" and cmd[1] == "N" and cmd[3] == "N" and cmd[5] == "N":
+                prev_red = int(float(cmd[6]))
+                # prev_green = int(float(cmd[8]))
+                # prev_blue = int(float(cmd[10]))
+                # prev_redS = int(float(cmd[7]))
+                # prev_greenS = int(float(cmd[9]))
+                # prev_blueS = int(float(cmd[11]))
 
-            h_p_r_thread.start()
+                h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
+                                                args=(prev_red, int(float(cmd[0])),))
 
-            h_s_g_thread.start()
+                h_p_r_thread.start()
 
-        elif cmd[0] != "N" and cmd[2] == "N" and cmd[4] == "N" and cmd[1] == "N" and cmd[3] == "N" and cmd[5] != "N":
-            prev_red = int(float(cmd[6]))
-            # prev_green = int(float(cmd[8]))
-            # prev_blue = int(float(cmd[10]))
-            # prev_redS = int(float(cmd[7]))
-            # prev_greenS = int(float(cmd[9]))
-            prev_blueS = int(float(cmd[11]))
+            elif cmd[0] == "N" and cmd[2] != "N" and cmd[4] != "N" and cmd[1] != "N" and cmd[3] != "N" and cmd[5] != "N":
+                # prev_red = int(float(cmd[6]))
+                prev_green = int(float(cmd[8]))
+                prev_blue = int(float(cmd[10]))
+                prev_redS = int(float(cmd[7]))
+                prev_greenS = int(float(cmd[9]))
+                prev_blueS = int(float(cmd[11]))
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[0])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[1])),))
 
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[5])),))
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[2])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[3])),))
 
-            h_p_r_thread.start()
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[4])),))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[5])),))
 
-            h_s_b_thread.start()
-        elif cmd[0] != "N" and cmd[2] == "N" and cmd[4] == "N" and cmd[1] == "N" and cmd[3] == "N" and cmd[5] == "N":
-            prev_red = int(float(cmd[6]))
-            # prev_green = int(float(cmd[8]))
-            # prev_blue = int(float(cmd[10]))
-            # prev_redS = int(float(cmd[7]))
-            # prev_greenS = int(float(cmd[9]))
-            # prev_blueS = int(float(cmd[11]))
+                h_s_r_thread.start()
 
-            h_p_r_thread = threading.Thread(name='h_p_r', target=handle_primary_red,
-                                            args=(prev_red, int(float(cmd[0])),))
+                h_p_g_thread.start()
+                h_s_g_thread.start()
 
-            h_p_r_thread.start()
+                h_p_b_thread.start()
+                h_s_b_thread.start()
+            elif cmd[0] == "N" and cmd[2] != "N" and cmd[4] != "N" and cmd[1] != "N" and cmd[3] != "N" and cmd[5] == "N":
+                # prev_red = int(float(cmd[6]))
+                prev_green = int(float(cmd[8]))
+                prev_blue = int(float(cmd[10]))
+                prev_redS = int(float(cmd[7]))
+                prev_greenS = int(float(cmd[9]))
+                # prev_blueS = int(float(cmd[11]))
 
-        elif cmd[0] == "N" and cmd[2] != "N" and cmd[4] != "N" and cmd[1] != "N" and cmd[3] != "N" and cmd[5] != "N":
-            # prev_red = int(float(cmd[6]))
-            prev_green = int(float(cmd[8]))
-            prev_blue = int(float(cmd[10]))
-            prev_redS = int(float(cmd[7]))
-            prev_greenS = int(float(cmd[9]))
-            prev_blueS = int(float(cmd[11]))
 
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[1])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[1])),))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[2])),))
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[3])),))
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[2])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[3])),))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[4])),))
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[5])),))
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[4])),))
 
-            h_s_r_thread.start()
+                h_s_r_thread.start()
 
-            h_p_g_thread.start()
-            h_s_g_thread.start()
+                h_p_g_thread.start()
+                h_s_g_thread.start()
 
-            h_p_b_thread.start()
-            h_s_b_thread.start()
-        elif cmd[0] == "N" and cmd[2] != "N" and cmd[4] != "N" and cmd[1] != "N" and cmd[3] != "N" and cmd[5] == "N":
-            # prev_red = int(float(cmd[6]))
-            prev_green = int(float(cmd[8]))
-            prev_blue = int(float(cmd[10]))
-            prev_redS = int(float(cmd[7]))
-            prev_greenS = int(float(cmd[9]))
-            # prev_blueS = int(float(cmd[11]))
+                h_p_b_thread.start()
 
+            elif cmd[0] == "N" and cmd[2] != "N" and cmd[4] != "N" and cmd[1] != "N" and cmd[3] == "N" and cmd[5] != "N":
+                # prev_red = int(float(cmd[6]))
+                prev_green = int(float(cmd[8]))
+                prev_blue = int(float(cmd[10]))
+                prev_redS = int(float(cmd[7]))
+                # prev_greenS = int(float(cmd[9]))
+                prev_blueS = int(float(cmd[11]))
 
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[1])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[1])),))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[2])),))
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[3])),))
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[2])),))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[4])),))
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[4])),))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[5])),))
 
-            h_s_r_thread.start()
+                h_s_r_thread.start()
 
-            h_p_g_thread.start()
-            h_s_g_thread.start()
+                h_p_g_thread.start()
 
-            h_p_b_thread.start()
+                h_p_b_thread.start()
+                h_s_b_thread.start()
+            elif cmd[0] == "N" and cmd[2] != "N" and cmd[4] != "N" and cmd[1] != "N" and cmd[3] == "N" and cmd[5] == "N":
+                # prev_red = int(float(cmd[6]))
+                prev_green = int(float(cmd[8]))
+                prev_blue = int(float(cmd[10]))
+                prev_redS = int(float(cmd[7]))
+                # prev_greenS = int(float(cmd[9]))
+                # prev_blueS = int(float(cmd[11]))
 
-        elif cmd[0] == "N" and cmd[2] != "N" and cmd[4] != "N" and cmd[1] != "N" and cmd[3] == "N" and cmd[5] != "N":
-            # prev_red = int(float(cmd[6]))
-            prev_green = int(float(cmd[8]))
-            prev_blue = int(float(cmd[10]))
-            prev_redS = int(float(cmd[7]))
-            # prev_greenS = int(float(cmd[9]))
-            prev_blueS = int(float(cmd[11]))
 
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[1])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[1])),))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[2])),))
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[2])),))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[4])),))
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[5])),))
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[4])),))
 
-            h_s_r_thread.start()
+                h_s_r_thread.start()
 
-            h_p_g_thread.start()
+                h_p_g_thread.start()
 
-            h_p_b_thread.start()
-            h_s_b_thread.start()
-        elif cmd[0] == "N" and cmd[2] != "N" and cmd[4] != "N" and cmd[1] != "N" and cmd[3] == "N" and cmd[5] == "N":
-            # prev_red = int(float(cmd[6]))
-            prev_green = int(float(cmd[8]))
-            prev_blue = int(float(cmd[10]))
-            prev_redS = int(float(cmd[7]))
-            # prev_greenS = int(float(cmd[9]))
-            # prev_blueS = int(float(cmd[11]))
+                h_p_b_thread.start()
 
+            elif cmd[0] == "N" and cmd[2] != "N" and cmd[4] != "N" and cmd[1] == "N" and cmd[3] != "N" and cmd[5] != "N":
+                # prev_red = int(float(cmd[6]))
+                prev_green = int(float(cmd[8]))
+                prev_blue = int(float(cmd[10]))
+                # prev_redS = int(float(cmd[7]))
+                prev_greenS = int(float(cmd[9]))
+                prev_blueS = int(float(cmd[11]))
 
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[1])),))
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[2])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[3])),))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[2])),))
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[4])),))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[5])),))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[4])),))
+                h_p_g_thread.start()
+                h_s_g_thread.start()
 
-            h_s_r_thread.start()
+                h_p_b_thread.start()
+                h_s_b_thread.start()
+            elif cmd[0] == "N" and cmd[2] != "N" and cmd[4] != "N" and cmd[1] == "N" and cmd[3] != "N" and cmd[5] == "N":
+                # prev_red = int(float(cmd[6]))
+                prev_green = int(float(cmd[8]))
+                prev_blue = int(float(cmd[10]))
+                # prev_redS = int(float(cmd[7]))
+                prev_greenS = int(float(cmd[9]))
+                # prev_blueS = int(float(cmd[11]))
 
-            h_p_g_thread.start()
 
-            h_p_b_thread.start()
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[2])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[3])),))
 
-        elif cmd[0] == "N" and cmd[2] != "N" and cmd[4] != "N" and cmd[1] == "N" and cmd[3] != "N" and cmd[5] != "N":
-            # prev_red = int(float(cmd[6]))
-            prev_green = int(float(cmd[8]))
-            prev_blue = int(float(cmd[10]))
-            # prev_redS = int(float(cmd[7]))
-            prev_greenS = int(float(cmd[9]))
-            prev_blueS = int(float(cmd[11]))
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[4])),))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[2])),))
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[3])),))
+                h_p_g_thread.start()
+                h_s_g_thread.start()
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[4])),))
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[5])),))
+                h_p_b_thread.start()
 
-            h_p_g_thread.start()
-            h_s_g_thread.start()
+            elif cmd[0] == "N" and cmd[2] != "N" and cmd[4] != "N" and cmd[1] == "N" and cmd[3] == "N" and cmd[5] != "N":
+                # prev_red = int(float(cmd[6]))
+                prev_green = int(float(cmd[8]))
+                prev_blue = int(float(cmd[10]))
+                # prev_redS = int(float(cmd[7]))
+                # prev_greenS = int(float(cmd[9]))
+                prev_blueS = int(float(cmd[11]))
 
-            h_p_b_thread.start()
-            h_s_b_thread.start()
-        elif cmd[0] == "N" and cmd[2] != "N" and cmd[4] != "N" and cmd[1] == "N" and cmd[3] != "N" and cmd[5] == "N":
-            # prev_red = int(float(cmd[6]))
-            prev_green = int(float(cmd[8]))
-            prev_blue = int(float(cmd[10]))
-            # prev_redS = int(float(cmd[7]))
-            prev_greenS = int(float(cmd[9]))
-            # prev_blueS = int(float(cmd[11]))
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[2])),))
 
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[4])),))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[5])),))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[2])),))
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[3])),))
+                h_p_g_thread.start()
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[4])),))
+                h_p_b_thread.start()
+                h_s_b_thread.start()
+            elif cmd[0] == "N" and cmd[2] != "N" and cmd[4] != "N" and cmd[1] == "N" and cmd[3] == "N" and cmd[5] == "N":
+                # prev_red = int(float(cmd[6]))
+                prev_green = int(float(cmd[8]))
+                prev_blue = int(float(cmd[10]))
+                # prev_redS = int(float(cmd[7]))
+                # prev_greenS = int(float(cmd[9]))
+                # prev_blueS = int(float(cmd[11]))
 
-            h_p_g_thread.start()
-            h_s_g_thread.start()
 
-            h_p_b_thread.start()
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[2])),))
 
-        elif cmd[0] == "N" and cmd[2] != "N" and cmd[4] != "N" and cmd[1] == "N" and cmd[3] == "N" and cmd[5] != "N":
-            # prev_red = int(float(cmd[6]))
-            prev_green = int(float(cmd[8]))
-            prev_blue = int(float(cmd[10]))
-            # prev_redS = int(float(cmd[7]))
-            # prev_greenS = int(float(cmd[9]))
-            prev_blueS = int(float(cmd[11]))
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[4])),))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[2])),))
+                h_p_g_thread.start()
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[4])),))
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[5])),))
+                h_p_b_thread.start()
 
-            h_p_g_thread.start()
+            elif cmd[0] == "N" and cmd[2] != "N" and cmd[4] == "N" and cmd[1] != "N" and cmd[3] != "N" and cmd[5] != "N":
+                # prev_red = int(float(cmd[6]))
+                prev_green = int(float(cmd[8]))
+                # prev_blue = int(float(cmd[10]))
+                prev_redS = int(float(cmd[7]))
+                prev_greenS = int(float(cmd[9]))
+                prev_blueS = int(float(cmd[11]))
 
-            h_p_b_thread.start()
-            h_s_b_thread.start()
-        elif cmd[0] == "N" and cmd[2] != "N" and cmd[4] != "N" and cmd[1] == "N" and cmd[3] == "N" and cmd[5] == "N":
-            # prev_red = int(float(cmd[6]))
-            prev_green = int(float(cmd[8]))
-            prev_blue = int(float(cmd[10]))
-            # prev_redS = int(float(cmd[7]))
-            # prev_greenS = int(float(cmd[9]))
-            # prev_blueS = int(float(cmd[11]))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[1])),))
 
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[2])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[3])),))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[2])),))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[5])),))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[4])),))
+                h_s_r_thread.start()
 
-            h_p_g_thread.start()
+                h_p_g_thread.start()
+                h_s_g_thread.start()
 
-            h_p_b_thread.start()
+                h_s_b_thread.start()
+            elif cmd[0] == "N" and cmd[2] != "N" and cmd[4] == "N" and cmd[1] != "N" and cmd[3] != "N" and cmd[5] == "N":
+                # prev_red = int(float(cmd[6]))
+                prev_green = int(float(cmd[8]))
+                # prev_blue = int(float(cmd[10]))
+                prev_redS = int(float(cmd[7]))
+                prev_greenS = int(float(cmd[9]))
+                # prev_blueS = int(float(cmd[11]))
 
-        elif cmd[0] == "N" and cmd[2] != "N" and cmd[4] == "N" and cmd[1] != "N" and cmd[3] != "N" and cmd[5] != "N":
-            # prev_red = int(float(cmd[6]))
-            prev_green = int(float(cmd[8]))
-            # prev_blue = int(float(cmd[10]))
-            prev_redS = int(float(cmd[7]))
-            prev_greenS = int(float(cmd[9]))
-            prev_blueS = int(float(cmd[11]))
 
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[1])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[1])),))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[2])),))
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[3])),))
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[2])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[3])),))
 
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[5])),))
+                h_s_r_thread.start()
 
-            h_s_r_thread.start()
+                h_p_g_thread.start()
+                h_s_g_thread.start()
 
-            h_p_g_thread.start()
-            h_s_g_thread.start()
+            elif cmd[0] == "N" and cmd[2] != "N" and cmd[4] == "N" and cmd[1] != "N" and cmd[3] == "N" and cmd[5] != "N":
+                # prev_red = int(float(cmd[6]))
+                prev_green = int(float(cmd[8]))
+                # prev_blue = int(float(cmd[10]))
+                prev_redS = int(float(cmd[7]))
+                # prev_greenS = int(float(cmd[9]))
+                prev_blueS = int(float(cmd[11]))
 
-            h_s_b_thread.start()
-        elif cmd[0] == "N" and cmd[2] != "N" and cmd[4] == "N" and cmd[1] != "N" and cmd[3] != "N" and cmd[5] == "N":
-            # prev_red = int(float(cmd[6]))
-            prev_green = int(float(cmd[8]))
-            # prev_blue = int(float(cmd[10]))
-            prev_redS = int(float(cmd[7]))
-            prev_greenS = int(float(cmd[9]))
-            # prev_blueS = int(float(cmd[11]))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[1])),))
 
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[2])),))
 
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[1])),))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[5])),))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[2])),))
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[3])),))
+                h_s_r_thread.start()
 
-            h_s_r_thread.start()
+                h_p_g_thread.start()
 
-            h_p_g_thread.start()
-            h_s_g_thread.start()
+                h_s_b_thread.start()
+            elif cmd[0] == "N" and cmd[2] != "N" and cmd[4] == "N" and cmd[1] != "N" and cmd[3] == "N" and cmd[5] == "N":
+                # prev_red = int(float(cmd[6]))
+                prev_green = int(float(cmd[8]))
+                # prev_blue = int(float(cmd[10]))
+                prev_redS = int(float(cmd[7]))
+                # prev_greenS = int(float(cmd[9]))
+                # prev_blueS = int(float(cmd[11]))
 
-        elif cmd[0] == "N" and cmd[2] != "N" and cmd[4] == "N" and cmd[1] != "N" and cmd[3] == "N" and cmd[5] != "N":
-            # prev_red = int(float(cmd[6]))
-            prev_green = int(float(cmd[8]))
-            # prev_blue = int(float(cmd[10]))
-            prev_redS = int(float(cmd[7]))
-            # prev_greenS = int(float(cmd[9]))
-            prev_blueS = int(float(cmd[11]))
 
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[1])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[1])),))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[2])),))
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[2])),))
 
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[5])),))
+                h_s_r_thread.start()
 
-            h_s_r_thread.start()
+                h_p_g_thread.start()
 
-            h_p_g_thread.start()
+            elif cmd[0] == "N" and cmd[2] != "N" and cmd[4] == "N" and cmd[1] == "N" and cmd[3] != "N" and cmd[5] != "N":
+                # prev_red = int(float(cmd[6]))
+                prev_green = int(float(cmd[8]))
+                # prev_blue = int(float(cmd[10]))
+                # prev_redS = int(float(cmd[7]))
+                prev_greenS = int(float(cmd[9]))
+                prev_blueS = int(float(cmd[11]))
 
-            h_s_b_thread.start()
-        elif cmd[0] == "N" and cmd[2] != "N" and cmd[4] == "N" and cmd[1] != "N" and cmd[3] == "N" and cmd[5] == "N":
-            # prev_red = int(float(cmd[6]))
-            prev_green = int(float(cmd[8]))
-            # prev_blue = int(float(cmd[10]))
-            prev_redS = int(float(cmd[7]))
-            # prev_greenS = int(float(cmd[9]))
-            # prev_blueS = int(float(cmd[11]))
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[2])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[3])),))
 
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[5])),))
 
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[1])),))
+                h_p_g_thread.start()
+                h_s_g_thread.start()
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[2])),))
+                h_s_b_thread.start()
+            elif cmd[0] == "N" and cmd[2] != "N" and cmd[4] == "N" and cmd[1] == "N" and cmd[3] != "N" and cmd[5] == "N":
+                # prev_red = int(float(cmd[6]))
+                prev_green = int(float(cmd[8]))
+                # prev_blue = int(float(cmd[10]))
+                # prev_redS = int(float(cmd[7]))
+                prev_greenS = int(float(cmd[9]))
+                # prev_blueS = int(float(cmd[11]))
 
-            h_s_r_thread.start()
 
-            h_p_g_thread.start()
 
-        elif cmd[0] == "N" and cmd[2] != "N" and cmd[4] == "N" and cmd[1] == "N" and cmd[3] != "N" and cmd[5] != "N":
-            # prev_red = int(float(cmd[6]))
-            prev_green = int(float(cmd[8]))
-            # prev_blue = int(float(cmd[10]))
-            # prev_redS = int(float(cmd[7]))
-            prev_greenS = int(float(cmd[9]))
-            prev_blueS = int(float(cmd[11]))
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[2])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[3])),))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[2])),))
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[3])),))
+                h_p_g_thread.start()
+                h_s_g_thread.start()
 
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[5])),))
+            elif cmd[0] == "N" and cmd[2] != "N" and cmd[4] == "N" and cmd[1] == "N" and cmd[3] == "N" and cmd[5] != "N":
+                # prev_red = int(float(cmd[6]))
+                prev_green = int(float(cmd[8]))
+                # prev_blue = int(float(cmd[10]))
+                # prev_redS = int(float(cmd[7]))
+                # prev_greenS = int(float(cmd[9]))
+                prev_blueS = int(float(cmd[11]))
 
-            h_p_g_thread.start()
-            h_s_g_thread.start()
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[2])),))
 
-            h_s_b_thread.start()
-        elif cmd[0] == "N" and cmd[2] != "N" and cmd[4] == "N" and cmd[1] == "N" and cmd[3] != "N" and cmd[5] == "N":
-            # prev_red = int(float(cmd[6]))
-            prev_green = int(float(cmd[8]))
-            # prev_blue = int(float(cmd[10]))
-            # prev_redS = int(float(cmd[7]))
-            prev_greenS = int(float(cmd[9]))
-            # prev_blueS = int(float(cmd[11]))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[5])),))
 
+                h_p_g_thread.start()
 
+                h_s_b_thread.start()
+            elif cmd[0] == "N" and cmd[2] != "N" and cmd[4] == "N" and cmd[1] == "N" and cmd[3] == "N" and cmd[5] == "N":
+                # prev_red = int(float(cmd[6]))
+                prev_green = int(float(cmd[8]))
+                # prev_blue = int(float(cmd[10]))
+                # prev_redS = int(float(cmd[7]))
+                # prev_greenS = int(float(cmd[9]))
+                # prev_blueS = int(float(cmd[11]))
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[2])),))
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[3])),))
 
-            h_p_g_thread.start()
-            h_s_g_thread.start()
+                h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
+                                                args=(prev_green, int(float(cmd[2])),))
 
-        elif cmd[0] == "N" and cmd[2] != "N" and cmd[4] == "N" and cmd[1] == "N" and cmd[3] == "N" and cmd[5] != "N":
-            # prev_red = int(float(cmd[6]))
-            prev_green = int(float(cmd[8]))
-            # prev_blue = int(float(cmd[10]))
-            # prev_redS = int(float(cmd[7]))
-            # prev_greenS = int(float(cmd[9]))
-            prev_blueS = int(float(cmd[11]))
+                h_p_g_thread.start()
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[2])),))
+            elif cmd[0] == "N" and cmd[2] == "N" and cmd[4] != "N" and cmd[1] != "N" and cmd[3] != "N" and cmd[5] != "N":
+                # prev_red = int(float(cmd[6]))
+                # prev_green = int(float(cmd[8]))
+                prev_blue = int(float(cmd[10]))
+                prev_redS = int(float(cmd[7]))
+                prev_greenS = int(float(cmd[9]))
+                prev_blueS = int(float(cmd[11]))
 
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[5])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[1])),))
 
-            h_p_g_thread.start()
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[3])),))
 
-            h_s_b_thread.start()
-        elif cmd[0] == "N" and cmd[2] != "N" and cmd[4] == "N" and cmd[1] == "N" and cmd[3] == "N" and cmd[5] == "N":
-            # prev_red = int(float(cmd[6]))
-            prev_green = int(float(cmd[8]))
-            # prev_blue = int(float(cmd[10]))
-            # prev_redS = int(float(cmd[7]))
-            # prev_greenS = int(float(cmd[9]))
-            # prev_blueS = int(float(cmd[11]))
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[4])),))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[5])),))
 
+                h_s_r_thread.start()
 
-            h_p_g_thread = threading.Thread(name='h_p_g', target=handle_primary_green,
-                                            args=(prev_green, int(float(cmd[2])),))
+                h_s_g_thread.start()
 
-            h_p_g_thread.start()
+                h_p_b_thread.start()
+                h_s_b_thread.start()
+            elif cmd[0] == "N" and cmd[2] == "N" and cmd[4] != "N" and cmd[1] != "N" and cmd[3] != "N" and cmd[5] == "N":
+                # prev_red = int(float(cmd[6]))
+                # prev_green = int(float(cmd[8]))
+                prev_blue = int(float(cmd[10]))
+                prev_redS = int(float(cmd[7]))
+                prev_greenS = int(float(cmd[9]))
+                # prev_blueS = int(float(cmd[11]))
 
-        elif cmd[0] == "N" and cmd[2] == "N" and cmd[4] != "N" and cmd[1] != "N" and cmd[3] != "N" and cmd[5] != "N":
-            # prev_red = int(float(cmd[6]))
-            # prev_green = int(float(cmd[8]))
-            prev_blue = int(float(cmd[10]))
-            prev_redS = int(float(cmd[7]))
-            prev_greenS = int(float(cmd[9]))
-            prev_blueS = int(float(cmd[11]))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[1])),))
 
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[1])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[3])),))
 
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[3])),))
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[4])),))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[4])),))
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[5])),))
+                h_s_r_thread.start()
 
-            h_s_r_thread.start()
+                h_s_g_thread.start()
 
-            h_s_g_thread.start()
+                h_p_b_thread.start()
 
-            h_p_b_thread.start()
-            h_s_b_thread.start()
-        elif cmd[0] == "N" and cmd[2] == "N" and cmd[4] != "N" and cmd[1] != "N" and cmd[3] != "N" and cmd[5] == "N":
-            # prev_red = int(float(cmd[6]))
-            # prev_green = int(float(cmd[8]))
-            prev_blue = int(float(cmd[10]))
-            prev_redS = int(float(cmd[7]))
-            prev_greenS = int(float(cmd[9]))
-            # prev_blueS = int(float(cmd[11]))
+            elif cmd[0] == "N" and cmd[2] == "N" and cmd[4] != "N" and cmd[1] != "N" and cmd[3] == "N" and cmd[5] != "N":
+                # prev_red = int(float(cmd[6]))
+                # prev_green = int(float(cmd[8]))
+                prev_blue = int(float(cmd[10]))
+                prev_redS = int(float(cmd[7]))
+                # prev_greenS = int(float(cmd[9]))
+                prev_blueS = int(float(cmd[11]))
 
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[1])),))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[1])),))
 
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[3])),))
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[4])),))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[5])),))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[4])),))
+                h_s_r_thread.start()
 
-            h_s_r_thread.start()
+                h_p_b_thread.start()
+                h_s_b_thread.start()
+            elif cmd[0] == "N" and cmd[2] == "N" and cmd[4] != "N" and cmd[1] != "N" and cmd[3] == "N" and cmd[5] == "N":
+                # prev_red = int(float(cmd[6]))
+                # prev_green = int(float(cmd[8]))
+                prev_blue = int(float(cmd[10]))
+                prev_redS = int(float(cmd[7]))
+                # prev_greenS = int(float(cmd[9]))
+                # prev_blueS = int(float(cmd[11]))
 
-            h_s_g_thread.start()
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[1])),))
 
-            h_p_b_thread.start()
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[4])),))
 
-        elif cmd[0] == "N" and cmd[2] == "N" and cmd[4] != "N" and cmd[1] != "N" and cmd[3] == "N" and cmd[5] != "N":
-            # prev_red = int(float(cmd[6]))
-            # prev_green = int(float(cmd[8]))
-            prev_blue = int(float(cmd[10]))
-            prev_redS = int(float(cmd[7]))
-            # prev_greenS = int(float(cmd[9]))
-            prev_blueS = int(float(cmd[11]))
+                h_s_r_thread.start()
 
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[1])),))
+                h_p_b_thread.start()
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[4])),))
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[5])),))
+            elif cmd[0] == "N" and cmd[2] == "N" and cmd[4] != "N" and cmd[1] == "N" and cmd[3] != "N" and cmd[5] != "N":
+                # prev_red = int(float(cmd[6]))
+                # prev_green = int(float(cmd[8]))
+                prev_blue = int(float(cmd[10]))
+                # prev_redS = int(float(cmd[7]))
+                prev_greenS = int(float(cmd[9]))
+                prev_blueS = int(float(cmd[11]))
 
-            h_s_r_thread.start()
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[3])),))
 
-            h_p_b_thread.start()
-            h_s_b_thread.start()
-        elif cmd[0] == "N" and cmd[2] == "N" and cmd[4] != "N" and cmd[1] != "N" and cmd[3] == "N" and cmd[5] == "N":
-            # prev_red = int(float(cmd[6]))
-            # prev_green = int(float(cmd[8]))
-            prev_blue = int(float(cmd[10]))
-            prev_redS = int(float(cmd[7]))
-            # prev_greenS = int(float(cmd[9]))
-            # prev_blueS = int(float(cmd[11]))
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[4])),))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[5])),))
 
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[1])),))
+                h_s_g_thread.start()
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[4])),))
+                h_p_b_thread.start()
+                h_s_b_thread.start()
+            elif cmd[0] == "N" and cmd[2] == "N" and cmd[4] != "N" and cmd[1] == "N" and cmd[3] != "N" and cmd[5] == "N":
+                # prev_red = int(float(cmd[6]))
+                # prev_green = int(float(cmd[8]))
+                prev_blue = int(float(cmd[10]))
+                # prev_redS = int(float(cmd[7]))
+                prev_greenS = int(float(cmd[9]))
+                # prev_blueS = int(float(cmd[11]))
 
-            h_s_r_thread.start()
 
-            h_p_b_thread.start()
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[3])),))
 
-        elif cmd[0] == "N" and cmd[2] == "N" and cmd[4] != "N" and cmd[1] == "N" and cmd[3] != "N" and cmd[5] != "N":
-            # prev_red = int(float(cmd[6]))
-            # prev_green = int(float(cmd[8]))
-            prev_blue = int(float(cmd[10]))
-            # prev_redS = int(float(cmd[7]))
-            prev_greenS = int(float(cmd[9]))
-            prev_blueS = int(float(cmd[11]))
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[4])),))
 
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[3])),))
+                h_s_g_thread.start()
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[4])),))
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[5])),))
+                h_p_b_thread.start()
 
-            h_s_g_thread.start()
+            elif cmd[0] == "N" and cmd[2] == "N" and cmd[4] != "N" and cmd[1] == "N" and cmd[3] == "N" and cmd[5] != "N":
+                # prev_red = int(float(cmd[6]))
+                # prev_green = int(float(cmd[8]))
+                prev_blue = int(float(cmd[10]))
+                # prev_redS = int(float(cmd[7]))
+                # prev_greenS = int(float(cmd[9]))
+                prev_blueS = int(float(cmd[11]))
 
-            h_p_b_thread.start()
-            h_s_b_thread.start()
-        elif cmd[0] == "N" and cmd[2] == "N" and cmd[4] != "N" and cmd[1] == "N" and cmd[3] != "N" and cmd[5] == "N":
-            # prev_red = int(float(cmd[6]))
-            # prev_green = int(float(cmd[8]))
-            prev_blue = int(float(cmd[10]))
-            # prev_redS = int(float(cmd[7]))
-            prev_greenS = int(float(cmd[9]))
-            # prev_blueS = int(float(cmd[11]))
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[4])),))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[5])),))
 
+                h_p_b_thread.start()
+                h_s_b_thread.start()
+            elif cmd[0] == "N" and cmd[2] == "N" and cmd[4] != "N" and cmd[1] == "N" and cmd[3] == "N" and cmd[5] == "N":
+                # prev_red = int(float(cmd[6]))
+                # prev_green = int(float(cmd[8]))
+                prev_blue = int(float(cmd[10]))
+                # prev_redS = int(float(cmd[7]))
+                # prev_greenS = int(float(cmd[9]))
+                # prev_blueS = int(float(cmd[11]))
 
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[3])),))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[4])),))
+                h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
+                                                args=(prev_blue, int(float(cmd[4])),))
 
-            h_s_g_thread.start()
+                h_p_b_thread.start()
 
-            h_p_b_thread.start()
+            elif cmd[0] == "N" and cmd[2] == "N" and cmd[4] == "N" and cmd[1] != "N" and cmd[3] != "N" and cmd[5] != "N":
+                # prev_red = int(float(cmd[6]))
+                # prev_green = int(float(cmd[8]))
+                # prev_blue = int(float(cmd[10]))
+                prev_redS = int(float(cmd[7]))
+                prev_greenS = int(float(cmd[9]))
+                prev_blueS = int(float(cmd[11]))
 
-        elif cmd[0] == "N" and cmd[2] == "N" and cmd[4] != "N" and cmd[1] == "N" and cmd[3] == "N" and cmd[5] != "N":
-            # prev_red = int(float(cmd[6]))
-            # prev_green = int(float(cmd[8]))
-            prev_blue = int(float(cmd[10]))
-            # prev_redS = int(float(cmd[7]))
-            # prev_greenS = int(float(cmd[9]))
-            prev_blueS = int(float(cmd[11]))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[1])),))
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[4])),))
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[5])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[3])),))
 
-            h_p_b_thread.start()
-            h_s_b_thread.start()
-        elif cmd[0] == "N" and cmd[2] == "N" and cmd[4] != "N" and cmd[1] == "N" and cmd[3] == "N" and cmd[5] == "N":
-            # prev_red = int(float(cmd[6]))
-            # prev_green = int(float(cmd[8]))
-            prev_blue = int(float(cmd[10]))
-            # prev_redS = int(float(cmd[7]))
-            # prev_greenS = int(float(cmd[9]))
-            # prev_blueS = int(float(cmd[11]))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[5])),))
 
+                h_s_r_thread.start()
 
-            h_p_b_thread = threading.Thread(name='h_p_b', target=handle_primary_blue,
-                                            args=(prev_blue, int(float(cmd[4])),))
+                h_s_g_thread.start()
 
-            h_p_b_thread.start()
+                h_s_b_thread.start()
+            elif cmd[0] == "N" and cmd[2] == "N" and cmd[4] == "N" and cmd[1] != "N" and cmd[3] != "N" and cmd[5] == "N":
+                # prev_red = int(float(cmd[6]))
+                # prev_green = int(float(cmd[8]))
+                # prev_blue = int(float(cmd[10]))
+                prev_redS = int(float(cmd[7]))
+                prev_greenS = int(float(cmd[9]))
+                # prev_blueS = int(float(cmd[11]))
 
-        elif cmd[0] == "N" and cmd[2] == "N" and cmd[4] == "N" and cmd[1] != "N" and cmd[3] != "N" and cmd[5] != "N":
-            # prev_red = int(float(cmd[6]))
-            # prev_green = int(float(cmd[8]))
-            # prev_blue = int(float(cmd[10]))
-            prev_redS = int(float(cmd[7]))
-            prev_greenS = int(float(cmd[9]))
-            prev_blueS = int(float(cmd[11]))
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[1])),))
 
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[1])),))
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[3])),))
 
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[3])),))
+                h_s_r_thread.start()
 
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[5])),))
+                h_s_g_thread.start()
 
-            h_s_r_thread.start()
+            elif cmd[0] == "N" and cmd[2] == "N" and cmd[4] == "N" and cmd[1] != "N" and cmd[3] == "N" and cmd[5] != "N":
+                # prev_red = int(float(cmd[6]))
+                # prev_green = int(float(cmd[8]))
+                # prev_blue = int(float(cmd[10]))
+                prev_redS = int(float(cmd[7]))
+                # prev_greenS = int(float(cmd[9]))
+                prev_blueS = int(float(cmd[11]))
 
-            h_s_g_thread.start()
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[1])),))
 
-            h_s_b_thread.start()
-        elif cmd[0] == "N" and cmd[2] == "N" and cmd[4] == "N" and cmd[1] != "N" and cmd[3] != "N" and cmd[5] == "N":
-            # prev_red = int(float(cmd[6]))
-            # prev_green = int(float(cmd[8]))
-            # prev_blue = int(float(cmd[10]))
-            prev_redS = int(float(cmd[7]))
-            prev_greenS = int(float(cmd[9]))
-            # prev_blueS = int(float(cmd[11]))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[5])),))
 
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[1])),))
+                h_s_r_thread.start()
 
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[3])),))
+                h_s_b_thread.start()
+            elif cmd[0] == "N" and cmd[2] == "N" and cmd[4] == "N" and cmd[1] != "N" and cmd[3] == "N" and cmd[5] == "N":
+                # prev_red = int(float(cmd[6]))
+                # prev_green = int(float(cmd[8]))
+                # prev_blue = int(float(cmd[10]))
+                prev_redS = int(float(cmd[7]))
+                # prev_greenS = int(float(cmd[9]))
+                # prev_blueS = int(float(cmd[11]))
 
-            h_s_r_thread.start()
 
-            h_s_g_thread.start()
+                h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
+                                                args=(prev_redS, int(float(cmd[1])),))
 
-        elif cmd[0] == "N" and cmd[2] == "N" and cmd[4] == "N" and cmd[1] != "N" and cmd[3] == "N" and cmd[5] != "N":
-            # prev_red = int(float(cmd[6]))
-            # prev_green = int(float(cmd[8]))
-            # prev_blue = int(float(cmd[10]))
-            prev_redS = int(float(cmd[7]))
-            # prev_greenS = int(float(cmd[9]))
-            prev_blueS = int(float(cmd[11]))
+                h_s_r_thread.start()
 
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[1])),))
 
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[5])),))
+            elif cmd[0] == "N" and cmd[2] == "N" and cmd[4] == "N" and cmd[1] == "N" and cmd[3] != "N" and cmd[5] != "N":
+                # prev_red = int(float(cmd[6]))
+                # prev_green = int(float(cmd[8]))
+                # prev_blue = int(float(cmd[10]))
+                # prev_redS = int(float(cmd[7]))
+                prev_greenS = int(float(cmd[9]))
+                prev_blueS = int(float(cmd[11]))
 
-            h_s_r_thread.start()
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[3])),))
 
-            h_s_b_thread.start()
-        elif cmd[0] == "N" and cmd[2] == "N" and cmd[4] == "N" and cmd[1] != "N" and cmd[3] == "N" and cmd[5] == "N":
-            # prev_red = int(float(cmd[6]))
-            # prev_green = int(float(cmd[8]))
-            # prev_blue = int(float(cmd[10]))
-            prev_redS = int(float(cmd[7]))
-            # prev_greenS = int(float(cmd[9]))
-            # prev_blueS = int(float(cmd[11]))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[5])),))
 
+                h_s_g_thread.start()
 
-            h_s_r_thread = threading.Thread(name='h_s_r', target=handle_secondary_red,
-                                            args=(prev_redS, int(float(cmd[1])),))
+                h_s_b_thread.start()
+            elif cmd[0] == "N" and cmd[2] == "N" and cmd[4] == "N" and cmd[1] == "N" and cmd[3] != "N" and cmd[5] == "N":
+                # prev_red = int(float(cmd[6]))
+                # prev_green = int(float(cmd[8]))
+                # prev_blue = int(float(cmd[10]))
+                # prev_redS = int(float(cmd[7]))
+                prev_greenS = int(float(cmd[9]))
+                # prev_blueS = int(float(cmd[11]))
 
-            h_s_r_thread.start()
 
+                h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
+                                                args=(prev_greenS, int(float(cmd[3])),))
 
-        elif cmd[0] == "N" and cmd[2] == "N" and cmd[4] == "N" and cmd[1] == "N" and cmd[3] != "N" and cmd[5] != "N":
-            # prev_red = int(float(cmd[6]))
-            # prev_green = int(float(cmd[8]))
-            # prev_blue = int(float(cmd[10]))
-            # prev_redS = int(float(cmd[7]))
-            prev_greenS = int(float(cmd[9]))
-            prev_blueS = int(float(cmd[11]))
+                h_s_g_thread.start()
 
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[3])),))
+            elif cmd[0] == "N" and cmd[2] == "N" and cmd[4] == "N" and cmd[1] == "N" and cmd[3] == "N" and cmd[5] != "N":
+                # prev_red = int(float(cmd[6]))
+                # prev_green = int(float(cmd[8]))
+                # prev_blue = int(float(cmd[8]))
+                # prev_redS = int(float(cmd[7]))
+                # prev_greenS = int(float(cmd[9]))
+                prev_blueS = int(float(cmd[11]))
 
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[5])),))
+                h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
+                                                args=(prev_blueS, int(float(cmd[5])),))
 
-            h_s_g_thread.start()
-
-            h_s_b_thread.start()
-        elif cmd[0] == "N" and cmd[2] == "N" and cmd[4] == "N" and cmd[1] == "N" and cmd[3] != "N" and cmd[5] == "N":
-            # prev_red = int(float(cmd[6]))
-            # prev_green = int(float(cmd[8]))
-            # prev_blue = int(float(cmd[10]))
-            # prev_redS = int(float(cmd[7]))
-            prev_greenS = int(float(cmd[9]))
-            # prev_blueS = int(float(cmd[11]))
-
-
-            h_s_g_thread = threading.Thread(name='h_s_g', target=handle_secondary_green,
-                                            args=(prev_greenS, int(float(cmd[3])),))
-
-            h_s_g_thread.start()
-
-        elif cmd[0] == "N" and cmd[2] == "N" and cmd[4] == "N" and cmd[1] == "N" and cmd[3] == "N" and cmd[5] != "N":
-            # prev_red = int(float(cmd[6]))
-            # prev_green = int(float(cmd[8]))
-            # prev_blue = int(float(cmd[8]))
-            # prev_redS = int(float(cmd[7]))
-            # prev_greenS = int(float(cmd[9]))
-            prev_blueS = int(float(cmd[11]))
-
-            h_s_b_thread = threading.Thread(name='h_s_b', target=handle_secondary_blue,
-                                            args=(prev_blueS, int(float(cmd[5])),))
-
-            h_s_b_thread.start()
+                h_s_b_thread.start()
 
 
         wiringpi.delay(10)

@@ -261,7 +261,6 @@ def boot_up():
         is_red_deg = temp[0][5]
         is_green_deg = temp[0][6]
         is_blue_deg = temp[0][7]
-        is_lumen_deg = temp[0][8]
         sql = """UPDATE sensor_status SET distance = 8 WHERE ip = %s"""
         try:
             cursor.execute(sql, ([local_ip]))
@@ -389,31 +388,6 @@ def boot_up():
                 db.rollback()
         if is_blue_deg:
             sql = """UPDATE sensor_status SET blue_degraded = 0 WHERE ip = %s"""
-            try:
-                cursor.execute(sql, ([local_ip]))
-                db.commit()
-            except (AttributeError, MySQLdb.OperationalError):
-                """
-                If the DB connection was lost
-                """
-                print "Trying to reconnect to database in PIR thread..."
-                db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis",
-                                     db="ilcs")
-                print "Database connection re-established in PIR thread."
-                cursor = db.cursor()
-
-                try:
-                    """
-                    Try to update DB again
-                    """
-                    cursor.execute(sql, ([local_ip]))
-                    db.commit()
-                except:
-                    db.rollback()
-            except:
-                db.rollback()
-        if is_lumen_deg:
-            sql = """UPDATE sensor_status SET lumens_degraded = 0 WHERE ip = %s"""
             try:
                 cursor.execute(sql, ([local_ip]))
                 db.commit()
@@ -752,7 +726,7 @@ def init_red_offset():
         elif t >= 419 and t <= 420:
             MASTER_OFFSET_TABLE[t][0] = t - 372
         elif t >= 420 and t <= 540:
-            MASTER_OFFSET_TABLE[t][0] = 0.308*t - 81.5
+            MASTER_OFFSET_TABLE[t][0] = 0.308*t - 81.8
         elif t >= 540 and t <= 600:
             MASTER_OFFSET_TABLE[t][0] = 0.35 * t - 104
         elif t >= 600 and t <= 660:
@@ -774,7 +748,7 @@ def init_red_offset():
         elif t >= 1140 and t <= 1142:
             MASTER_OFFSET_TABLE[t][0] = -2 * t + 2422
         elif t >= 1142 and t <= 1146:
-            MASTER_OFFSET_TABLE[t][0] = -t + 1280
+            MASTER_OFFSET_TABLE[t][0] = -t * 1280
         elif t >= 1146 and t <= 1148:
             MASTER_OFFSET_TABLE[t][0] = 134
         elif t >= 1148 and t <= 1150:
@@ -1684,15 +1658,15 @@ def begin_threading():
     """
     Try to create the threads and add them to the THREADS list.
     """
-    try:
-        print "Starting PIR thread..."
-        pir_thread = threading.Thread(name='pir_thread', target=PIR_sensor, args=(
-            pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event,
-            keyboard_Event,))
-        pir_thread.start()
-        THREADS.append(pir_thread)
-    except:
-        print "Error: unable to start pir thread"
+    # try:
+    #     print "Starting PIR thread..."
+    #     pir_thread = threading.Thread(name='pir_thread', target=PIR_sensor, args=(
+    #         pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event,
+    #         keyboard_Event,))
+    #     pir_thread.start()
+    #     THREADS.append(pir_thread)
+    # except:
+    #     print "Error: unable to start pir thread"
     try:
         print "Starting RGB thread..."
         rgb_thread = threading.Thread(name='rgb_thread', target=RGB_sensor, args=(
@@ -1821,8 +1795,8 @@ def PIR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
         trigger2 = 0
         
     while True and keyboard_Event.isSet():
-        if timer == 10 or trigger:
-            print "turning off lights^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+        if timer == 60 or trigger:
+            print "turning off lights"
             """
             1 Min of no motion. Create client socket to lighting sub
             and issue sleep command.
@@ -1835,7 +1809,7 @@ def PIR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                     (sensor_to_lighting_cli_sock_host, sensor_to_lighting_cli_sock_port))
             except:
                 print "Could not connect to lighting subsystem"
-            #sensor_to_lighting_cli_sock.send("0|0|0|")
+            sensor_to_lighting_cli_sock.send("0|0|0|")
             current_minute = time.localtime()[3] * 60 + time.localtime()[4]
             user_ct_mutex.acquire()
             try:
@@ -2012,11 +1986,9 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
     Set the rgb_DB_Event and wait for other DB connections to finish
     """
     rgb_DB_Event.set()
-    pir_DB_Event.wait()
+    #pir_DB_Event.wait()
     usr_DB_Event.wait()
     cmd_DB_Event.wait()
-
-
 
     """
     Initialize the RGB sensor
@@ -2053,8 +2025,6 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
         prev_primary_red = USER_CIRCADIAN_TABLE[current_minute][0]
         prev_primary_green = USER_CIRCADIAN_TABLE[current_minute][1]
         prev_primary_blue = USER_CIRCADIAN_TABLE[current_minute][2]
-        # test = USER_OFFSET_TABLE[934][0]
-        # print "Test", test
     finally:
         user_ct_mutex.release()
     prev_secondary_red = 0
@@ -2106,7 +2076,20 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                 finally:
                     finalize_par_mutex.release()
             if sleep_mode == False and change_par == False and change_reset == False:
-
+                if change_par:
+                    """
+                    If the change_par_Event was set then
+                    wait for the changes to finalize
+                    """
+                    print "Here waiting to finalize3"
+                    finalize_change_Event.wait()
+                    time.sleep(1)
+                    print "Done with finalize3"
+                    finalize_par_mutex.acquire()
+                    try:
+                        finalize_change_Event.clear()
+                    finally:
+                        finalize_par_mutex.release()
                 """
                 Get current minute
                 """
@@ -2127,20 +2110,6 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                 or B value, divide it by 256. Then to get the RGB brightness
                 divide by 255 and multiply by 100.
                 """
-                if change_par:
-                    """
-                    If the change_par_Event was set then
-                    wait for the changes to finalize
-                    """
-                    print "Here waiting to finalize3"
-                    finalize_change_Event.wait()
-                    time.sleep(1)
-                    print "Done with finalize3"
-                    finalize_par_mutex.acquire()
-                    try:
-                        finalize_change_Event.clear()
-                    finally:
-                        finalize_par_mutex.release()
                 red = float(data[3] << 8 | data[2])
 
                 green = float(data[5] << 8 | data[4])
@@ -2159,8 +2128,6 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                     offset_red = USER_OFFSET_TABLE[current_minute][0]
                     offset_green = USER_OFFSET_TABLE[current_minute][1]
                     offset_blue = USER_OFFSET_TABLE[current_minute][2]
-                    test = USER_OFFSET_TABLE[934][0]
-                    print "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$Test", test
                 finally:
                     user_ct_mutex.release()
                 #print "offset_green:", offset_blue
@@ -2183,25 +2150,11 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
 
                 dist_in_meters = 8 * 0.3048
                 try:
-                    if red2 > circadian_red:
-                        red_temp = circadian_red
-                    else:
-                        red_temp = red2
-                    if green2 > circadian_green:
-                        green_temp = circadian_green
-                    else:
-                        green_temp = green2
-                    if blue2 > circadian_blue:
-                        blue_temp = circadian_blue
-                    else:
-                        blue_temp = blue2
-                    lux = ((red_temp + green_temp + blue_temp) / (circadian_red+circadian_green+circadian_blue)) * USER_LUX_TABLE[current_minute]
+                    lux = ((red2 + green2 + blue2) / (circadian_red+circadian_green+circadian_blue)) * USER_LUX_TABLE[current_minute]
                     lumens = calc_Illuminance(lux, dist_in_meters, 120)
                 except:
                     lux = 0
                     lumens = 0
-
-                lumens = int(lumens)
                 """
                 Store Lumens into the database
                 """
@@ -2825,14 +2778,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                         """
                         comp_cli_sock.connect((comp_cli_sock_host, comp_cli_sock_port))
                         if change_par == False:
-                            time.sleep(1)
-                            sleep_mutex.acquire()
-                            try:
-                                sleep_mode = sleep_mode_Event.isSet()
-                            finally:
-                                sleep_mutex.release()
-                            if not sleep_mode:
-                                comp_cli_sock.send(comp_cmd)
+                            comp_cli_sock.send(comp_cmd)
                         comp_cli_sock.close()
                         time.sleep(1)
                         comp_cmd = ""
@@ -2958,63 +2904,6 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                             db.rollback()
                     except:
                         db.rollback()
-                """
-                Insert Lumens into DB
-                """
-
-                sql = """UPDATE sensor_status SET lumens = %s WHERE ip = %s"""
-                try:
-                    cursor.execute(sql, ([lumens, local_ip]))
-                    db.commit()
-                except (AttributeError, MySQLdb.OperationalError):
-                    """
-                    If DB connection was lost, then reconnect
-                    """
-                    print "Trying to reconnect to database in RGB thread..."
-                    db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis",
-                                         db="ilcs")
-                    print "Database connection re-established in RGB thread."
-                    cursor = db.cursor()
-                    try:
-                        sql = """UPDATE sensor_status SET lumens = %s WHERE ip = %s"""
-
-                        cursor.execute(sql, ([lumens, local_ip]))
-                        db.commit()
-                    except:
-                        db.rollback()
-                except:
-                    db.rollback()
-
-                primary_deg_mutex.acquire()
-                try:
-                    primary_red_deg = primary_red_degraded
-                    primary_green_deg = primary_green_degraded
-                    primary_blue_deg = primary_blue_degraded
-                finally:
-                    primary_deg_mutex.release()
-                if primary_red_deg or primary_green_deg or primary_blue_deg:
-                    sql = """UPDATE sensor_status SET lumens_degraded = 1 WHERE ip = %s"""
-                    try:
-                        cursor.execute(sql, ([local_ip]))
-                        db.commit()
-                    except (AttributeError, MySQLdb.OperationalError):
-                        """
-                        If DB connection was lost, then reconnect
-                        """
-                        print "Trying to reconnect to database in RGB thread..."
-                        db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis",
-                                             db="ilcs")
-                        print "Database connection re-established in RGB thread."
-                        cursor = db.cursor()
-                        try:
-                            sql = """UPDATE sensor_status SET lumens_degraded = 1 WHERE ip = %s"""
-
-                            cursor.execute(sql, ([local_ip]))
-                            db.commit()
-                        except:
-                            db.rollback()
-                    except:
-                        db.rollback()
 
                 time.sleep(2)
 
@@ -3062,7 +2951,7 @@ def USR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
     Set the usr_DB_event and wait for other connections to finish
     """
     usr_DB_Event.set()
-    pir_DB_Event.wait()
+    #pir_DB_Event.wait()
     rgb_DB_Event.wait()
     cmd_DB_Event.wait()
     local_ip = get_ip()
@@ -3231,7 +3120,7 @@ def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_E
     Wait for DB connections to finish
     """
     usr_DB_Event.wait()
-    pir_DB_Event.wait()
+    #pir_DB_Event.wait()
     rgb_DB_Event.wait()
     cmd_DB_Event.wait()
     #local_ip = get_ip()
@@ -3677,7 +3566,7 @@ def wait_for_cmd(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, cha
     """
     cmd_DB_Event.set()
     usr_DB_Event.wait()
-    pir_DB_Event.wait()
+    #pir_DB_Event.wait()
     rgb_DB_Event.wait()
     local_ip = get_ip()
     """
