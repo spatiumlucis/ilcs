@@ -1,0 +1,81 @@
+
+.quotes{
+	overflow: hidden;
+	
+	width:100%;
+	height: 100px;
+	position: relative;
+	background-size: cover;
+	background: #232526;  /* fallback for old browsers */
+	background: -webkit-linear-gradient(to right, #414345, #232526);  /* Chrome 10-25, Safari 5.1-6 */
+	background: linear-gradient(to right, #414345, #232526); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+	color: white;
+}
+
+
+
+
+.item-1, 
+.item-2, 
+.item-3 {
+	position: absolute;
+    display: block;
+	bottom: 1px;
+	overflow-y: visible;
+	width: 60%;
+	font-size: 14px;
+	top:10px;
+	animation-duration: 30s;
+	animation-timing-function: ease-in-out;
+	animation-iteration-count: infinite;
+}
+
+.item-1{
+	animation-name: anim-1;
+	text-align: center;
+	top: 30%;
+}
+
+.item-2{
+	animation-name: anim-2;
+	text-align: center;
+	top: 30%;
+}
+
+.item-3{
+	animation-name: anim-3;
+	text-align: center;
+	top: 30%;
+}
+
+@keyframes anim-1 {
+	0%, 8.3% { left: -100%; opacity: 0; }
+  8.3%,25% { left: 12%; opacity: 1; }
+  33.33%, 100% { left: 110%; opacity: 0; }
+}
+
+@keyframes anim-2 {
+	0%, 33.33% { left: -100%; opacity: 0; }
+  41.63%, 58.29% { left: 12%; opacity: 1; }
+  66.66%, 100% { left: 110%; opacity: 0; }
+}
+
+@keyframes anim-3 {
+	0%, 66.66% { left: -100%; opacity: 0; }
+  74.96%, 91.62% { left: 12%; opacity: 1; }
+  100% { left: 110%; opacity: 0; }
+}
+
+
+@media (max-width: 767px) {
+	.item-1, 
+	.item-2, 
+	.item-3 {	
+		top: 15%;
+	}
+
+
+	.item-2{
+		top: 3%;
+	}
+}

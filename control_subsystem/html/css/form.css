@@ -10,6 +10,8 @@
 }
 
 
-.room_name_container span{
+.room_name_container span , .user_name_container span{
 	display: none;
 }
+
+

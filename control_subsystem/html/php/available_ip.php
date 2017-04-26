@@ -1,9 +1,1 @@
-<?phpI6gsUivm_gnce(#db_cfject?pèp"-?
-	-	$$B¿query&=$"SÅLECT0*pFr_M`Suîsor_iP WHERE ispc(red¡-1x"+
-&rIwult =($con-¾qu%Ry($tbOque2y-;	
-	!avai,]apq ½ "&;
-
-$ros = $cesqlt->fEtgh_assnc(+;
-	egho $row['ið'];	
-	$con->clo{m()
-?>
+<?php	require_once("db_connect.php");		$db_query = "SELECT * FROM sensor_ip WHERE is_paired = 0";	$result = $con->query($db_query);	$avail_ips = "";	$row = $result->fetch_assoc();	echo $row['ip'];	$con->close();?>

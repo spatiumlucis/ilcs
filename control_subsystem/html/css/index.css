@@ -8,31 +8,43 @@
 }
 
 
+#menu_text{
+	color: white;
+}
+
+
+
 #menu_items{
 	font-weight: bold;
+	margin: 0 auto;
 }
 
 .title{
 	/*background-color: #0074D9;*/
 	background-image : url("../media/sunrise.jpg");
-	background-position: 0% -30%;
+	background-position: 0% -45%;
+
 	margin-top: 0;
-	
-	
 }
+
+
+
 
 .well{
 	background-color: transparent;
 	border: 0px;
 }
 
-.well h1{
+.well h1, .date_time h3{
 	
 	text-align: center;
 	font-family: Georgia, Times, serif;
 	color: white;
 	
 }
+
+
+
 
 .glyphicon-menu-up{
 	display: none;
@@ -48,13 +60,17 @@
 	color: white;
 	width: auto;
 }
-
+                                                                                                                                
 
 
 
 #alert{
 	text-align: center;
+	position:relative;
 }
+
+
+
 
 .sensor_values{
 	border-top: 5px solid grey;
@@ -65,10 +81,14 @@
 	margin: 0px;
 }
 
-.degradation_header, .sleep_mode_header, .service_header, .sleep_divider, .service_divider{
+.degradation_header, .sleep_mode_header, .service_header, .distance_header, .sleep_divider, .service_divider, .distance_divider{
 	display: none;
 }
 
+#room_title{
+	margin-top: 15px;
+	text-align: center;
+}
 
 
 #no_room{
@@ -83,6 +103,7 @@
 #sensor_container{
 	display:none;
 	margin-top: 3%;
+
 }
 
 
@@ -131,6 +152,7 @@
 
 .btn_container{
 	display: none;
+	
 }
 
 
@@ -141,6 +163,8 @@
 .mobile_submenu, .desktop_submenu{
 	display: none;
 }
+
+
 
 
 .user_set_values h3{
@@ -164,30 +188,55 @@
 	padding-left: 5px;
 }
 
-.chart {
-	/*background-color:#808080;*/
-	background-color: #cccccc;
-	padding: 10px;
+
+.service_message{
+	text-align: center;
+	display: none;
 }
 
+.chart {
+	background-color:#888888;
+	//padding: 10px;
+
+}
+
+
+#room_title h4{
+	display: none;
+}
 
 
 
 .error{
 	color: red;
-
 }
 
 
+#create_user_invalid{
+	display: none;
+}
+
+@media(max-width:1200px){
+	.large_submenu{
+		margin-top: 23px;
+	}
+
+
+}
+
 @media (min-width: 768px) {
+	.title{
+		background-position: 0% -30%;
+	}
+
 	.large_screen_view{
 		display: block;
 		text-align: center;
 	}
-	
 	.first{
 		border-right: 5px solid grey;
 	}
+
 
 	.small_screen_view{
 		display: none;
@@ -212,7 +261,8 @@
     }
 	
 	#menu_items li{
-        margin-right:80px;
+        margin-right:20px;
+		margin-left:20px;
     }
 	
 	.dropdown-header{
@@ -234,17 +284,6 @@
 	
 }
 
-
-@media (min-height: 700px){
-	#sensor_container{
-		display:none;
-		margin-top: 6%;
-	}
-
-	.chart {
-		margin-top: 6%;
-
-	}
 
 	
 }

@@ -16,6 +16,7 @@
 	}
 	
 
+
 	require_once('db_connect.php');
 	$roomName       = $_POST['room_name'];
 	$roomIp         = $_POST['room_ip'];
@@ -23,6 +24,8 @@
 	$threshold      = $_POST['threshold'];
 	
 	
+
+
 	
 	$db_query = "INSERT INTO sensor_settings(ip, wake_time, color_thres, light_thres, name) VALUES('". $roomIp."', '". $wakeTime ."', '". $threshold."', '". 0 . "', '". $roomName. "')";
 
