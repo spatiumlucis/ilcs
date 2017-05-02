@@ -1863,7 +1863,6 @@ def PIR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
         
     while True and keyboard_Event.isSet():
         if timer == 60 or trigger:
-            timer += 1
             print "turning off lights^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
             """
             1 Min of no motion. Create client socket to lighting sub
@@ -2068,14 +2067,13 @@ def PIR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
 
         else:
             
-            if timer < 60 and trigger2:
+            if timer <= 60 and trigger2:
                 """
                 Increase the motion timer
                 """
                 timer +=1
                 print "sleep timer: ", timer
                 time.sleep(1)
-
 
 
 def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event,
@@ -3731,8 +3729,6 @@ def USR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
             if distInFt < 7:
                 print "distance is less"
                 num_of_less += 1
-            else:
-                num_of_less = 0
 
             temp += 1
 
@@ -3936,6 +3932,7 @@ def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_E
             print "HANDLED", deg_red_handle, deg_green_handle, deg_blue_handle
             user_ct_mutex.acquire()
             try:
+
                 if primary_red_deg and not CHANGE_WAKE:
                     if deg_red_handle:
                         circadian_cmd = str(USER_CIRCADIAN_TABLE[current_minute][0]) + "|"
@@ -4200,7 +4197,7 @@ def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_E
                         finalize_par_mutex.acquire()
                         try:
                             finalize_change_Event.clear()
-                            time.sleep(1)
+                            time.sleep(2)
                             finalize_change_Event.set()
                         finally:
                             finalize_par_mutex.release()
@@ -4216,6 +4213,13 @@ def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_E
             Reset the counter after 1 min, or sleep mode or change par events
             """
             count = 0
+        else:
+            """
+            To be removed later
+            """
+            print "checking again.."
+            time.sleep(1)
+
 
 def wait_for_cmd(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event,
                  keyboard_Event, finalize_change_Event):
