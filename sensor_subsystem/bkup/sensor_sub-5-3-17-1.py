@@ -50,9 +50,6 @@ https://www.tutorialspoint.com/python/python_database_access.htm
 
 -Python thread code:
 https://www.tutorialspoint.com/python/python_multithreading.htm
-
--Lux to Lumens functions:
-https://www.ledrise.com/shop_content.php?coID=19
 """
 
 """
@@ -69,7 +66,6 @@ import os
 import signal
 import math
 import datetime
-import random
 
 """
 Global Variables
@@ -2287,7 +2283,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
 
                 blue = float(data[7] << 8 | data[6])
 
-                print "Raw R: %s, G: %s, B: %s" % (red, green, blue)
+                #print "Raw R: %s, G: %s, B: %s" % (red, green, blue)
                 """
                 Get the current circadian table value for red
                 """
@@ -2345,10 +2341,10 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                 """
                 Store Lumens into the database
                 """
-                print " RED should be: %s and is reading %s" % (circadian_red, red2)
-                print " GREEN should be: %s and is reading %s" % (circadian_green, green2)
-                print " BLUE should be: %s and is reading %s" % (circadian_blue, blue2)
-                print "Lux: %s ; lumens: %s " % (lux, lumens)
+                #print " RED should be: %s and is reading %s" % (circadian_red, red2)
+                #print " GREEN should be: %s and is reading %s" % (circadian_green, green2)
+                #print " BLUE should be: %s and is reading %s" % (circadian_blue, blue2)
+                #print "Lux: %s ; lumens: %s " % (lux, lumens)
                 color_threshold_mutex.acquire()
                 try:
                     color_threshold = COLOR_THRESHOLD
@@ -3173,7 +3169,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                     finally:
                         user_ct_mutex.release()
                 for key in comp_list:
-                    if key != "N" and ((red2 < (circadian_red - (circadian_red*color_threshold))) and r_service == False or (green2 < (circadian_green - (circadian_green*color_threshold))) and g_service == False or (blue2 < (circadian_blue - (circadian_blue*color_threshold))) and b_service == False):
+                    if key != "N":
                         #print "comp_list:",comp_list
                         comp_cmd += comp_list[0]
                         comp_cmd += "|"
@@ -3283,8 +3279,8 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                                     sleep_mutex.release()
                                 if sleep_mode:
                                     red2 = 0
-                                #else:
-                                    #red2 = circadian_red
+                                else:
+                                    red2 = circadian_red
                                 cursor.execute(sql, ([red2, local_ip]))
                                 db.commit()
                             sleep_mutex.acquire()
@@ -3329,8 +3325,8 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                                         sleep_mutex.release()
                                     if sleep_mode:
                                         red2 = 0
-                                    #else:
-                                        #red2 = circadian_red
+                                    else:
+                                        red2 = circadian_red
                                     cursor.execute(sql, ([red2, local_ip]))
                                     db.commit()
                                 sleep_mutex.acquire()
@@ -3375,8 +3371,8 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                                     sleep_mutex.release()
                                 if sleep_mode:
                                     green2 = 0
-                                #else:
-                                    #green2 = circadian_green
+                                else:
+                                    green2 = circadian_green
                                 cursor.execute(sql, ([green2, local_ip]))
                                 db.commit()
                             sleep_mutex.acquire()
@@ -3420,8 +3416,8 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                                         sleep_mutex.release()
                                     if sleep_mode:
                                         green2 = 0
-                                    #else:
-                                        #green2 = circadian_green
+                                    else:
+                                        green2 = circadian_green
                                     cursor.execute(sql, ([green2, local_ip]))
                                     db.commit()
                                 sleep_mutex.acquire()
@@ -3465,8 +3461,8 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                                     sleep_mutex.release()
                                 if sleep_mode:
                                     blue2 = 0
-                                #else:
-                                    #blue2 = circadian_blue
+                                else:
+                                    blue2 = circadian_blue
                                 cursor.execute(sql, ([blue2, local_ip]))
                                 db.commit()
                             sleep_mutex.acquire()
@@ -3510,8 +3506,8 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                                         sleep_mutex.release()
                                     if sleep_mode:
                                         blue2 = 0
-                                    #else:
-                                        #blue2 = circadian_blue
+                                    else:
+                                        blue2 = circadian_blue
                                     cursor.execute(sql, ([blue2, local_ip]))
                                     db.commit()
                                 sleep_mutex.acquire()
@@ -3729,14 +3725,9 @@ def USR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
         distance = round(distance, 2)
         distInFt = distance / 30.48
         distInFt = round(distInFt, 2)
-
+        #print "Current distance:",distInFt
         if distInFt < 7:
             num_of_less += 1
-        elif distInFt >= 8:
-            num_of_less = 0
-        # elif distInFt < 8:
-        #     distInFt = round(random.uniform(7.9, 8.01), 2)
-        print "Current distance:", distInFt
 
         #print "NUM_OF_LESS", num_of_less
         if num_of_less >= 5 and not distance_deg:
@@ -3794,7 +3785,7 @@ def USR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                     db.rollback()
             except:
                 db.rollback()
-        #time.sleep(1)
+        time.sleep(1)
         temp += 1
 
 
@@ -4067,13 +4058,7 @@ def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_E
             """
             circadian_cli_sock.connect((circadian_cli_sock_host, circadian_cli_sock_port))
             #print "gonna send cmd",circadian_cmd
-            sleep_mutex.acquire()
-            try:
-                sleep_mode = sleep_mode_Event.isSet()
-            finally:
-                sleep_mutex.release()
-            if not sleep_mode:
-                circadian_cli_sock.send(circadian_cmd)
+            circadian_cli_sock.send(circadian_cmd)
             user_ct_mutex.acquire()
             try:
 

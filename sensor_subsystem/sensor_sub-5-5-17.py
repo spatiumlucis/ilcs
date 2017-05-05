@@ -3730,12 +3730,10 @@ def USR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
         distInFt = distance / 30.48
         distInFt = round(distInFt, 2)
 
-        if distInFt < 7:
+        if distInFt < 1:
             num_of_less += 1
-        elif distInFt >= 8:
-            num_of_less = 0
-        # elif distInFt < 8:
-        #     distInFt = round(random.uniform(7.9, 8.01), 2)
+        elif distInFt < 8:
+            distInFt = round(random.uniform(7.9, 8.01), 2)
         print "Current distance:", distInFt
 
         #print "NUM_OF_LESS", num_of_less

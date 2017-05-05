@@ -50,9 +50,6 @@ https://www.tutorialspoint.com/python/python_database_access.htm
 
 -Python thread code:
 https://www.tutorialspoint.com/python/python_multithreading.htm
-
--Lux to Lumens functions:
-https://www.ledrise.com/shop_content.php?coID=19
 """
 
 """
@@ -69,7 +66,6 @@ import os
 import signal
 import math
 import datetime
-import random
 
 """
 Global Variables
@@ -293,7 +289,7 @@ def boot_up():
                 db.rollback()
         except:
             db.rollback()
-        #print "Deg values: %s %s %s %s" % (is_sensor_service, is_red_deg, is_green_deg, is_blue_deg)
+        print "Deg values: %s %s %s %s" % (is_sensor_service, is_red_deg, is_green_deg, is_blue_deg)
         if is_sensor_service:
             sql = """UPDATE sensor_status SET service = 0 WHERE ip = %s"""
             try:
@@ -478,7 +474,7 @@ def boot_up():
         cursor.execute(sql)
         temp = cursor.fetchall()
         lighting_ip = temp[0][0]
-        #print "lighting ip: ", lighting_ip
+        print "lighting ip: ", lighting_ip
 
         """
         Update the DB with paired status
@@ -514,10 +510,10 @@ def boot_up():
         sql = """SELECT * FROM sensor_settings WHERE ip = %s"""
         cursor.execute(sql, ([local_ip]))
         temp = cursor.fetchall()
-        #print "Sensor Subsystem added with user values: ", temp[0]
+        print "Sensor Subsystem added with user values: ", temp[0]
         WAKE_UP_TIME = temp[0][1]
         COLOR_THRESHOLD = float(temp[0][2])/100
-        #print "COLOR_thres is:", COLOR_THRESHOLD
+        print "COLOR_thres is:", COLOR_THRESHOLD
         LIGHT_THRESHOLD = float(temp[0][3])/100
 
     else:
@@ -566,7 +562,7 @@ def boot_up():
     current_time = datetime.datetime.now()
     current_time = current_time.strftime("%Y-%m-%d %H:%M")
     #current_time = current_time[11:16]
-    #print "current_time",current_time
+    print "current_time",current_time
     #exit()
     message = "Sensor Subsystem: "
     message += local_ip
@@ -1001,7 +997,7 @@ def init_red_offset():
 def init_green_offset():
     global MASTER_OFFSET_TABLE
     t = 0
-    #print "INIT GREEN"
+    print "INIT GREEN"
     while t < 1440:
         if t >= 313 and t <= 315:
             MASTER_OFFSET_TABLE[t][1] = 0
@@ -1198,6 +1194,8 @@ def init_green_offset():
         elif t >= 1328 and t <= 1330:
             MASTER_OFFSET_TABLE[t][1] = -0.5 * t + 665
         else:
+            if t == 1343:
+                print "Yes"
             MASTER_OFFSET_TABLE[t][1] = 0
 
         t += 1
@@ -1604,7 +1602,8 @@ def calc_user_circadian_table(change_par_Event, finalize_change_Event):
             User wakes up later than 7 AM
             """
             while count < 1440:
-
+                if (count+wake_diff) == 1189:
+                    print "USER[%s] = MASTER[%s]"%((count+wake_diff), count)
                 if (count + wake_diff) > 1439:
                     """
                     For later indexes in the list, the values must wrap around
@@ -1837,9 +1836,9 @@ def PIR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
     GPIO.setmode(GPIO.BOARD)
     pir = 12
     GPIO.setup(pir, GPIO.IN)
-    #print "Waiting for PIR sensor to settle..."
+    print "Waiting for PIR sensor to settle..."
     time.sleep(2)
-    #print "PIR sensor has now settled."
+    print "PIR sensor has now settled."
 
     """
     Create timer variable and begin polling PIR sensor.
@@ -1858,14 +1857,14 @@ def PIR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
         sleep_mutex.release()
         
     if sleep_mode:
-        #print "setting trigger"
+        print "setting trigger"
         trigger = 1
         trigger2 = 0
         
     while True and keyboard_Event.isSet():
         if timer == 60 or trigger:
             timer += 1
-            #print "turning off lights^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+            print "turning off lights^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
             """
             1 Min of no motion. Create client socket to lighting sub
             and issue sleep command.
@@ -2236,10 +2235,10 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                 If the change_par_Event was set then
                 wait for the changes to finalize
                 """
-                #print "Here waiting to finalize2"
+                print "Here waiting to finalize2"
                 finalize_change_Event.wait()
                 time.sleep(2)
-                #print "Done with finalize2"
+                print "Done with finalize2"
                 finalize_par_mutex.acquire()
                 try:
                     finalize_change_Event.clear()
@@ -2251,7 +2250,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                 Get current minute
                 """
                 current_minute = time.localtime()[3] * 60 + time.localtime()[4]
-                #print "current min:",current_minute
+                print "current min:",current_minute
                 comp_list = ["N", "N", "N", "N", "N", "N", "N", "N", "N", "N", "N", "N"]
                 comp_cmd = ""
                 """
@@ -2272,10 +2271,10 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                     If the change_par_Event was set then
                     wait for the changes to finalize
                     """
-                    #print "Here waiting to finalize3"
+                    print "Here waiting to finalize3"
                     finalize_change_Event.wait()
                     time.sleep(1)
-                    #print "Done with finalize3"
+                    print "Done with finalize3"
                     finalize_par_mutex.acquire()
                     try:
                         finalize_change_Event.clear()
@@ -2300,14 +2299,14 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                     offset_green = USER_OFFSET_TABLE[current_minute][1]
                     offset_blue = USER_OFFSET_TABLE[current_minute][2]
                     test = USER_OFFSET_TABLE[934][0]
-                    #print "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$Test", test
+                    print "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$Test", test
                 finally:
                     user_ct_mutex.release()
                 #print "offset_green:", offset_blue
                 x = (float(circadian_red) / 100) * 147
                 y = (float(circadian_green) / 100) * 121
                 z = (float(circadian_blue) / 100) * 189
-                #print "offset red",offset_red
+                print "offset red",offset_red
                 red2 = (float(red + (x - offset_red)) / 147 ) * 100
                 green2 = (float(green + (y - offset_green)) / 121) * 100
 
@@ -2355,7 +2354,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                 finally:
                     color_threshold_mutex.release()
                 if (red2 < (circadian_red - (circadian_red*color_threshold))) and r_service == False:
-                    #print "r_serv", r_service
+                    print "r_serv", r_service
                     primary_deg_mutex.acquire()
                     try:
                         primary_red_deg = primary_red_degraded
@@ -2451,7 +2450,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                             """
                             Turn secondaries on
                             """
-                            #print "Turning secondaries on"
+                            print "Turning secondaries on"
                             sql = """INSERT INTO system_logs(time, message, user) VALUES(%s, %s, %s)"""
                             current_time = datetime.datetime.now()
                             current_time = current_time.strftime("%Y-%m-%d %H:%M")
@@ -2491,7 +2490,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                                 primary_red_comp = red2
                                 p_red_comp = circadian_red + (circadian_red - red2)
                                 comp_list[0] = str(prev_primary_red)
-                                #print "comp0",comp_list[0]
+                                print "comp0",comp_list[0]
                                 comp_list[1] = str(p_red_comp)
                                 prev_primary_red = p_red_comp
                                 secondary_red_on = True
@@ -2507,7 +2506,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                         """
                         Primary has now degraded
                         """
-                        #print "Primary Degraded"
+                        print "Primary Degraded"
                         sql = """INSERT INTO system_logs(time, message, user) VALUES(%s, %s, %s)"""
                         current_time = datetime.datetime.now()
                         current_time = current_time.strftime("%Y-%m-%d %H:%M")
@@ -2589,7 +2588,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                         """
                         Secondaries have degraded
                         """
-                        #print "Secondaries degraded"
+                        print "Secondaries degraded"
                         secondary_red_comp = red_diff
                         primary_comp_mutex.acquire()
                         try:
@@ -2606,7 +2605,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                         comp_list[3] = str(0)
                         prev_secondary_red = 0
                     else:
-                        #print "*****************************GOT HERE "
+                        print "*****************************GOT HERE "
                         primary_comp_mutex.acquire()
                         try:
                             if primary_red_deg:
@@ -2630,7 +2629,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                         user_ct_mutex.release()
 
                 if (green2 < (circadian_green - (circadian_green*color_threshold))) and g_service == False:
-                    #print "g_serv", g_service
+                    print "g_serv", g_service
                     primary_deg_mutex.acquire()
                     try:
                         primary_green_deg = primary_green_degraded
@@ -2704,7 +2703,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                                         db.rollback()
                                 except:
                                     db.rollback()
-                                #print "Secondaries degraded"
+                                print "Secondaries degraded"
                                 secondary_green_comp = circadian_green - green2
                                 primary_comp_mutex.acquire()
                                 try:
@@ -2755,7 +2754,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                                     db.rollback()
                             except:
                                 db.rollback()
-                            #print "Turning secondaries on"
+                            print "Turning secondaries on"
 
                             """
                             Send command to turn secondaries for red on
@@ -2812,7 +2811,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                                 db.rollback()
                         except:
                             db.rollback()
-                        #print "Primary Degraded"
+                        print "Primary Degraded"
 
                         sql = """UPDATE sensor_status SET green_degraded = 1 WHERE ip = %s"""
                         try:
@@ -2863,7 +2862,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                         """
                         Secondaries have degraded
                         """
-                        #print "Secondaries degraded"
+                        print "Secondaries degraded"
                         secondary_green_comp = red_diff
                         primary_comp_mutex.acquire()
                         try:
@@ -2902,7 +2901,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                         user_ct_mutex.release()
 
                 if (blue2 < (circadian_blue - (circadian_blue*color_threshold))) and b_service == False:
-                    #print "b_serv",b_service
+                    print "b_serv",b_service
                     primary_deg_mutex.acquire()
                     try:
                         primary_blue_deg = primary_blue_degraded
@@ -2976,7 +2975,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                                         db.rollback()
                                 except:
                                     db.rollback()
-                                #print "Secondaries degraded"
+                                print "Secondaries degraded"
                                 secondary_blue_comp = circadian_blue - blue2
                                 primary_comp_mutex.acquire()
                                 try:
@@ -2997,7 +2996,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                             """
                             Turn secondaries on
                             """
-                            #print "Turning secondaries on"
+                            print "Turning secondaries on"
                             sql = """INSERT INTO system_logs(time, message, user) VALUES(%s, %s, %s)"""
                             current_time = datetime.datetime.now()
                             current_time = current_time.strftime("%Y-%m-%d %H:%M")
@@ -3082,7 +3081,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                                 db.rollback()
                         except:
                             db.rollback()
-                        #print "Primary Degraded"
+                        print "Primary Degraded"
 
                         sql = """UPDATE sensor_status SET blue_degraded = 1 WHERE ip = %s"""
                         try:
@@ -3134,7 +3133,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                         """
                         Secondaries have degraded
                         """
-                        #print "Secondaries degraded"
+                        print "Secondaries degraded"
                         secondary_blue_comp = red_diff
                         primary_comp_mutex.acquire()
                         try:
@@ -3173,8 +3172,8 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                     finally:
                         user_ct_mutex.release()
                 for key in comp_list:
-                    if key != "N" and ((red2 < (circadian_red - (circadian_red*color_threshold))) and r_service == False or (green2 < (circadian_green - (circadian_green*color_threshold))) and g_service == False or (blue2 < (circadian_blue - (circadian_blue*color_threshold))) and b_service == False):
-                        #print "comp_list:",comp_list
+                    if key != "N":
+                        print "comp_list:",comp_list
                         comp_cmd += comp_list[0]
                         comp_cmd += "|"
                         comp_cmd += comp_list[1]
@@ -3199,7 +3198,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                         comp_cmd += "|"
                         comp_cmd += comp_list[11]
                         comp_cmd += "|"
-                        #print "comp_cmd:",comp_cmd
+                        print "comp_cmd:",comp_cmd
                         user_ct_mutex.acquire()
                         try:
                             if comp_list[1] != "N":
@@ -3211,7 +3210,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                             primary_comp_mutex.acquire()
                             try:
                                 if comp_list[3] != "N":
-                                    #print "NOT 3 bruh"
+                                    print "NOT 3 bruh"
                                     PREV_COLORS[3] = int(float(comp_list[3]))
                                 if comp_list[7] != "N":
                                     PREV_COLORS[4] = int(float(comp_list[7]))
@@ -3254,7 +3253,7 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                         sleep_mode = sleep_mode_Event.isSet()
                     finally:
                         sleep_mutex.release()
-                    #print "sleep mode", sleep_mode
+                    print "sleep mode", sleep_mode
                     if red2 < (OLD_RED - (OLD_RED * 0.05)) or red > (OLD_RED + (OLD_RED * 0.05)):
                         """
                         If the red color reading is 5% less or greater than the previous
@@ -3283,8 +3282,8 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                                     sleep_mutex.release()
                                 if sleep_mode:
                                     red2 = 0
-                                #else:
-                                    #red2 = circadian_red
+                                else:
+                                    red2 = circadian_red
                                 cursor.execute(sql, ([red2, local_ip]))
                                 db.commit()
                             sleep_mutex.acquire()
@@ -3329,8 +3328,8 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                                         sleep_mutex.release()
                                     if sleep_mode:
                                         red2 = 0
-                                    #else:
-                                        #red2 = circadian_red
+                                    else:
+                                        red2 = circadian_red
                                     cursor.execute(sql, ([red2, local_ip]))
                                     db.commit()
                                 sleep_mutex.acquire()
@@ -3375,8 +3374,8 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                                     sleep_mutex.release()
                                 if sleep_mode:
                                     green2 = 0
-                                #else:
-                                    #green2 = circadian_green
+                                else:
+                                    green2 = circadian_green
                                 cursor.execute(sql, ([green2, local_ip]))
                                 db.commit()
                             sleep_mutex.acquire()
@@ -3420,8 +3419,8 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                                         sleep_mutex.release()
                                     if sleep_mode:
                                         green2 = 0
-                                    #else:
-                                        #green2 = circadian_green
+                                    else:
+                                        green2 = circadian_green
                                     cursor.execute(sql, ([green2, local_ip]))
                                     db.commit()
                                 sleep_mutex.acquire()
@@ -3465,8 +3464,8 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                                     sleep_mutex.release()
                                 if sleep_mode:
                                     blue2 = 0
-                                #else:
-                                    #blue2 = circadian_blue
+                                else:
+                                    blue2 = circadian_blue
                                 cursor.execute(sql, ([blue2, local_ip]))
                                 db.commit()
                             sleep_mutex.acquire()
@@ -3510,8 +3509,8 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                                         sleep_mutex.release()
                                     if sleep_mode:
                                         blue2 = 0
-                                    #else:
-                                        #blue2 = circadian_blue
+                                    else:
+                                        blue2 = circadian_blue
                                     cursor.execute(sql, ([blue2, local_ip]))
                                     db.commit()
                                 sleep_mutex.acquire()
@@ -3688,58 +3687,57 @@ def USR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
     ECHO = 11
     GPIO.setup(TRIG, GPIO.OUT)
     GPIO.setup(ECHO, GPIO.IN)
-    num_of_less = 0
-    temp = 0
+
     while True and keyboard_Event.isSet():
-        if temp == 5:
-            temp = 0
-            num_of_less = 0
-        """
-        Begin reading from the sensor
-        """
-        GPIO.output(TRIG, False)
-        time.sleep(2)
+        num_of_less = 0
+        temp = 0
+        while temp < 10:
+            """
+            Begin reading from the sensor
+            """
+            GPIO.output(TRIG, False)
+            time.sleep(2)
 
-        GPIO.output(TRIG, True)
-        time.sleep(0.00001)
-        GPIO.output(TRIG, False)
+            GPIO.output(TRIG, True)
+            time.sleep(0.00001)
+            GPIO.output(TRIG, False)
 
-        """
-        Check if ECHO is LOW
-        Save the last known time of LOW
-        """
-        while GPIO.input(ECHO) == 0:
-            pulse_start = time.time()
-        """
-        Check if ECHO is HIGH
-        Save last know time of HIGH
-        """
-        while GPIO.input(ECHO) == 1:
-            pulse_end = time.time()
+            """
+            Check if ECHO is LOW
+            Save the last known time of LOW
+            """
+            while GPIO.input(ECHO) == 0:
+                pulse_start = time.time()
+            """
+            Check if ECHO is HIGH
+            Save last know time of HIGH
+            """
+            while GPIO.input(ECHO) == 1:
+                pulse_end = time.time()
 
-        """
-        Get pulse duration
-        """
-        pulse_duration = pulse_end - pulse_start
+            """
+            Get pulse duration
+            """
+            pulse_duration = pulse_end - pulse_start
 
-        """
-        Get distance and convert to Feet from cm.
-        """
-        distance = pulse_duration * 17150
-        distance = round(distance, 2)
-        distInFt = distance / 30.48
-        distInFt = round(distInFt, 2)
+            """
+            Get distance and convert to Feet from cm.
+            """
+            distance = pulse_duration * 17150
+            distance = round(distance, 2)
+            distInFt = distance / 30.48
+            distInFt = round(distInFt, 2)
+            print "Current distance:",distInFt
+            if distInFt < 7:
+                print "distance is less"
+                num_of_less += 1
+            else:
+                num_of_less = 0
 
-        if distInFt < 7:
-            num_of_less += 1
-        elif distInFt >= 8:
-            num_of_less = 0
-        # elif distInFt < 8:
-        #     distInFt = round(random.uniform(7.9, 8.01), 2)
-        print "Current distance:", distInFt
+            temp += 1
 
-        #print "NUM_OF_LESS", num_of_less
-        if num_of_less >= 5 and not distance_deg:
+        print "NUM_OF_LESS", num_of_less
+        if num_of_less >= 10 and not distance_deg:
             distance_deg = True
             """
             If distance is out of range then update DB
@@ -3794,8 +3792,6 @@ def USR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                     db.rollback()
             except:
                 db.rollback()
-        #time.sleep(1)
-        temp += 1
 
 
 def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, change_par_Event, cmd_DB_Event,
@@ -3935,9 +3931,9 @@ def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_E
                 finally:
                     primary_comp_mutex.release()
             circadian_cmd = ""
-            #print "CHANGE_WAKE2:", CHANGE_WAKE
-            #print "THE VALUES:", primary_red_deg, primary_green_deg, primary_blue_deg, sec_red_on, sec_red_deg, sec_green_on, sec_green_deg, sec_blue_on, sec_blue_deg
-            #print "HANDLED", deg_red_handle, deg_green_handle, deg_blue_handle
+            print "CHANGE_WAKE2:", CHANGE_WAKE
+            print "THE VALUES:", primary_red_deg, primary_green_deg, primary_blue_deg, sec_red_on, sec_red_deg, sec_green_on, sec_green_deg, sec_blue_on, sec_blue_deg
+            print "HANDLED", deg_red_handle, deg_green_handle, deg_blue_handle
             user_ct_mutex.acquire()
             try:
                 if primary_red_deg and not CHANGE_WAKE:
@@ -3945,7 +3941,7 @@ def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_E
                         circadian_cmd = str(USER_CIRCADIAN_TABLE[current_minute][0]) + "|"
                         circadian_cmd += str(0) + "|"
                     else:
-                        #print "sending boosted red", red_comp, 2 * (USER_CIRCADIAN_TABLE[current_minute][0]) - red_comp
+                        print "sending boosted red", red_comp, 2 * (USER_CIRCADIAN_TABLE[current_minute][0]) - red_comp
                         circadian_cmd = str(2 * (USER_CIRCADIAN_TABLE[current_minute][0]) - red_comp) + "|"
                         if sec_red_on:
                             if sec_red_deg:
@@ -3955,9 +3951,9 @@ def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_E
                         else:
                             circadian_cmd += str(0) + "|"
                 else:
-                    #print "yuh",primary_red_deg,deg_red_handle, sec_red_on
+                    print "yuh",primary_red_deg,deg_red_handle, sec_red_on
                     if primary_red_deg and not deg_red_handle:
-                        #print "sending boosted red2", red_comp, 2 * (USER_CIRCADIAN_TABLE[current_minute][0]) - red_comp
+                        print "sending boosted red2", red_comp, 2 * (USER_CIRCADIAN_TABLE[current_minute][0]) - red_comp
                         circadian_cmd = str(2 * (USER_CIRCADIAN_TABLE[current_minute][0]) - red_comp) + "|"
                         if sec_red_on:
                             if sec_red_deg:
@@ -3967,7 +3963,7 @@ def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_E
                         else:
                             circadian_cmd += str(0) + "|"
                     else:
-                        #print "sending normal red"
+                        print "sending normal red"
                         circadian_cmd = str(USER_CIRCADIAN_TABLE[current_minute][0]) + "|"
                         circadian_cmd += str(0) + "|"
 
@@ -3976,7 +3972,7 @@ def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_E
                         circadian_cmd += str(USER_CIRCADIAN_TABLE[current_minute][1]) + "|"
                         circadian_cmd += str(0) + "|"
                     else:
-                        #print "sending boosted green", green_comp,2 * (USER_CIRCADIAN_TABLE[current_minute][1])-green_comp
+                        print "sending boosted green", green_comp,2 * (USER_CIRCADIAN_TABLE[current_minute][1])-green_comp
                         circadian_cmd += str(2 * (USER_CIRCADIAN_TABLE[current_minute][1])-green_comp) + "|"
                         if sec_green_on:
                             if sec_green_deg:
@@ -3987,7 +3983,7 @@ def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_E
                             circadian_cmd += str(0) + "|"
                 else:
                     if primary_green_deg and not deg_green_handle:
-                        #print "sending boosted red", green_comp, 2 * (USER_CIRCADIAN_TABLE[current_minute][1]) - green_comp
+                        print "sending boosted red", green_comp, 2 * (USER_CIRCADIAN_TABLE[current_minute][1]) - green_comp
                         circadian_cmd += str(2 * (USER_CIRCADIAN_TABLE[current_minute][1]) - green_comp) + "|"
                         if sec_green_on:
                             if sec_green_deg:
@@ -3997,7 +3993,7 @@ def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_E
                         else:
                             circadian_cmd += str(0) + "|"
                     else:
-                        #print "sending normal green"
+                        print "sending normal green"
                         circadian_cmd += str(USER_CIRCADIAN_TABLE[current_minute][1]) + "|"
                         circadian_cmd += str(0) + "|"
 
@@ -4006,7 +4002,7 @@ def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_E
                         circadian_cmd += str(USER_CIRCADIAN_TABLE[current_minute][2]) + "|"
                         circadian_cmd += str(0) + "|"
                     else:
-                        #print "sending boosted blue", blue_comp,2 * (USER_CIRCADIAN_TABLE[current_minute][2])-blue_comp
+                        print "sending boosted blue", blue_comp,2 * (USER_CIRCADIAN_TABLE[current_minute][2])-blue_comp
                         circadian_cmd += str(2 * (USER_CIRCADIAN_TABLE[current_minute][2])-blue_comp) + "|"
                         if sec_blue_on:
                             if sec_blue_deg:
@@ -4017,7 +4013,7 @@ def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_E
                             circadian_cmd += str(0) + "|"
                 else:
                     if primary_blue_deg and not deg_blue_handle:
-                        #print "sending boosted red", blue_comp, 2 * (USER_CIRCADIAN_TABLE[current_minute][2]) - blue_comp
+                        print "sending boosted red", blue_comp, 2 * (USER_CIRCADIAN_TABLE[current_minute][2]) - blue_comp
                         circadian_cmd += str(2 * (USER_CIRCADIAN_TABLE[current_minute][2]) - blue_comp) + "|"
                         if sec_blue_on:
                             if sec_blue_deg:
@@ -4027,17 +4023,17 @@ def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_E
                         else:
                             circadian_cmd += str(0) + "|"
                     else:
-                        #print "sending normal blue"
+                        print "sending normal blue"
                         circadian_cmd += str(USER_CIRCADIAN_TABLE[current_minute][2]) + "|"
                         circadian_cmd += str(0) + "|"
 
                 circadian_cmd += (str(PREV_COLORS[0]) + "|") #+ str(PREV_COLORS[1]) + "|" + str(PREV_COLORS[2]) + "|")
                 #+ str(PREV_COLORS[4]) + "|" + str(PREV_COLORS[5]) + "|"
                 if deg_red_handle:
-                    #print "NOPE@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+                    print "NOPE@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
                     circadian_cmd += str(0) + "|"
                 else:
-                    #print "YUP#$#$#$#$#$#$#$#$#$#$#$#$#$#$"
+                    print "YUP#$#$#$#$#$#$#$#$#$#$#$#$#$#$"
                     circadian_cmd += str(PREV_COLORS[3]) + "|"
                 circadian_cmd += (str(PREV_COLORS[1]) + "|")
                 if deg_green_handle:
@@ -4066,14 +4062,8 @@ def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_E
             Send the command string on the socket and close the socket
             """
             circadian_cli_sock.connect((circadian_cli_sock_host, circadian_cli_sock_port))
-            #print "gonna send cmd",circadian_cmd
-            sleep_mutex.acquire()
-            try:
-                sleep_mode = sleep_mode_Event.isSet()
-            finally:
-                sleep_mutex.release()
-            if not sleep_mode:
-                circadian_cli_sock.send(circadian_cmd)
+            print "gonna send cmd",circadian_cmd
+            circadian_cli_sock.send(circadian_cmd)
             user_ct_mutex.acquire()
             try:
 
@@ -4086,7 +4076,7 @@ def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_E
                             PREV_COLORS[3]= USER_CIRCADIAN_TABLE[current_minute][0] - red_comp
                     else:
                         PREV_COLORS[3] = 0
-                    #print "PREV3:",PREV_COLORS[3]
+                    print "PREV3:",PREV_COLORS[3]
                 else:
                     if primary_red_deg and not deg_red_handle:
                         PREV_COLORS[0] = 2 * (USER_CIRCADIAN_TABLE[current_minute][0]) - red_comp
@@ -4098,10 +4088,10 @@ def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_E
                         else:
                             PREV_COLORS[3] = 0
                     else:
-                        #print "sending normal red"
+                        print "sending normal red"
                         PREV_COLORS[0] = USER_CIRCADIAN_TABLE[current_minute][0]
                         PREV_COLORS[3] = 0
-                    #print "PREV3:", PREV_COLORS[3]
+                    print "PREV3:", PREV_COLORS[3]
 
 
                 if primary_green_deg and not CHANGE_WAKE:
@@ -4124,7 +4114,7 @@ def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_E
                         else:
                             PREV_COLORS[4] = 0
                     else:
-                        #print "sending normal green"
+                        print "sending normal green"
                         PREV_COLORS[1] = USER_CIRCADIAN_TABLE[current_minute][1]
                         PREV_COLORS[4] = 0
 
@@ -4148,7 +4138,7 @@ def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_E
                         else:
                             PREV_COLORS[5] = 0
                     else:
-                        #print "sending normal blue"
+                        print "sending normal blue"
                         PREV_COLORS[2] = USER_CIRCADIAN_TABLE[current_minute][2]
                         PREV_COLORS[5] = 0
                 if CHANGE_WAKE:
@@ -4159,7 +4149,7 @@ def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_E
             circadian_cli_sock.close()
             if first_time:
                 time.sleep(2)
-                #print "It's my first time..."
+                print "It's my first time..."
                 first_time_Event.set()
                 first_time = not first_time
             change_reset_Event_mutex.acquire()
@@ -4198,15 +4188,15 @@ def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_E
                     If the sleep_mode_Event was set break out of
                     counting loop
                     """
-                    #print "vals changed"
+                    print "vals changed"
                     if change_par:
                         """
                         If the change_par_Event was set then
                         wait for the changes to finalize
                         """
-                        #print "Here waiting to finalize"
+                        print "Here waiting to finalize"
                         finalize_change_Event.wait()
-                        #print "Done with finalize"
+                        print "Done with finalize"
                         finalize_par_mutex.acquire()
                         try:
                             finalize_change_Event.clear()
@@ -4214,7 +4204,7 @@ def send_circadian_values(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_E
                             finalize_change_Event.set()
                         finally:
                             finalize_par_mutex.release()
-                    #print "CHANGE_WAKE",CHANGE_WAKE
+                    print "CHANGE_WAKE",CHANGE_WAKE
                     if CHANGE_WAKE or sleep_mode:
                         # if CHANGE_WAKE:
                         #     CHANGE_WAKE = False
@@ -4475,7 +4465,7 @@ def wait_for_cmd(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, cha
                             PREV_COLORS[2] = USER_CIRCADIAN_TABLE[current_minute][2]
                             primary_comp_mutex.acquire()
                             try:
-                                #print "SETTING PREV3:",primary_red_comp
+                                print "SETTING PREV3:",primary_red_comp
                                 if secondary_red_on or secondary_red_degraded:
                                     PREV_COLORS[3] = primary_red_comp
                                 else:

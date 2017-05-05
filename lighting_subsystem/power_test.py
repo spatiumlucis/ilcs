@@ -9,37 +9,6 @@ import os
 import signal
 
 
-# GPIO.setwarnings(False)
-# pinRelay = 4
-# pinRelayS = 5
-#
-# wiringpi.wiringPiSetupGpio()
-# GPIO.setmode(GPIO.BCM) #choose BCM or BOARD numbering schemes
-# GPIO.setup(17, GPIO.OUT) #set GIPO 17 as red led
-# GPIO.setup(27, GPIO.OUT) #set GIPO 27 as green led
-# GPIO.setup(22, GPIO.OUT) #set GIPO 22 as blue led
-# GPIO.setup(pinRelay, GPIO.OUT)
-#
-# red = GPIO.PWM(17, 100) #create object red for PWM on port 17 at 100Hz
-# green = GPIO.PWM(27, 100) #create object red for PWM on port 27 at 100Hz
-# blue = GPIO.PWM(22, 100) #create object red for PWM on port 22 at 100Hz
-#
-# red.start(0)
-# green.start(0)
-# blue.start(0)
-#
-# GPIO.setup(29, GPIO.OUT) #set GIPO 17 as red led
-# GPIO.setup(31, GPIO.OUT) #set GIPO 27 as green led
-# GPIO.setup(33, GPIO.OUT) #set GIPO 22 as blue led
-# GPIO.setup(pinRelayS, GPIO.OUT) #secondary relay
-#
-# redS = GPIO.PWM(29, 100) #create object red for PWM on port 17 at 100Hz
-# greenS = GPIO.PWM(31, 100) #create object red for PWM on port 27 at 100Hz
-# blueS = GPIO.PWM(33, 100) #create object red for PWM on port 22 at 100Hz
-#
-# redS.start(0)
-# greenS.start(0)
-# blueS.start(0)
 GPIO.setwarnings(False)
 pinRelay = 4
 pinRelayS = 5
@@ -58,7 +27,6 @@ wiringpi.softPwmCreate(22,0,100)
 
 GPIO.setup(pinRelayS, GPIO.OUT) #secondary relay
 
-
 wiringpi.pinMode(6, 6) #RedS on pin 29
 wiringpi.softPwmCreate(6,0,100) #Red PWM with 100Hz
 wiringpi.pinMode(13, 13) #GreenS
@@ -74,8 +42,8 @@ def init_circadian_table():
     circadian table. The table is a list that has
     1440 locations (1 for each minute of the day).
     Each location is also a list of R, G, B brightness
-    values.The value depends on what time of day is is.
-    Between different ranges of time there are different
+    values. The value depends on what time of day it is.
+    Between different ranges of time, there are different
     linear functions for the brightness values.
     NOTE: This table is calculated for a person that wakes
     up at 7AM (420 min) and goes to sleep at 11 PM (1380 min).
@@ -159,25 +127,34 @@ def boot_up():
     global green
     global blue
     global pinRelay
+    global pinRelayS
     init_circadian_table()
-    timer = 300
+    timer = 313
+    temp = 0
     GPIO.output(pinRelay, GPIO.HIGH)
     time.sleep(1)
     try:
         while True:
-            if timer > 1380:
-                timer = 300
+            # if timer == 1380:
+            #     timer = 313
+            print "Current Minute: ", timer
+            print "Current Red: ",int(MASTER_CIRCADIAN_TABLE[timer][0])
+            print "Current Green: ",int(MASTER_CIRCADIAN_TABLE[timer][1])
+            print "Current Blue: ",int(MASTER_CIRCADIAN_TABLE[timer][2])
+            
+            wiringpi.softPwmWrite(17, int(MASTER_CIRCADIAN_TABLE[300][0]/2))
+            wiringpi.softPwmWrite(27, int(MASTER_CIRCADIAN_TABLE[300][1]/2))
+            wiringpi.softPwmWrite(22, int(MASTER_CIRCADIAN_TABLE[300][2]/2))
 
-            # red.ChangeDutyCycle(MASTER_CIRCADIAN_TABLE[timer][0] / 2)
-            # green.ChangeDutyCycle(MASTER_CIRCADIAN_TABLE[timer][1] / 2)
-            # blue.ChangeDutyCycle(MASTER_CIRCADIAN_TABLE[timer][2] / 2)
-            wiringpi.softPwmWrite(17, int(MASTER_CIRCADIAN_TABLE[timer][0] / 2))
-            wiringpi.softPwmWrite(27, int(MASTER_CIRCADIAN_TABLE[timer][1] / 2))
-            wiringpi.softPwmWrite(22, int(MASTER_CIRCADIAN_TABLE[timer][2] / 2))
-            time.sleep(0.02)
-            #time.sleep(0.005)
+            #wiringpi.softPwmWrite(6, 12)
+            #wiringpi.softPwmWrite(13, 12)
+            #wiringpi.softPwmWrite(26, 12)
 
-            timer += 1
+            while temp < 59:
+                time.sleep(1)
+                temp +=1
+            temp = 0
+            #timer += 1
     except KeyboardInterrupt:
         GPIO.output(pinRelay, GPIO.LOW)
 
