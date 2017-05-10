@@ -69,7 +69,7 @@ def get_ip():
     return IP
 
 def boot_up():
-    #print "entered"
+    print "entered"
     # Open database connection
     print "connecting to database..."
     db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
@@ -82,7 +82,7 @@ def boot_up():
     cursor.execute(sql, ([local_ip]))
     temp = cursor.fetchall()
     if len(temp) == 0:
-        #print "empty tuple"
+        print "empty tuple"
         #insert into DB
         sql = """INSERT INTO lighting_ip(ip, is_paired) VALUES(%s, 0)"""
         try:
@@ -152,7 +152,7 @@ def delete_cmd(delete_Event):
     end_green = int(float(cmd[1]))
     end_blue = int(float(cmd[2]))
 
-    #print "Values at delete: %s %s %s"%(end_red, end_green, end_blue)
+    print "Values at delete: %s %s %s"%(end_red, end_green, end_blue)
     secondary_mutex.acquire()
     try:
         end_red_s = PREV_SEC_RED
@@ -161,39 +161,39 @@ def delete_cmd(delete_Event):
     finally:
         secondary_mutex.release()
     light_mutex.acquire()
-    #print "gotcha"
+    print "gotcha"
     try:
-        #print "about to delete"
+        print "about to delete"
         while end_red > 0 or end_green > 0 or end_blue > 0 or end_red_s > 0 or end_green_s > 0 or end_blue_s > 0:
             if end_red > 0:
-                #"red"
+                "red"
                 end_red -= 1
                 wiringpi.softPwmWrite(17, int(float(end_red)/2))
             if end_green > 0:
-                #"green"
+                "green"
                 end_green -= 1
                 wiringpi.softPwmWrite(27, int(float(end_green) / 2))
             if end_blue > 0:
-                #"blue"
+                "blue"
                 end_blue -= 1
                 wiringpi.softPwmWrite(22, int(float(end_blue) / 2))
             if end_red_s > 0:
-                #"red"
+                "red"
                 end_red_s -= 1
                 wiringpi.softPwmWrite(6, int(float(end_red_s)/2))
             if end_green_s > 0:
-                #"green"
+                "green"
                 end_green_s -= 1
                 wiringpi.softPwmWrite(13, int(float(end_green_s) / 2))
             if end_blue_s > 0:
-                #"blue"
+                "blue"
                 end_blue_s -= 1
                 wiringpi.softPwmWrite(26, int(float(end_blue_s) / 2))
             time.sleep(0.005)
         GPIO.output(pinRelay, GPIO.LOW)
         GPIO.output(pinRelayS, GPIO.LOW)
     finally:
-        #print "releasing mutex"
+        print "releasing mutex"
         light_mutex.release()
 
     pid = os.getpid()
@@ -1907,12 +1907,12 @@ def PIR_cmd(keyboard_Event, comp_Event, delete_Event):
         cmd = lighting_pir_svr_sock_connection.recv(1024)
         cmd = cmd.split('|')
         print "GOT on pir_cmd thread: ", cmd
-        #print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
         end_red = int(float(cmd[0]))
         end_green = int(float(cmd[1]))
         end_blue = int(float(cmd[2]))
 
-        #print "Values at delete: %s %s %s" % (end_red, end_green, end_blue)
+        print "Values at delete: %s %s %s" % (end_red, end_green, end_blue)
         secondary_mutex.acquire()
         try:
             end_red_s = PREV_SEC_RED
@@ -1923,37 +1923,37 @@ def PIR_cmd(keyboard_Event, comp_Event, delete_Event):
         light_mutex.acquire()
         #print "gotcha"
         try:
-            #print "about to sleep"
+            print "about to sleep"
             while end_red > 0 or end_green > 0 or end_blue > 0 or end_red_s > 0 or end_green_s > 0 or end_blue_s > 0:
                 if end_red > 0:
-                    #"red"
+                    "red"
                     end_red -= 1
                     wiringpi.softPwmWrite(17, int(float(end_red) / 2))
                 if end_green > 0:
-                    #"green"
+                    "green"
                     end_green -= 1
                     wiringpi.softPwmWrite(27, int(float(end_green) / 2))
                 if end_blue > 0:
-                    #"blue"
+                    "blue"
                     end_blue -= 1
                     wiringpi.softPwmWrite(22, int(float(end_blue) / 2))
                 if end_red_s > 0:
-                    #"red"
+                    "red"
                     end_red_s -= 1
                     wiringpi.softPwmWrite(6, int(float(end_red_s) / 2))
                 if end_green_s > 0:
-                    #"green"
+                    "green"
                     end_green_s -= 1
                     wiringpi.softPwmWrite(13, int(float(end_green_s) / 2))
                 if end_blue_s > 0:
-                    #"blue"
+                    "blue"
                     end_blue_s -= 1
                     wiringpi.softPwmWrite(26, int(float(end_blue_s) / 2))
                 time.sleep(0.005)
             #GPIO.output(pinRelay, GPIO.LOW)
             #GPIO.output(pinRelayS, GPIO.LOW)
         finally:
-            #print "releasing mutex"
+            print "releasing mutex"
             light_mutex.release()
         # end_red = int(float(cmd[2]))
         # end_green = int(float(cmd[1]))
