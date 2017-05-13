@@ -51,8 +51,10 @@ var sleep_sound = 0;
 var degrade_sound = 0;
 var distance_sound = 0;
 var service_sound = 0;
-
-
+var onloadSound = 0;
+var delete_stat = 0;
+var edit_stat = 0;
+var room_valid = true;
 /*
 	This function is called to turn on/off the 
 	blinking white led. The blinking white led
@@ -445,9 +447,14 @@ function createUser(username, password, priviledge, serverPage){
 			priv: priviledge},
 
 		function(data, status){
+			
 			if(data == "success"){
 				$('#create_user_error').hide();
 				$('#adduser_form_container').modal('hide');
+				message = $('#alert');
+				message.fadeIn();
+				message.text("New user added");
+				message.fadeOut(3000);
 			}
 			else{
 		
@@ -628,7 +635,7 @@ function checkDeleteStat(){
 	for(var ip in room_prop){
 		if(ip != 'degrade_notification' && ip != 'sleep_notification' && ip != 'service_count' && ip != 'distance_notification'){
 			if(room_prop[ip]['delete_stat'] == 0){
-				DeleteRoom(room_prop[ip]['name'], ip);
+				DeleteRoom(room_prop[ip]['name'], ip, 0);
 			}
 		}			
 	}
@@ -1169,8 +1176,10 @@ function readSensorsValues(){
 	  checkForDistance();
 
 	if(sleep_sound || degrade_sound || distance_sound || service_sound){
+		if(onloadSound == 0)
+			onloadSound = 1;
 		soundAlarm();
-		setTimeout(silentAlarm, 1500);
+		setTimeout(silentAlarm, 1700);
 		sleep_sound = 0;
 		degrade_sound = 0;
 		distance_sound = 0;
@@ -1317,7 +1326,11 @@ function login(user, pass, serverPage){
 */
 
 function soundAlarm(){
-	
+	if(navigator.userAgent.toLowerCase().match(/(ipod|iphone|ipad)/)){
+		var target = $('#alert_sound');
+		target[0].play();
+		return;
+	}
 	var target = $('#alert_sound');
 	target[0].currentTime = 0;
 	target[0].volume = 1;
@@ -1326,12 +1339,16 @@ function soundAlarm(){
 
 /*
 	This function is used to turn off the alert sound
-	
 	parameters - none
-
 */
 
 function silentAlarm(){	
+	if(navigator.userAgent.toLowerCase().match(/(ipod|iphone|ipad)/)){
+		var target = $('#alert_sound');
+		target[0].pause();
+		target[0].currentTime = 0;
+		return;
+	}
 	var target = $('#alert_sound');
 	target[0].volume = 0;
 }
@@ -1455,15 +1472,19 @@ function sendData(roomName, roomIp, wakeTime, thresh, serverPage){
 
 */
 
-function sendDeleteCommand(serverPage, roomIp){
+function sendDeleteCommand(serverPage, roomIp, make_connection){
+	
 	$.post(serverPage,
 	{
-		room_ip : roomIp
+		room_ip : roomIp,
+		connect : make_connection
 	},
 
 	function(data, status){
-		console.log("delete");	
+		delete_stat = data;	
 	});
+
+	return delete_stat;
 }
 
 /*
@@ -1490,11 +1511,11 @@ function sendEditCommand(serverPage, roomName, roomIp, wakeTime, thresh, code){
 		edit_code      : code
 	},
 		function(data, status){
-			stat =  data;
+			edit_stat =  data;
 
 			
 		});
-	return stat;
+	return edit_stat;
 
 }
 
@@ -1513,6 +1534,7 @@ function sendEditCommand(serverPage, roomName, roomIp, wakeTime, thresh, code){
 
 function SaveRoom(roomName, roomIp, wakeTime, threshold){
 
+	edit_status = 0;
 	var current = '#sensors .rooms:not(:hidden) ';
 
 	var prev_room_name   = $(current +'.aroom_name').text().trim();
@@ -1757,6 +1779,7 @@ function deleteNotificationValue(room_ip, room_name){
 	}
 	
 	
+	
 	////
 	
 	
@@ -1848,8 +1871,8 @@ function deleteNotificationValue(room_ip, room_name){
 
 
 
-function DeleteRoom(name, ip){
-	
+function DeleteRoom(name, ip, make_connection = 1){
+	delete_stat = 0;
 	if(name && ip){
 		var div  = "#Div_" + name;
 		var room_tag = '#sensors ' + div;
@@ -1864,18 +1887,45 @@ function DeleteRoom(name, ip){
 		var room_ip = $(room_tag + ' input[type = "hidden"]').val();
 		var room_name = $(room_tag + ' .aroom_name').text().trim();	
 	}
-	sendDeleteCommand(DELETE_ROOM_PAGE, room_ip);
+	var stat = sendDeleteCommand(DELETE_ROOM_PAGE, room_ip, make_connection);
+	
+	if(parseInt(stat) == 2){
+		$('#delete_room_container').modal('hide');
+		var status_info = "Can not delete room when room is in service";
+		message = $('#alert');
+		message.fadeIn()
+		message.text(status_info);
+		message.fadeOut(3000);
+		return;
+	}
 	deleteNotificationValue(room_ip, room_name);
 	
 
 	room.remove();
-	//var target = $('#room_select :selected');
+	
 
-	var target = $('#room_select option[value = "Room_' + room_name + '"');
+	if(navigator.userAgent.toLowerCase().match(/(ipod|iphone|ipad)/)){
+		
+		$('#room_select').val("Room_" + room_name);
+		var target = $('#room_select :selected');
+
+		
+	}
+
+	else{
+		var target = $('#room_select option[value = "Room_' + room_name + '"');
+	}
+	
+	
+
+
+
 	var chart_target = "Div_" + room_name;
+	
 
 	var message = $('#alert');
 	var opt = target.next();
+	
 	if(!opt.text()){
 		opt = target.prev();
 		if(!opt.text()){
@@ -2060,21 +2110,25 @@ function setDialogValues(isDefault){
 
 
 function checkRoomName(roomName, serverPage){
+	
 	$('.room_name_container').removeClass('has-success');
 	$('.room_name_container').removeClass('has-error');
 	$('.room_name_container .glyphicon-ok, .room_name_container .error_msg_a').hide()
-	$('.room_name_container .error_msg_b, .room_name_container .error_msg_b, .room_name_container .glyphicon-remove').hide();
+	$('.room_name_container .error_msg_b, .room_name_container .error_msg_c, .room_name_container .glyphicon-remove').hide();
 	
+	room_valid = true;
+	roomName = roomName.trim();
 	if(roomName.length <= 4){
 		$('.room_name_container').addClass('has-error');
 		$('.room_name_container .glyphicon-remove').show();
 		$('.room_name_container .error_msg_b').show();	
-		return false;
+		room_valid = false;
+		return room_valid;
 	}
 
 
 	var code;
-	var valid = true;
+
 	var temp = roomName.toLowerCase();
 
 	for(var i = 0; i < temp.length; i++){
@@ -2082,17 +2136,17 @@ function checkRoomName(roomName, serverPage){
 		if((code > 96 && code < 123) || (code > 47 && code < 58))
 			continue;
 		else{
-			valid = false;
+			room_valid = false;
 			break;
 		}
 	}
 
 
-	if(!valid){
+	if(!room_valid){
 		$('.room_name_container').addClass('has-error');
 		$('.room_name_container .glyphicon-remove').show();
 		$('.room_name_container .error_msg_c').show();	
-		return false;
+		room_valid = false;
 	}
 
 
@@ -2108,17 +2162,19 @@ function checkRoomName(roomName, serverPage){
 			if(data == "valid"){
 				$('.room_name_container').addClass('has-success');
 				$('.room_name_container .glyphicon-ok').show();
+				room_valid = true;
 			}
 			
 			else{
 				$('.room_name_container').addClass('has-error');
 				$('.room_name_container .glyphicon-remove').show();
 				$('.room_name_container .error_msg_a').show();
+				room_valid = false;
 			}
 		}
 	);
 	
-	return true;
+	return room_valid;
 }
 
 
@@ -2134,11 +2190,11 @@ function checkUserName(userName, serverPage){
 		$('.user_name_container').addClass('has-error');
 		$('.user_name_container .glyphicon-remove').show();
 		$('.user_name_container .error_msg_b').show();	
-		return false;
+		room_valid = false;
+		return room_valid;
 	}
 	
 	var code;
-	var valid = true;
 
 
 	var temp = userName.toLowerCase();
@@ -2148,44 +2204,49 @@ function checkUserName(userName, serverPage){
 		if((code > 96 && code < 123) || (code > 47 && code < 58))
 			continue;
 		else{
-			valid = false;
+			room_valid = false;
 			break;
 		}
 	}
 
-	if(!valid){
+	if(!room_valid){
 		$('.user_name_container').addClass('has-error');
 		$('.user_name_container .glyphicon-remove').show();
 		$('.user_name_container .error_msg_c').show();	
-		return false;
+		return room_valid;
+	
 	}
 
+	
 	$.get(serverPage,
 		{
 		username : userName
 		},
 	
 		function(data, status){
+			
 			if(data == "valid"){
 				$('.user_name_container').addClass('has-success');
 				$('.user_name_container .glyphicon-ok').show();
+				room_valid = true;
 			}
 			
 			else{
 				$('.user_name_container').addClass('has-error');
 				$('.user_name_container .glyphicon-remove').show();
 				$('.user_name_container .error_msg_a').show();
+				room_valid = false;
 			}
 		});
 	
-	return true;
+	return room_valid;
 }
 
 
 $(document).ready(function(){
 	//This function runs when the the body finish loading
 	
-		
+	
 	checkScreen();
 	loadWakeTimeValues();
     loadLightIntensityValues();
@@ -2253,10 +2314,11 @@ $(document).ready(function(){
 		$('#room_name').removeAttr('disabled');
 		var temp = $('#add_room_btn').text().trim();
 		if (temp == ADD_ROOM){
-			if(!checkRoomName($('#room_name').val(), CHECK_ROOM_NAME))
-				return;
-			$('#room_form_main_container').modal('hide');
-			CreateSaveRoom(ADD_ACTION);		
+			var stat = checkRoomName($('#room_name').val(), CHECK_ROOM_NAME);
+			if(stat){
+				$('#room_form_main_container').modal('hide');
+				CreateSaveRoom(ADD_ACTION);		
+			}
 			
 		}
 		
@@ -2350,6 +2412,10 @@ $(document).ready(function(){
 
 
 	$('#menu_add_user').click(function(){
+		$('#adduser_form_container #new_username').val("");
+		$('#adduser_form_container #new_password').val("");
+		$('#adduser_form_container #admin_priveledge').removeAttr('checked');
+	
 		$('#create_user_error').hide();
 		$('.user_name_container').removeClass('has-error');true
 		$('.user_name_container').removeClass('has-success');
@@ -2361,6 +2427,20 @@ $(document).ready(function(){
 	
 	});
 
+	
+	$('#close_message').click(function(){
+		/*alert(onloadSound);
+		alert(parseInt(room_prop['degrade_notification']));
+		alert(parseInt(room_prop['sleep_notification']));
+		alert(parseInt(room_prop['service_count']));
+		alert(parseInt(room_prop['distance_notification']));*/
+		if(parseInt(room_prop['degrade_notification']) || parseInt(room_prop['sleep_notification']) || parseInt(room_prop['service_count']) || parseInt(room_prop['distance_notification']) || onloadSound == 1){
+			setTimeout(soundAlarm, 1500);
+			setTimeout(silentAlarm, 3200);
+		}
+		onloadSound = 2;
+	});
+
 
 	$('#create_user_btn').click(function(){
 
@@ -2370,9 +2450,10 @@ $(document).ready(function(){
 
 
 		
-		if(!new_username.length || !new_password.length)
+		if(!new_username.length || !new_password.length){
 			$('#create_user_invalid').show();	
-		else if(checkUserName(new_username))
+		}
+		else if(checkUserName(new_username,CHECK_USERNAME))
 			createUser(new_username, new_password, priviledge, CREATE_USER);
 	});
 
@@ -2387,10 +2468,15 @@ $(document).ready(function(){
 	
 	
 	$('.mobile_modal_close').click(function(){
-		var target = $('#alert_sound');
-		target[0].volume = 0;
-		target[0].play();
 		
+		var target = $('#alert_sound');
+		target[0].play();
+		target[0].volume = 0;
+		silentAlarm();
+		if(navigator.userAgent.toLowerCase().match(/(ipod|iphone|ipad)/)){
+			$("#alert_sound").removeAttr('loop');
+			
+		}
 	});
 	
 	
@@ -2413,11 +2499,17 @@ $(document).ready(function(){
 	});
 	
 	
+	
 	// The below if statement initializes the audio sound when the page loads for the first time
 	if(window.innerWidth >= 1200){
 		var target = $('#alert_sound');
-		target[0].volume = 0;
 		target[0].play();
+		target[0].volume = 0;
+		silentAlarm();
+		if(navigator.userAgent.toLowerCase().match(/(ipod|iphone|ipad)/)){
+			$("#alert_sound").removeAttr('loop');
+			
+		}
 		
 	}
 

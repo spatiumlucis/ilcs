@@ -6,10 +6,12 @@
 		$valid = true;
 		for($i = 0; $i < strlen($data); $i++){
 			$code = ord($data[$i]);
-			if(($code > 96 && $code < 123) || ($code > 47 && $code < 58))
+			if(($code > 96 && $code < 123) || ($code > 47 && $code < 58) || ($code > 64 && $code < 91))
 				continue;
-			else
+			else{
 				$valid = false;
+				break;
+			}
 		}
 		return $valid;
 
@@ -52,16 +54,18 @@
 
 	$result = $con->query($db_query);
 
-	$time = date('Y-m-d H:i');
-	$user = $_SESSION['user'];
-	$db_query = "INSERT INTO system_logs(time, message, user) VALUES('$time','Created new user: $username', '$user')";
-	$result = $con->query($db_query);
-
 	if($result)
 		echo "success";
 
 	else
 		echo "failed";
+
+	$time = date('Y-m-d H:i');
+	$user = $_SESSION['user'];
+	$db_query = "INSERT INTO system_logs(time, message, user) VALUES('$time','Created new user: $username', '$user')";
+	$result = $con->query($db_query);
+
+	
 
 	
 	

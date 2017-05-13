@@ -40,7 +40,7 @@
 						<span id = "menu_text">Menu</span>
 					</button>
 					
-					<a class="navbar-brand" href="index.html"> ILCS </a>
+					<a class="navbar-brand" href="#"> ILCS </a>
 				</div>
 				
 				<div class = "collapse navbar-collapse" id = "menu">
@@ -48,7 +48,7 @@
 						<li><a href = "#" id = "menu_add_room" class = "admin_view"> Add New Room </a></li>
 						<li><a href = "#" id = "menu_add_user" class = "admin_view"> Add New User </a></li>
 						<li><a href = "systemlog.php" target = "blank"> Logs </a></li>
-						<li><a href = "#" class = "admin_view"> Help </a></li>
+						<li><a href = "media/UserManual.pdf" target = "blank"> Help </a></li>
 					</ul>
 					
 					<ul class = "nav navbar-nav navbar-right" id = "user_login_btn">
@@ -56,7 +56,7 @@
 					</ul>
 					
 					<ul class = "nav navbar-nav navbar-right" id = "user_logout_btn">
-						<li><a href = "www.google.com" class = "user_view"> Help </a></li>
+						<li><a href = "media/UserManual.pdf" target = "blank" class = "user_view"> Help </a></li>
 						<li><button class= "btn btn-primary navbar-btn" > <span class ="glyphicon glyphicon-log-out"> Logout</button><li>
 					</ul>
 					
@@ -410,7 +410,7 @@
 							</p>
 						</div>
 					<div class="modal-footer">
-						<button type="button" class="btn btn-default mobile_modal_close" data-dismiss="modal" >Close</button>
+						<button type="button" id = "close_message" class="btn btn-default mobile_modal_close" data-dismiss="modal" >Close</button>
 					</div>
 				</div>
 			</div>
@@ -421,6 +421,9 @@
 				$('#mobile_modal').click();
 				checkScreen();
 			}
+
+			
+
 				
 		</script> 
 		
