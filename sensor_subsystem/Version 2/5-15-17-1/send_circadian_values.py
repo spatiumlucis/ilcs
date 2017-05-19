@@ -7,6 +7,7 @@ import MySQLdb
 import socket
 import datetime
 
+
 """
 Global variables
 """
@@ -31,18 +32,24 @@ def handle_change_cmd(signum, stack):
     global cursor
     global WAKE_UP_TIME
     global COLOR_THRESHOLD
+    print "User changed something..."
     time.sleep(3)
 
 def handle_sleep_mode(signum, stack):
     global SLEEP_MODE
     SLEEP_MODE = True
+    print "Entering sleep mode..."
+    while SLEEP_MODE:
+        print "Sleeping..."
+        time.sleep(3)
 
 def handle_wake_up(signum, stack):
     global SLEEP_MODE
     SLEEP_MODE = False
+    print "Exiting sleep mode..."
 
-def handle_send_circadian(signum, stack):
-    print "New circadian value sent..."
+def handle_send_compensation(signum, stack):
+    print "RGB sent compensation value"
     time.sleep(3)
 
 def handle_wait_for_cmd_dB_connect(signum, stack):
@@ -53,13 +60,13 @@ def handle_pir_dB_connect(signum, stack):
     global PIR_DB_CONNECTED
     PIR_DB_CONNECTED = True
 
+def handle_rgb_dB_connect(signum, stack):
+    global RGB_DB_CONNECTED
+    RGB_DB_CONNECTED = True
+
 def handle_usr_dB_connect(signum, stack):
     global USR_DB_CONNECTED
     USR_DB_CONNECTED = True
-
-def handle_send_circadian_dB_connect(signum, stack):
-    global SEND_CIRCADIAN_DB_CONNECTED
-    SEND_CIRCADIAN_DB_CONNECTED = True
 
 """
 Non-Signal Handler Functions
@@ -82,38 +89,40 @@ kill -15 is send_circadian dB connection
 signal.signal(3, handle_change_cmd)
 signal.signal(4, handle_sleep_mode)
 signal.signal(5, handle_wake_up)
-signal.signal(6, catch_other_signals)
-signal.signal(7, handle_send_circadian)
+signal.signal(6, handle_send_compensation)
+signal.signal(7, catch_other_signals)
 signal.signal(8, handle_wait_for_cmd_dB_connect)
 signal.signal(10, handle_pir_dB_connect)
-signal.signal(11, catch_other_signals)
+signal.signal(11, handle_rgb_dB_connect)
 signal.signal(12, handle_usr_dB_connect)
-signal.signal(15, handle_send_circadian_dB_connect)
+signal.signal(15, catch_other_signals)
 
 """
 Establish DB connection
 """
 db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
 cursor = db.cursor()
-print "RGB DB connection established"
 
 """
 Alert other Python scripts that the PIR has connected
 """
 pid_list = circadian.get_pids()
 for pid in pid_list:
-    os.kill(pid, 11)
+    os.kill(pid, 15)
 
 """
 Wait for other sensor scripts to connect to the DB
 """
-while not WAIT_FOR_CMD_DB_CONNECTED or not PIR_DB_CONNECTED or not USR_DB_CONNECTED or not SEND_CIRCADIAN_DB_CONNECTED:
+while not WAIT_FOR_CMD_DB_CONNECTED or not PIR_DB_CONNECTED or not USR_DB_CONNECTED or not RGB_DB_CONNECTED:
     time.sleep(1)
 
+begin_timer = time.time()
+
 while True:
-    if not SLEEP_MODE:
-        print "I'm reading from the RGB..."
-    """
-    Compensation value will be sent here
-    """
-    time.sleep(3)
+    current_timer = time.time()
+    time_diff = int(current_timer - begin_timer)
+    if time_diff >= 60:
+        pid_list = circadian.get_pids()
+        for pid in pid_list:
+            os.kill(pid, 7)
+        begin_timer = time.time()

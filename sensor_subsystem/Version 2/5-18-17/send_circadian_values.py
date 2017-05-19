@@ -19,13 +19,7 @@ WAIT_FOR_CMD_DB_CONNECTED = False
 SLEEP_MODE = False
 WAKE_UP_TIME = 0
 COLOR_THRESHOLD = 0
-local_ip = circadian.get_ip()
 MASTER_CIRCADIAN_TABLE = circadian.init_circadian_table()
-MASTER_OFFSET_TABLE = circadian.init_offset_table()
-MASTER_LUX_TABLE = circadian.init_master_lux_table()
-PREV_PRIMARY_RED = 0
-PREV_PRIMARY_GREEN = 0
-PREV_PRIMARY_BLUE = 0
 
 """
 Signal Handlers
@@ -112,24 +106,6 @@ cursor = db.cursor()
 print "Send circadian DB connection established"
 
 """
-Get lighting sub IP
-"""
-sql = """SELECT * FROM sensor_light_pairs WHERE sensor_ip = %s"""
-temp = circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
-lighting_ip = temp[0][1]
-
-"""
-Get User initial parameters and calc user tables
-"""
-sql = """SELECT * FROM sensor_settings WHERE ip = %s"""
-temp = circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
-WAKE_UP_TIME = int(temp[0][1])
-user_tuple = circadian.calc_user_tables(WAKE_UP_TIME, MASTER_CIRCADIAN_TABLE, MASTER_OFFSET_TABLE, MASTER_LUX_TABLE)
-USER_CIRCADIAN_TABLE = user_tuple[0]
-USER_OFFSET_TABLE = user_tuple[1]
-USER_LUX_TABLE = user_tuple[2]
-
-"""
 Alert other Python scripts that the PIR has connected
 """
 pid_list = circadian.get_pids()
@@ -141,27 +117,7 @@ Wait for other sensor scripts to connect to the DB
 """
 while not WAIT_FOR_CMD_DB_CONNECTED or not PIR_DB_CONNECTED or not USR_DB_CONNECTED or not RGB_DB_CONNECTED:
     time.sleep(1)
-"""
-Connect to lighting subsystem and send circadian value
-"""
-sys_time = circadian.get_system_time()
-circadian_cmd = str(USER_CIRCADIAN_TABLE[sys_time][0])+"|0|"+str(USER_CIRCADIAN_TABLE[sys_time][1])+"|0|"+str(USER_CIRCADIAN_TABLE[sys_time][2])+"|0|"
-circadian_cmd += str(PREV_PRIMARY_RED)+"|0|"+str(PREV_PRIMARY_GREEN)+"|0|"+str(PREV_PRIMARY_BLUE)+"|0|"
-pid_list = circadian.get_pids()
-for pid in pid_list:
-    os.kill(pid, 7)
-"""
-Connect to lighting subsystem and send circadian value
-"""
-circadian_cli_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-circadian_cli_sock_host = lighting_ip.strip()
-circadian_cli_sock_port = 12347
-circadian_cli_sock.connect((circadian_cli_sock_host, circadian_cli_sock_port))
-circadian_cli_sock.send(circadian_cmd)
-circadian_cli_sock.close()
-PREV_PRIMARY_RED = USER_CIRCADIAN_TABLE[sys_time][0]
-PREV_PRIMARY_GREEN = USER_CIRCADIAN_TABLE[sys_time][1]
-PREV_PRIMARY_BLUE = USER_CIRCADIAN_TABLE[sys_time][2]
+
 begin_timer = time.time()
 
 while True:
@@ -169,22 +125,7 @@ while True:
         current_timer = time.time()
         time_diff = int(current_timer - begin_timer)
         if time_diff >= 60:
-            sys_time = circadian.get_system_time()
-            circadian_cmd = str(USER_CIRCADIAN_TABLE[sys_time][0])+"|0|"+str(USER_CIRCADIAN_TABLE[sys_time][1])+"|0|"+str(USER_CIRCADIAN_TABLE[sys_time][2])+"|0|"
-            circadian_cmd += str(PREV_PRIMARY_RED)+"|0|"+str(PREV_PRIMARY_GREEN)+"|0|"+str(PREV_PRIMARY_BLUE)+"|0|"
             pid_list = circadian.get_pids()
             for pid in pid_list:
                 os.kill(pid, 7)
-            """
-            Connect to lighting subsystem and send circadian value
-            """
-            circadian_cli_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            circadian_cli_sock_host = lighting_ip.strip()
-            circadian_cli_sock_port = 12347
-            circadian_cli_sock.connect((circadian_cli_sock_host, circadian_cli_sock_port))
-            circadian_cli_sock.send(circadian_cmd)
-            circadian_cli_sock.close()
-            PREV_PRIMARY_RED = USER_CIRCADIAN_TABLE[sys_time][0]
-            PREV_PRIMARY_GREEN = USER_CIRCADIAN_TABLE[sys_time][1]
-            PREV_PRIMARY_BLUE = USER_CIRCADIAN_TABLE[sys_time][2]
             begin_timer = time.time()

@@ -36,6 +36,9 @@ def handle_change_cmd(signum, stack):
 def handle_sleep_mode(signum, stack):
     global SLEEP_MODE
     SLEEP_MODE = True
+    while SLEEP_MODE:
+        print ""
+        time.sleep(3)
 
 def handle_wake_up(signum, stack):
     global SLEEP_MODE
@@ -95,7 +98,6 @@ Establish DB connection
 """
 db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
 cursor = db.cursor()
-print "RGB DB connection established"
 
 """
 Alert other Python scripts that the PIR has connected
@@ -111,8 +113,7 @@ while not WAIT_FOR_CMD_DB_CONNECTED or not PIR_DB_CONNECTED or not USR_DB_CONNEC
     time.sleep(1)
 
 while True:
-    if not SLEEP_MODE:
-        print "I'm reading from the RGB..."
+    print "I'm reading from the RGB..."
     """
     Compensation value will be sent here
     """

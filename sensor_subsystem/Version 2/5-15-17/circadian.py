@@ -1,7 +1,6 @@
 import subprocess
 import socket
 import MySQLdb
-import time
 
 def init_circadian_table():
     """
@@ -1049,9 +1048,6 @@ def get_pids():
     result.append(wait_for_cmd_pid)
     result.append(send_circadian_pid)
     return result
-
-def get_system_time():
-    return time.localtime()[3] * 60 + time.localtime()[4]
 
 def get_ip():
     """

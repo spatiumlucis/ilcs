@@ -68,16 +68,10 @@ def handle_motion_detection(PIR_PIN):
     global SLEEP_MODE
     print "MOTION DETECTED!!"
     if SLEEP_MODE:
-        rgb_sensor_pid = subprocess.check_output(['pgrep', '-f', 'rgb_sensor.py'])
-        rgb_sensor_pid = rgb_sensor_pid.split('\n')
-        rgb_sensor_pid = int(rgb_sensor_pid[0])
-        send_circadian_pid = subprocess.check_output(['pgrep', '-f', 'send_circadian_values.py'])
-        send_circadian_pid = send_circadian_pid.split('\n')
-        send_circadian_pid = int(send_circadian_pid[0])
-        os.kill(rgb_sensor_pid, 5)
-        # time.sleep(0.5)
-        os.kill(send_circadian_pid, 5)
         SLEEP_MODE = False
+        pid_list = circadian.get_pids()
+        for pid in pid_list:
+            os.kill(pid, 5)
     begin_timer = time.time()
 
 """
@@ -108,14 +102,13 @@ signal.signal(10, catch_other_signals)
 signal.signal(11, handle_rgb_dB_connect)
 signal.signal(12, handle_usr_dB_connect)
 signal.signal(15, handle_send_circadian_dB_connect)
-
+GPIO.add_event_detect(PIR_PIN, GPIO.RISING, callback=handle_motion_detection)
 
 """
 Establish DB connection
 """
 db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
 cursor = db.cursor()
-print "PIR DB connection established"
 
 """
 Alert other Python scripts that the PIR has connected
@@ -129,10 +122,6 @@ Wait for other sensor scripts to connect to the DB
 """
 while not WAIT_FOR_CMD_DB_CONNECTED or not RGB_DB_CONNECTED or not USR_DB_CONNECTED or not SEND_CIRCADIAN_DB_CONNECTED:
     time.sleep(1)
-"""
-Create interrupt detection
-"""
-GPIO.add_event_detect(PIR_PIN, GPIO.RISING, callback=handle_motion_detection)
 
 """
 Begin reading from the motion sensor
@@ -143,12 +132,7 @@ while True:
     time_diff = int(current_timer - begin_timer)
     if time_diff >= 60 and not SLEEP_MODE:
         SLEEP_MODE = True
-        rgb_sensor_pid = subprocess.check_output(['pgrep', '-f', 'rgb_sensor.py'])
-        rgb_sensor_pid = rgb_sensor_pid.split('\n')
-        rgb_sensor_pid = int(rgb_sensor_pid[0])
-        send_circadian_pid = subprocess.check_output(['pgrep', '-f', 'send_circadian_values.py'])
-        send_circadian_pid = send_circadian_pid.split('\n')
-        send_circadian_pid = int(send_circadian_pid[0])
-        os.kill(send_circadian_pid, 4)
-        os.kill(rgb_sensor_pid, 4)
+        pid_list = circadian.get_pids()
+        for pid in pid_list:
+            os.kill(pid, 4)
         begin_timer = time.time()

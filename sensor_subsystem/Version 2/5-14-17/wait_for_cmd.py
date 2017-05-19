@@ -24,23 +24,32 @@ lighting_ip = ""
 """
 Signal Handlers
 """
-def catch_other_signals(signum, stack):
-    pass
+def handle_send_compensation(signum, stack):
+    print "sending compensation value..."
+    time.sleep(3)
+
+def handle_send_circadian(signum, stack):
+    print "sending circadian value..."
+    time.sleep(3)
 
 def handle_pir_dB_connect(signum, stack):
     global PIR_DB_CONNECTED
+    print "RGB DB connection established"
     PIR_DB_CONNECTED = True
 
 def handle_rgb_dB_connect(signum, stack):
     global RGB_DB_CONNECTED
+    print "RGB DB connection established"
     RGB_DB_CONNECTED = True
 
 def handle_usr_dB_connect(signum, stack):
     global USR_DB_CONNECTED
+    print "RGB DB connection established"
     USR_DB_CONNECTED = True
 
 def handle_send_circadian_dB_connect(signum, stack):
     global SEND_CIRCADIAN_DB_CONNECTED
+    print "Send circadian DB connection established"
     SEND_CIRCADIAN_DB_CONNECTED = True
 
 """
@@ -76,14 +85,16 @@ def boot_up():
     global cursor
     global lighting_ip
 
-    local_ip = circadian.get_ip()
+    print "Booting up..."
+
+    local_ip = get_ip()
     is_sensor_sub_paired = 0
 
     """
     Check DB if the sensor sub exists
     """
     sql = """SELECT * FROM sensor_ip WHERE ip = %s"""
-    temp = circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
+    temp = execute_db_query(cursor, db, sql, ([local_ip]))
 
     if len(temp) == 0:
         """
@@ -92,7 +103,7 @@ def boot_up():
         """
         sql = """INSERT INTO sensor_ip(ip, is_paired) VALUES(%s, 0)"""
 
-        circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
+        execute_db_query(cursor, db, sql, ([local_ip]))
     else:
         """
         The sensor sub DOES exist in the DB. Grab its paired status
@@ -103,7 +114,7 @@ def boot_up():
         Check degrade status for red
         """
         sql = """SELECT * FROM sensor_status WHERE ip = %s"""
-        temp = circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
+        temp = execute_db_query(cursor, db, sql, ([local_ip]))
 
         is_sensor_service = temp[0][11]
         is_being_serviced = temp[0][12]
@@ -112,26 +123,26 @@ def boot_up():
         is_blue_deg = temp[0][7]
         is_lumen_deg = temp[0][8]
         sql = """UPDATE sensor_status SET distance = 8 WHERE ip = %s"""
-        circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
+        execute_db_query(cursor, db, sql, ([local_ip]))
 
         if is_sensor_service:
             sql = """UPDATE sensor_status SET service = 0 WHERE ip = %s"""
-            circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
+            execute_db_query(cursor, db, sql, ([local_ip]))
         if is_being_serviced:
             sql = """UPDATE sensor_status SET being_serviced = 0 WHERE ip = %s"""
-            circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
+            execute_db_query(cursor, db, sql, ([local_ip]))
         if is_red_deg:
             sql = """UPDATE sensor_status SET red_degraded = 0 WHERE ip = %s"""
-            circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
+            execute_db_query(cursor, db, sql, ([local_ip]))
         if is_green_deg:
             sql = """UPDATE sensor_status SET green_degraded = 0 WHERE ip = %s"""
-            circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
+            execute_db_query(cursor, db, sql, ([local_ip]))
         if is_blue_deg:
             sql = """UPDATE sensor_status SET blue_degraded = 0 WHERE ip = %s"""
-            circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
+            execute_db_query(cursor, db, sql, ([local_ip]))
         if is_lumen_deg:
             sql = """UPDATE sensor_status SET lumens_degraded = 0 WHERE ip = %s"""
-            circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
+            execute_db_query(cursor, db, sql, ([local_ip]))
 
     if is_sensor_sub_paired == 0:
         """
@@ -153,35 +164,35 @@ def boot_up():
         sensor_add_svr_sock_connection.close()
 
         sql = """INSERT INTO sensor_status(ip, red, green, blue, lumens, red_degraded, green_degraded, blue_degraded, lumens_degraded, sleep_mode_status, distance, service, being_serviced) VALUEs(%s, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0)"""
-        circadian.execute_dB_query(cursor,db, sql, ([local_ip]))
+        execute_db_query(cursor,db, sql, ([local_ip]))
 
         """
         Grab the lighting sub IP to be paired with.
         """
         sql = """SELECT * from lighting_ip where is_paired = 0"""
-        temp = circadian.execute_dB_query(cursor, db, sql, ())
+        temp = execute_db_query(cursor, db, sql, ())
         lighting_ip = temp[0][0]
 
         """
         Update the DB with paired status
         """
         sql = """UPDATE sensor_ip SET is_paired = 1 WHERE ip = %s"""
-        circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
+        execute_db_query(cursor, db, sql, ([local_ip]))
 
         sql = """UPDATE lighting_ip SET is_paired = 1 WHERE ip = %s"""
-        circadian.execute_dB_query(cursor, db, sql, ([lighting_ip]))
+        execute_db_query(cursor, db, sql, ([lighting_ip]))
 
         """
         Establish sensor-light pair
         """
         sql = """INSERT INTO sensor_light_pairs(sensor_ip, lighting_ip) VALUES(%s ,%s)"""
-        circadian.execute_dB_query(cursor, db, sql, ([local_ip, lighting_ip]))
+        execute_db_query(cursor, db, sql, ([local_ip, lighting_ip]))
 
         """
         Grab user's values
         """
         sql = """SELECT * FROM sensor_settings WHERE ip = %s"""
-        temp = circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
+        temp = execute_db_query(cursor, db, sql, ([local_ip]))
 
         WAKE_UP_TIME = temp[0][1]
         COLOR_THRESHOLD = float(temp[0][2])/100
@@ -194,7 +205,7 @@ def boot_up():
         """
         print "Reconnecting to previous Lighting Subsystem..."
         sql = """SELECT * FROM sensor_light_pairs WHERE sensor_ip = %s"""
-        temp = circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
+        temp = execute_db_query(cursor, db, sql, ([local_ip]))
 
         lighting_ip = temp[0][1]
 
@@ -202,14 +213,14 @@ def boot_up():
         Grab previous sensor sub settings
         """
         sql = """SELECT * FROM sensor_settings WHERE ip = %s"""
-        temp = circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
+        temp = execute_db_query(cursor, db, sql, ([local_ip]))
 
         WAKE_UP_TIME = temp[0][1]
         COLOR_THRESHOLD = float(temp[0][2])/100
 
         print "Sensor-Light pair re-established with values: ", temp[0]
         # sql = "SELECT * FROM sensor_status WHERE ip = " + local_ip
-        # temp = circadian.execute_dB_query(cursor, db, sql)
+        # temp = execute_db_query(cursor, db, sql)
         # SLEEP_MODE_STATUS = temp[0][9]
 
     """
@@ -222,6 +233,61 @@ def boot_up():
     current_time = datetime.datetime.now()
     current_time = current_time.strftime("%Y-%m-%d %H:%M")
 
+def execute_db_query(cursor, db, sql, sql_args):
+    if sql[0] != 'S' and sql[0] != 's':
+        print "im here"
+        """
+        Query is something other than select query
+        """
+        try:
+            if len(sql_args) == 0:
+                cursor.execute(sql)
+            else:
+                cursor.execute(sql, sql_args)
+            db.commit()
+        except (AttributeError, MySQLdb.OperationalError):
+            print "Re-establishing database connection in main thread..."
+            db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis",
+                                 db="ilcs")
+            print "Database connection re-established in main thread."
+            cursor = db.cursor()
+            try:
+                if len(sql_args) == 0:
+                    cursor.execute(sql)
+                else:
+                    cursor.execute(sql, sql_args)
+                db.commit()
+            except:
+                db.rollback()
+        except:
+            db.rollback()
+    else:
+        """
+        query is select query
+        """
+        if len(sql_args) == 0:
+            cursor.execute(sql)
+        else:
+            cursor.execute(sql, sql_args)
+        result = cursor.fetchall()
+        return result
+
+def get_ip():
+    """
+    This function is used to get the local IP address of the Raspberry Pi.
+
+    :return: The local IP address.
+    """
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        # doesn't even have to be reachable
+        s.connect(('10.255.255.255', 0))
+        IP = s.getsockname()[0]
+    except:
+        IP = '127.0.0.1'
+    finally:
+        s.close()
+    return IP
 
 """
 Signal declarations (software interrupts)
@@ -236,53 +302,49 @@ kill -11 is rgb_sensor dB connection
 kill -12 is usr_sensor dB connection
 kill -15 is send_circadian dB connection
 """
-signal.signal(3, catch_other_signals)
-signal.signal(4, catch_other_signals)
-signal.signal(5, catch_other_signals)
-signal.signal(6, catch_other_signals)
-signal.signal(7, catch_other_signals)
-signal.signal(8, catch_other_signals)
-signal.signal(10, handle_pir_dB_connect)
-signal.signal(11, handle_rgb_dB_connect)
-signal.signal(12, handle_usr_dB_connect)
-signal.signal(15, handle_send_circadian_dB_connect)
-local_ip = circadian.get_ip()
+signal.signal(signal.SIGIOT, handle_send_compensation)
+signal.signal(7, handle_send_circadian)
+local_ip = get_ip()
 
 """
 Establish DB connection
 """
-print "\nBooting up..."
+print "Establishing Database connection in main thread..."
 db = MySQLdb.connect(host="192.168.1.6", port=3306, user="spatiumlucis", passwd="spatiumlucis", db="ilcs")
+print "Database connection established in main thread."
 cursor = db.cursor()
+
 
 """
 BOOT UP
 """
 boot_up()
-print "Boot up successful"
 
 """
 Execute the other scripts here
 """
-os.system("python pir_sensor.py &")
-os.system("python rgb_sensor.py &")
-os.system("python usr_sensor.py &")
-os.system("python send_circadian_values.py &")
+subprocess.call(["python", "pir_sensor.py"])
+subprocess.call(["python", "rgb_sensor.py"])
+subprocess.call(["python", "usr_sensor.py"])
+subprocess.call(["python", "send_circadian_values.py"])
 time.sleep(1)
-
 """
 Alert other Python scripts that the PIR has connected
 """
-pid_list = circadian.get_pids()
-for pid in pid_list:
-    os.kill(pid, 8)
+pir_sensor_pid = int(subprocess.check_output(['pgrep', '-f', 'pir_sensor.py']))
+rgb_sensor_pid = int(subprocess.check_output(['pgrep', '-f', 'rgb_sensor.py']))
+usr_sensor_pid = int(subprocess.check_output(['pgrep', '-f', 'usr_sensor.py']))
+send_circadian_pid = int(subprocess.check_output(['pgrep', '-f', 'send_circadian_values.py']))
+os.kill(pir_sensor_pid, 8)
+os.kill(rgb_sensor_pid, 8)
+os.kill(usr_sensor_pid, 8)
+os.kill(wait_for_cmd_pid, 8)
 
 """
 Wait for other sensor scripts to connect to the DB
 """
-print "Establishing database connections..."
 while not SEND_CIRCADIAN_DB_CONNECTED or not PIR_DB_CONNECTED or not USR_DB_CONNECTED or not RGB_DB_CONNECTED:
-    time.sleep(1)
+    pass
 
 while True:
     """
@@ -297,10 +359,8 @@ while True:
     wait_cmd_svr_sock.listen(5)
     try:
         while True:
-            try:
-                wait_cmd_svr_sock_connection, wait_cmd_svr_sock_connection_addr = wait_cmd_svr_sock.accept()
-            except:
-                continue
+            # print "current values", WAKE_UP_TIME, " ", COLOR_THRESHOLD, " ", LIGHT_THRESHOLD
+            wait_cmd_svr_sock_connection, wait_cmd_svr_sock_connection_addr = wait_cmd_svr_sock.accept()  # * Establish connection w
             print '\nGot connection from', wait_cmd_svr_sock_connection_addr, "\n"
 
             """
@@ -332,37 +392,37 @@ while True:
                 """
                 Get user ct values for delete cmd here.
                 """
-                delete_cmd = "0|0|0|"
+                delete_cmd = ["0", "0", "0"]
 
-                """
-                UNCOMMENT THIS LATER ZACH!!!!!!!
-                """
                 delete_sock.send(delete_cmd)
                 delete_sock.close()
 
                 sql = """DELETE FROM sensor_ip WHERE ip = %s"""
-                circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
+                execute_db_query(cursor, db, sql, ([local_ip]))
 
                 sql = """DELETE FROM sensor_settings WHERE ip = %s"""
-                circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
+                execute_db_query(cursor, db, sql, ([local_ip]))
 
                 sql = """DELETE FROM sensor_status WHERE ip = %s"""
-                circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
+                execute_db_query(cursor, db, sql, ([local_ip]))
 
                 sql = """DELETE FROM sensor_light_pairs WHERE sensor_ip = %s"""
-                circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
+                execute_db_query(cursor, db, sql, ([local_ip]))
 
                 sql = """DELETE FROM lighting_ip WHERE ip = %s"""
-                circadian.execute_dB_query(cursor, db, sql, ([lighting_ip]))
+                execute_db_query(cursor, db, sql, ([lighting_ip]))
 
                 """
                 Issue kill command to the scripts
                 """
-                pid_list = circadian.get_pids()
-                for pid in pid_list:
-                    os.kill(pid, 9)
-                # pid = os.getpid()
-                # os.kill(pid, signal.SIGINT)
+                rgb_sensor_pid = int(subprocess.check_output(['pgrep', '-f', 'rgb_sensor.py']))
+                pir_sensor_pid = int(subprocess.check_output(['pgrep', '-f', 'pir_sensor.py']))
+                send_circadian_pid = int(subprocess.check_output(['pgrep', '-f', 'send_circadian_values.py']))
+                os.kill(rgb_sensor_pid, signal.SIGINT)
+                os.kill(pir_sensor_pid, signal.SIGINT)
+                os.kill(send_circadian_pid, signal.SIGINT)
+                pid = os.getpid()
+                os.kill(pid, signal.SIGINT)
             else:
                 """
                 If the control subsystem sent a command string then
@@ -383,10 +443,14 @@ while True:
                     """
                     COLOR_THRESHOLD = float(cmd[1]) / 100
 
-                pid_list = circadian.get_pids()
-                for pid in pid_list:
-                    os.kill(pid, 3)
+                rgb_sensor_pid = int(subprocess.check_output(['pgrep', '-f', 'rgb_sensor.py']))
+                pir_sensor_pid = int(subprocess.check_output(['pgrep', '-f', 'pir_sensor.py']))
+                send_circadian_pid = int(subprocess.check_output(['pgrep', '-f', 'send_circadian_values.py']))
+                os.kill(rgb_sensor_pid, signal.SIGQUIT)
+                os.kill(pir_sensor_pid, signal.SIGQUIT)
+                os.kill(send_circadian_pid, signal.SIGQUIT)
 
             wait_cmd_svr_sock_connection.close()
     except KeyboardInterrupt:
+
         sys.exit()

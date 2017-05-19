@@ -29,18 +29,22 @@ def catch_other_signals(signum, stack):
 
 def handle_pir_dB_connect(signum, stack):
     global PIR_DB_CONNECTED
+    print "PIR DB connection established"
     PIR_DB_CONNECTED = True
 
 def handle_rgb_dB_connect(signum, stack):
     global RGB_DB_CONNECTED
+    print "RGB DB connection established"
     RGB_DB_CONNECTED = True
 
 def handle_usr_dB_connect(signum, stack):
     global USR_DB_CONNECTED
+    print "USR DB connection established"
     USR_DB_CONNECTED = True
 
 def handle_send_circadian_dB_connect(signum, stack):
     global SEND_CIRCADIAN_DB_CONNECTED
+    print "Send circadian DB connection established"
     SEND_CIRCADIAN_DB_CONNECTED = True
 
 """
@@ -337,7 +341,7 @@ while True:
                 """
                 UNCOMMENT THIS LATER ZACH!!!!!!!
                 """
-                delete_sock.send(delete_cmd)
+                #delete_sock.send(delete_cmd)
                 delete_sock.close()
 
                 sql = """DELETE FROM sensor_ip WHERE ip = %s"""

@@ -337,7 +337,7 @@ while True:
                 """
                 UNCOMMENT THIS LATER ZACH!!!!!!!
                 """
-                delete_sock.send(delete_cmd)
+                #delete_sock.send(delete_cmd)
                 delete_sock.close()
 
                 sql = """DELETE FROM sensor_ip WHERE ip = %s"""
