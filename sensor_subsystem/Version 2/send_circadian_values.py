@@ -23,9 +23,11 @@ local_ip = circadian.get_ip()
 MASTER_CIRCADIAN_TABLE = circadian.init_circadian_table()
 MASTER_OFFSET_TABLE = circadian.init_offset_table()
 MASTER_LUX_TABLE = circadian.init_master_lux_table()
-PREV_PRIMARY_RED = 0
-PREV_PRIMARY_GREEN = 0
-PREV_PRIMARY_BLUE = 0
+PREV_PRIMARY_COLORS = [0, 0, 0]
+PREV_SECONDARY_COLORS = [0, 0, 0]
+IS_PRIMARY_DEG = [False, False, False]
+IS_SEC_ON = [False, False, False]
+IS_SEC_DEG = [False, False, False]
 
 """
 Signal Handlers
@@ -144,9 +146,10 @@ while not WAIT_FOR_CMD_DB_CONNECTED or not PIR_DB_CONNECTED or not USR_DB_CONNEC
 """
 Connect to lighting subsystem and send circadian value
 """
-sys_time = circadian.get_system_time()
-circadian_cmd = str(USER_CIRCADIAN_TABLE[sys_time][0])+"|0|"+str(USER_CIRCADIAN_TABLE[sys_time][1])+"|0|"+str(USER_CIRCADIAN_TABLE[sys_time][2])+"|0|"
-circadian_cmd += str(PREV_PRIMARY_RED)+"|0|"+str(PREV_PRIMARY_GREEN)+"|0|"+str(PREV_PRIMARY_BLUE)+"|0|"
+
+circadian_cmd_tuple = circadian.get_circadian_cmd(USER_CIRCADIAN_TABLE, PREV_PRIMARY_COLORS, PREV_SECONDARY_COLORS, IS_PRIMARY_DEG, IS_SEC_ON, IS_SEC_DEG)
+circadian_cmd = circadian_cmd_tuple[0]
+
 pid_list = circadian.get_pids()
 for pid in pid_list:
     os.kill(pid, 7)
@@ -159,9 +162,9 @@ circadian_cli_sock_port = 12347
 circadian_cli_sock.connect((circadian_cli_sock_host, circadian_cli_sock_port))
 circadian_cli_sock.send(circadian_cmd)
 circadian_cli_sock.close()
-PREV_PRIMARY_RED = USER_CIRCADIAN_TABLE[sys_time][0]
-PREV_PRIMARY_GREEN = USER_CIRCADIAN_TABLE[sys_time][1]
-PREV_PRIMARY_BLUE = USER_CIRCADIAN_TABLE[sys_time][2]
+PREV_PRIMARY_COLORS[0] = circadian_cmd_tuple[1][0]
+PREV_PRIMARY_COLORS[1] = circadian_cmd_tuple[1][1]
+PREV_PRIMARY_COLORS[2] = circadian_cmd_tuple[1][2]
 begin_timer = time.time()
 
 while True:
@@ -169,9 +172,8 @@ while True:
         current_timer = time.time()
         time_diff = int(current_timer - begin_timer)
         if time_diff >= 60:
-            sys_time = circadian.get_system_time()
-            circadian_cmd = str(USER_CIRCADIAN_TABLE[sys_time][0])+"|0|"+str(USER_CIRCADIAN_TABLE[sys_time][1])+"|0|"+str(USER_CIRCADIAN_TABLE[sys_time][2])+"|0|"
-            circadian_cmd += str(PREV_PRIMARY_RED)+"|0|"+str(PREV_PRIMARY_GREEN)+"|0|"+str(PREV_PRIMARY_BLUE)+"|0|"
+            circadian_cmd_tuple = circadian.get_circadian_cmd(USER_CIRCADIAN_TABLE, PREV_PRIMARY_COLORS, PREV_SECONDARY_COLORS, IS_PRIMARY_DEG, IS_SEC_ON, IS_SEC_DEG)
+            circadian_cmd = circadian_cmd_tuple[0]
             pid_list = circadian.get_pids()
             for pid in pid_list:
                 os.kill(pid, 7)
@@ -184,7 +186,7 @@ while True:
             circadian_cli_sock.connect((circadian_cli_sock_host, circadian_cli_sock_port))
             circadian_cli_sock.send(circadian_cmd)
             circadian_cli_sock.close()
-            PREV_PRIMARY_RED = USER_CIRCADIAN_TABLE[sys_time][0]
-            PREV_PRIMARY_GREEN = USER_CIRCADIAN_TABLE[sys_time][1]
-            PREV_PRIMARY_BLUE = USER_CIRCADIAN_TABLE[sys_time][2]
+            PREV_PRIMARY_COLORS[0] = circadian_cmd_tuple[1][0]
+            PREV_PRIMARY_COLORS[1] = circadian_cmd_tuple[1][1]
+            PREV_PRIMARY_COLORS[2] = circadian_cmd_tuple[1][2]
             begin_timer = time.time()

@@ -1107,3 +1107,23 @@ def execute_dB_query(cursor, db, sql, sql_args):
             cursor.execute(sql, sql_args)
         result = cursor.fetchall()
         return result
+
+def get_circadian_cmd(USER_CIRCADIAN_TABLE, PREV_PRIMARY_COLORS, PREV_SECONDARY_COLORS, IS_PRIMARY_DEG, IS_SEC_ON, IS_SEC_DEG):
+    sys_time = get_system_time()
+    new_prev_primary_colors = []
+    """
+    Do the comp check later...
+    """
+    """
+    Format:
+    EndPrRed|EndSeRed|EndPrGr|EndSeGr|EndPrBl|EndSeBl|StartPrRed|StartSeRed|StartPrGr|StartSeGr|StartPrBl|StartSeBl|
+    """
+    circadian_cmd = str(USER_CIRCADIAN_TABLE[sys_time][0]) + "|0|" + str(USER_CIRCADIAN_TABLE[sys_time][1]) + "|0|" + str(USER_CIRCADIAN_TABLE[sys_time][2]) + "|0|"
+    circadian_cmd += str(PREV_PRIMARY_COLORS[0]) + "|0|" + str(PREV_PRIMARY_COLORS[1]) + "|0|" + str(PREV_PRIMARY_COLORS[2]) + "|0|"
+    """
+    Do comp check later...
+    """
+    new_prev_primary_colors.append(USER_CIRCADIAN_TABLE[0])
+    new_prev_primary_colors.append(USER_CIRCADIAN_TABLE[1])
+    new_prev_primary_colors.append(USER_CIRCADIAN_TABLE[2])
+    return (circadian_cmd, new_prev_primary_colors)
