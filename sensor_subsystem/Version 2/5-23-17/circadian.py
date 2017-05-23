@@ -1046,8 +1046,8 @@ def get_pids():
     result.append(pir_sensor_pid)
     result.append(rgb_sensor_pid)
     result.append(usr_sensor_pid)
-    result.append(send_circadian_pid)
     result.append(wait_for_cmd_pid)
+    result.append(send_circadian_pid)
     return result
 
 def get_system_time():
@@ -1120,11 +1120,10 @@ def get_circadian_cmd(USER_CIRCADIAN_TABLE, PREV_PRIMARY_COLORS, PREV_SECONDARY_
     """
     circadian_cmd = str(USER_CIRCADIAN_TABLE[sys_time][0]) + "|0|" + str(USER_CIRCADIAN_TABLE[sys_time][1]) + "|0|" + str(USER_CIRCADIAN_TABLE[sys_time][2]) + "|0|"
     circadian_cmd += str(PREV_PRIMARY_COLORS[0]) + "|0|" + str(PREV_PRIMARY_COLORS[1]) + "|0|" + str(PREV_PRIMARY_COLORS[2]) + "|0|"
-
     """
     Do comp check later...
     """
-    new_prev_primary_colors.append(USER_CIRCADIAN_TABLE[sys_time][0])
-    new_prev_primary_colors.append(USER_CIRCADIAN_TABLE[sys_time][1])
-    new_prev_primary_colors.append(USER_CIRCADIAN_TABLE[sys_time][2])
+    new_prev_primary_colors.append(USER_CIRCADIAN_TABLE[0])
+    new_prev_primary_colors.append(USER_CIRCADIAN_TABLE[1])
+    new_prev_primary_colors.append(USER_CIRCADIAN_TABLE[2])
     return (circadian_cmd, new_prev_primary_colors)

@@ -19,9 +19,6 @@ SLEEP_MODE = False
 WAKE_UP_TIME = 0
 COLOR_THRESHOLD = 0
 MASTER_CIRCADIAN_TABLE = circadian.init_circadian_table()
-MASTER_OFFSET_TABLE = circadian.init_offset_table()
-MASTER_LUX_TABLE = circadian.init_master_lux_table()
-
 lighting_ip = ""
 
 """
@@ -263,13 +260,7 @@ BOOT UP
 """
 boot_up()
 print "Boot up successful"
-"""
-Calc. user tables
-"""
-user_tuple = circadian.calc_user_tables(WAKE_UP_TIME, MASTER_CIRCADIAN_TABLE, MASTER_OFFSET_TABLE, MASTER_LUX_TABLE)
-USER_CIRCADIAN_TABLE = user_tuple[0]
-USER_OFFSET_TABLE = user_tuple[1]
-USER_LUX_TABLE = user_tuple[2]
+
 """
 Execute the other scripts here
 """
@@ -316,7 +307,7 @@ while True:
             Receive the command on the socket
             """
             cmd = (wait_cmd_svr_sock_connection.recv(1024)).strip()
-            cmd_str = cmd
+
             #current_minute = time.localtime()[3] * 60 + time.localtime()[4]
             """
             Split the string on '|'
@@ -341,9 +332,11 @@ while True:
                 """
                 Get user ct values for delete cmd here.
                 """
-                sys_time = circadian.get_system_time()
-                delete_cmd = str(USER_CIRCADIAN_TABLE[sys_time][0])+"|"+str(USER_CIRCADIAN_TABLE[sys_time][1])+"|"+str(USER_CIRCADIAN_TABLE[sys_time][2])+"|"
+                delete_cmd = "0|0|0|"
 
+                """
+                UNCOMMENT THIS LATER ZACH!!!!!!!
+                """
                 delete_sock.send(delete_cmd)
                 delete_sock.close()
 
@@ -365,11 +358,15 @@ while True:
                 """
                 Issue kill command to the scripts
                 """
-                os.system("python stop.py &")
-
+                pid_list = circadian.get_pids()
+                for pid in pid_list:
+                    os.kill(pid, 9)
+                # pid = os.getpid()
+                # os.kill(pid, signal.SIGINT)
             else:
                 """
-                If the control subsystem sent a command
+                If the control subsystem sent a command string then
+                set the change_par_Event so that other threads pause.
                 """
 
                 if cmd[0] != 'N':
@@ -378,14 +375,6 @@ while True:
                     the USER_CIRCADIAN_TABLE
                     """
                     WAKE_UP_TIME = int(cmd[0])
-                    """
-                    Set ALL the things
-                    """
-                    user_tuple = circadian.calc_user_tables(WAKE_UP_TIME, MASTER_CIRCADIAN_TABLE, MASTER_OFFSET_TABLE,
-                                                            MASTER_LUX_TABLE)
-                    USER_CIRCADIAN_TABLE = user_tuple[0]
-                    USER_OFFSET_TABLE = user_tuple[1]
-                    USER_LUX_TABLE = user_tuple[2]
 
                 if cmd[1] != 'N':
                     """
@@ -393,12 +382,7 @@ while True:
                     set the new COLOR_THRESHOLD value
                     """
                     COLOR_THRESHOLD = float(cmd[1]) / 100
-                """
-                Write to config file
-                """
-                file = open("config.txt", "w")
-                file.write(cmd_str)
-                file.close()
+
                 pid_list = circadian.get_pids()
                 for pid in pid_list:
                     os.kill(pid, 3)

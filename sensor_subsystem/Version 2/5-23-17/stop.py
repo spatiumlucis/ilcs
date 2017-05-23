@@ -1,8 +1,6 @@
 import subprocess
 import os
-import time
-time.sleep(2)
-os.system("fg")
+
 try:
     pir_sensor_pid = int(subprocess.check_output(['pgrep', '-f', 'pir_sensor.py']))
     os.kill(pir_sensor_pid, 9)
@@ -30,4 +28,3 @@ except:
     print "wait dead already"
 
 os.system("clear")
-print "System killed. Press the Enter key to continue..."

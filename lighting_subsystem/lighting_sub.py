@@ -152,7 +152,7 @@ def delete_cmd(delete_Event):
     end_green = int(float(cmd[1]))
     end_blue = int(float(cmd[2]))
 
-    #print "Values at delete: %s %s %s"%(end_red, end_green, end_blue)
+    print "Values at delete: %s %s %s"%(end_red, end_green, end_blue)
     secondary_mutex.acquire()
     try:
         end_red_s = PREV_SEC_RED

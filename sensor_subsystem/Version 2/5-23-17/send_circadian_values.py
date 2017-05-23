@@ -40,34 +40,8 @@ def handle_change_cmd(signum, stack):
     global cursor
     global WAKE_UP_TIME
     global COLOR_THRESHOLD
-    global MASTER_CIRCADIAN_TABLE
-    global USER_CIRCADIAN_TABLE
-    global USER_OFFSET_TABLE
-    global USER_LUX_TABLE
-    global MASTER_LUX_TABLE
-    global MASTER_OFFSET_TABLE
-    global begin_timer
-    global local_ip
     print "User changed something..."
     time.sleep(3)
-    file = open("config.txt", "r")
-    cmd_str = file.read()
-    file.close()
-    cmd = cmd_str.split('|')
-    temp_wake_time = int(cmd[0])
-
-    if temp_wake_time != WAKE_UP_TIME:
-        """
-        User changed wake up time
-        """
-        WAKE_UP_TIME = temp_wake_time
-        user_tuple = circadian.calc_user_tables(WAKE_UP_TIME, MASTER_CIRCADIAN_TABLE, MASTER_OFFSET_TABLE, MASTER_LUX_TABLE)
-        USER_CIRCADIAN_TABLE = user_tuple[0]
-        USER_OFFSET_TABLE = user_tuple[1]
-        USER_LUX_TABLE = user_tuple[2]
-        begin_timer = -60
-
-
 
 def handle_sleep_mode(signum, stack):
     global SLEEP_MODE
@@ -76,13 +50,12 @@ def handle_sleep_mode(signum, stack):
 
 def handle_wake_up(signum, stack):
     global SLEEP_MODE
-    # global begin_timer
+    global begin_timer
     SLEEP_MODE = False
-
-    # pid_list = circadian.get_pids()
-    # for pid in pid_list:
-    #     os.kill(pid, 7)
-    # begin_timer = time.time()
+    pid_list = circadian.get_pids()
+    for pid in pid_list:
+        os.kill(pid, 7)
+    begin_timer = time.time()
 
 def handle_send_compensation(signum, stack):
     print "RGB sent compensation value"
@@ -201,7 +174,6 @@ while True:
         if time_diff >= 60:
             circadian_cmd_tuple = circadian.get_circadian_cmd(USER_CIRCADIAN_TABLE, PREV_PRIMARY_COLORS, PREV_SECONDARY_COLORS, IS_PRIMARY_DEG, IS_SEC_ON, IS_SEC_DEG)
             circadian_cmd = circadian_cmd_tuple[0]
-
             pid_list = circadian.get_pids()
             for pid in pid_list:
                 os.kill(pid, 7)
@@ -217,5 +189,4 @@ while True:
             PREV_PRIMARY_COLORS[0] = circadian_cmd_tuple[1][0]
             PREV_PRIMARY_COLORS[1] = circadian_cmd_tuple[1][1]
             PREV_PRIMARY_COLORS[2] = circadian_cmd_tuple[1][2]
-
             begin_timer = time.time()
