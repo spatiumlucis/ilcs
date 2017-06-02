@@ -71,52 +71,18 @@ def handle_change_cmd(signum, stack):
 
 def handle_sleep_mode(signum, stack):
     global SLEEP_MODE
-    global PREV_PRIMARY_COLORS
-    global USER_CIRCADIAN_TABLE
-    global lighting_ip
-    global db
-    global cursor
-    global local_ip
-    global begin_timer
     SLEEP_MODE = True
     print "Entering sleep mode..."
-    """
-    Get user ct values for sleep cmd here.
-    """
-    sys_time = circadian.get_system_time()
-    sleep_cmd = str(USER_CIRCADIAN_TABLE[sys_time][0]) + "|" + str(USER_CIRCADIAN_TABLE[sys_time][1]) + "|" + str(
-        USER_CIRCADIAN_TABLE[sys_time][2]) + "|"
-    """
-    Connect to lighting subsystem and send sleep mode cmd
-    """
-    pir_cli_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    pir_cli_sock_host = lighting_ip.strip()
-    pir_cli_sock_port = 12346
-    pir_cli_sock.connect((pir_cli_sock_host, pir_cli_sock_port))
-    pir_cli_sock.send(sleep_cmd)
-    pir_cli_sock.close()
-    PREV_PRIMARY_COLORS[0] = 0
-    PREV_PRIMARY_COLORS[1] = 0
-    PREV_PRIMARY_COLORS[2] = 0
-    """
-    Update the DB with sleep mode status as 1
-    """
-    sql = """UPDATE sensor_status SET sleep_mode_status = 1 WHERE ip = %s"""
-    circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
-    begin_timer = -60
-
 
 def handle_wake_up(signum, stack):
     global SLEEP_MODE
-    global db
-    global cursor
-    global local_ip
+    # global begin_timer
     SLEEP_MODE = False
-    """
-    Update the DB with sleep mode status as 0
-    """
-    sql = """UPDATE sensor_status SET sleep_mode_status = 0 WHERE ip = %s"""
-    circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
+
+    # pid_list = circadian.get_pids()
+    # for pid in pid_list:
+    #     os.kill(pid, 7)
+    # begin_timer = time.time()
 
 def handle_send_compensation(signum, stack):
     print "RGB sent compensation value"
