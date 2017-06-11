@@ -54,19 +54,18 @@ def handle_change_cmd(signum, stack):
     cmd_str = file.read()
     file.close()
     cmd = cmd_str.split('|')
-    if cmd[0] != "N":
-        temp_wake_time = int(cmd[0])
+    temp_wake_time = int(cmd[0])
 
-        if temp_wake_time != WAKE_UP_TIME:
-            """
-            User changed wake up time
-            """
-            WAKE_UP_TIME = temp_wake_time
-            user_tuple = circadian.calc_user_tables(WAKE_UP_TIME, MASTER_CIRCADIAN_TABLE, MASTER_OFFSET_TABLE, MASTER_LUX_TABLE)
-            USER_CIRCADIAN_TABLE = user_tuple[0]
-            USER_OFFSET_TABLE = user_tuple[1]
-            USER_LUX_TABLE = user_tuple[2]
-            begin_timer = -60
+    if temp_wake_time != WAKE_UP_TIME:
+        """
+        User changed wake up time
+        """
+        WAKE_UP_TIME = temp_wake_time
+        user_tuple = circadian.calc_user_tables(WAKE_UP_TIME, MASTER_CIRCADIAN_TABLE, MASTER_OFFSET_TABLE, MASTER_LUX_TABLE)
+        USER_CIRCADIAN_TABLE = user_tuple[0]
+        USER_OFFSET_TABLE = user_tuple[1]
+        USER_LUX_TABLE = user_tuple[2]
+        begin_timer = -60
 
 
 
@@ -104,8 +103,7 @@ def handle_sleep_mode(signum, stack):
     """
     sql = """UPDATE sensor_status SET sleep_mode_status = 1 WHERE ip = %s"""
     circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
-    begin_timer = time.time()
-
+    begin_timer = -60
 
 
 def handle_wake_up(signum, stack):
@@ -113,14 +111,12 @@ def handle_wake_up(signum, stack):
     global db
     global cursor
     global local_ip
-    global begin_timer
     SLEEP_MODE = False
     """
     Update the DB with sleep mode status as 0
     """
     sql = """UPDATE sensor_status SET sleep_mode_status = 0 WHERE ip = %s"""
     circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
-    begin_timer = -60
 
 def handle_send_compensation(signum, stack):
     print "RGB sent compensation value"
