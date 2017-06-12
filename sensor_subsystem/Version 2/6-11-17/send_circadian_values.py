@@ -123,11 +123,7 @@ def handle_wake_up(signum, stack):
     begin_timer = -60
 
 def handle_send_compensation(signum, stack):
-    file = open("compensate.txt", "r")
-    cmd_str = file.read()
-    file.close()
-    cmd = cmd_str.split('|')
-    print "RGB sent compensation value", cmd
+    print "RGB sent compensation value"
     time.sleep(3)
 
 def handle_wait_for_cmd_dB_connect(signum, stack):

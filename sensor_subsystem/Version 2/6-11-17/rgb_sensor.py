@@ -22,12 +22,8 @@ COLOR_THRESHOLD = 0
 MASTER_CIRCADIAN_TABLE = circadian.init_circadian_table()
 MASTER_OFFSET_TABLE = circadian.init_offset_table()
 MASTER_LUX_TABLE = circadian.init_master_lux_table()
-TOO_BRIGHT_HANDLED = [False, False, False]
+TOO_BRIGHT = False
 local_ip = circadian.get_ip()
-SERVICE = [False, False, False]
-PRIMARY_DEGRADED =[False, False, False]
-SECONDARY_ON =[False, False, False]
-SECONDARY_DEGRADED = [False, False, False]
 
 """
 Signal Handlers
@@ -74,15 +70,7 @@ def handle_change_cmd(signum, stack):
 
 def handle_sleep_mode(signum, stack):
     global SLEEP_MODE
-    global db
-    global cursor
-    global local_ip
     SLEEP_MODE = True
-    """
-    Update database for sleep mode
-    """
-    sql = """UPDATE sensor_status SET red = 0 WHERE ip = %s"""
-    circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
 
 def handle_wake_up(signum, stack):
     global SLEEP_MODE
@@ -212,17 +200,12 @@ if ver == 0x44:
     """
     if red2 > USER_CIRCADIAN_TABLE[sys_time][0] and green2 > USER_CIRCADIAN_TABLE[sys_time][1] and blue2 > \
             USER_CIRCADIAN_TABLE[sys_time][2]:
-        TOO_BRIGHT_HANDLED = [True, True, True]
-        print "IT IS TOO BRIGHT IN THE BEGINNING!", TOO_BRIGHT_HANDLED
+        TOO_BRIGHT = True
+        print "IT IS TOO BRIGHT IN THE BEGINNING!", TOO_BRIGHT
 
 while True:
     if not SLEEP_MODE:
-        """
-        comp_cmd format:
-        PR|SR|PG|SG|PB|SB
-        These are the ending values. Beginning values are taken care of in send_circadian_values.py
-        """
-        comp_list = ["N","N","N","N","N","N"]
+
         data = bus.read_i2c_block_data(0x29, 0)
 
         red = float(data[3] << 8 | data[2])
@@ -238,112 +221,7 @@ while True:
         blue2 = (float(blue + (z - USER_OFFSET_TABLE[sys_time][2])) / 189) * 100
 
         print "I'm reading from the RGB %s %s %s..."%(red2, green2, blue2)
-
-
-        if (red2 < (USER_CIRCADIAN_TABLE[sys_time][0] - USER_CIRCADIAN_TABLE[sys_time][0]*COLOR_THRESHOLD)) and not \
-                SERVICE[0]:
-            if PRIMARY_DEGRADED[0]:
-                if SECONDARY_ON[0]:
-                    if SECONDARY_DEGRADED[0]:
-                        """
-                        Set service to true
-                        """
-                        SERVICE[0] = True
-
-                        """
-                        update the database
-                        """
-                        sql = """UPDATE sensor_status SET service = 1 WHERE ip = %s"""
-                        circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
-
-                    else:
-                        """
-                        Secondaries have degraded
-                        """
-                        SECONDARY_DEGRADED[0] = True
-
-                        """
-                        Add primary and secondary to comp_cmd
-                        """
-                        comp_list[0] = str(USER_CIRCADIAN_TABLE[sys_time][0] + (USER_CIRCADIAN_TABLE[sys_time][0] -
-                                                                               red2))
-                        comp_list[1] = str(2 * (USER_CIRCADIAN_TABLE[sys_time][0] - red2))
-                else:
-                    """
-                    Turn secondary red on
-                    """
-                    SECONDARY_ON[0] = True
-
-                    """
-                    Add primary and secondary to comp_cmd
-                    """
-                    comp_list[0] = str(USER_CIRCADIAN_TABLE[sys_time][0] + (USER_CIRCADIAN_TABLE[sys_time][0] - red2))
-                    comp_list[1] = str(USER_CIRCADIAN_TABLE[sys_time][0] - red2)
-            else:
-                """
-                Primary red has degraded
-                """
-                PRIMARY_DEGRADED[0] = True
-                TOO_BRIGHT_HANDLED[0] = False
-
-                """
-                Add to comp_cmd
-                """
-                comp_list[0] = str(USER_CIRCADIAN_TABLE[sys_time][0] + (USER_CIRCADIAN_TABLE[sys_time][0] - red2))
-
-                """
-                update the database
-                """
-                sql = """UPDATE sensor_status SET red_degraded = 1 WHERE ip = %s"""
-                circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
-        elif (red2 > USER_CIRCADIAN_TABLE[sys_time][0]) and not TOO_BRIGHT_HANDLED[0]:
-            """
-            sensor reading is too bright. Either from compensation or light pollution
-            then reduce back to normal and reset the service and compensation stuff
-            """
-            TOO_BRIGHT_HANDLED[0] = True
-            PRIMARY_DEGRADED[0] = False
-            SECONDARY_ON[0] = False
-            SECONDARY_DEGRADED[0] = False
-            SERVICE[0] = False
-            """
-            Update the database
-            """
-            sql = """UPDATE sensor_status SET red_degraded = 0 WHERE ip = %s"""
-            circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
-
         """
-        Green and blue check goes here
-        """
-
-        """
-        Check if a comp value needs to be sent
-        """
-        for key in comp_list:
-            if key != "N":
-                comp_cmd = comp_list[0]+"|"+comp_list[1]+"|"+comp_list[2]+"|"+comp_list[3]+"|"+comp_list[4]\
-                           +"|"+comp_list[5]+"|"
-                """
-                Write comp_cmd to compensate file and send signal to the send_circadian_values.py process
-                """
-                file = open("compensate.txt", "w")
-                file.write(comp_cmd)
-                file.close()
-                pid_list = circadian.get_pids()
-                for pid in pid_list:
-                    os.kill(pid, 6)
-                break
-        """
-        update database with sensor readings
-        """
-        if red2 > USER_CIRCADIAN_TABLE[sys_time][0]:
-            sql = """UPDATE sensor_status SET red = %s WHERE ip = %s"""
-            circadian.execute_dB_query(cursor, db, sql, ([USER_CIRCADIAN_TABLE[sys_time][0], local_ip]))
-        else:
-            sql = """UPDATE sensor_status SET red = %s WHERE ip = %s"""
-            circadian.execute_dB_query(cursor, db, sql, ([red2, local_ip]))
-
-        """
-        Green and blue check goes here
+        Compensation check will be done here
         """
     time.sleep(3)
