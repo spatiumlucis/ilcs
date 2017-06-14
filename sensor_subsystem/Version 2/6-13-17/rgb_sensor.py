@@ -28,9 +28,6 @@ SERVICE = [False, False, False]
 PRIMARY_DEGRADED =[False, False, False]
 SECONDARY_ON =[False, False, False]
 SECONDARY_DEGRADED = [False, False, False]
-OLD_RED = 0
-OLD_GREEN = 0
-OLD_BLUE = 0
 
 """
 Signal Handlers
@@ -85,10 +82,6 @@ def handle_sleep_mode(signum, stack):
     Update database for sleep mode
     """
     sql = """UPDATE sensor_status SET red = 0 WHERE ip = %s"""
-    circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
-    sql = """UPDATE sensor_status SET green = 0 WHERE ip = %s"""
-    circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
-    sql = """UPDATE sensor_status SET blue = 0 WHERE ip = %s"""
     circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
 
 def handle_wake_up(signum, stack):
@@ -226,8 +219,7 @@ while True:
     if not SLEEP_MODE:
         """
         comp_cmd format:
-        PR|SR$0/1|PG|SG$0/1|PB|SB$0/1
-        the $0/1 will indicate if the secondary had degraded
+        PR|SR|PG|SG|PB|SB
         These are the ending values. Beginning values are taken care of in send_circadian_values.py
         """
         comp_list = ["N","N","N","N","N","N"]
@@ -246,6 +238,7 @@ while True:
         blue2 = (float(blue + (z - USER_OFFSET_TABLE[sys_time][2])) / 189) * 100
 
         print "I'm reading from the RGB %s %s %s..."%(red2, green2, blue2)
+
 
         if (red2 < (USER_CIRCADIAN_TABLE[sys_time][0] - USER_CIRCADIAN_TABLE[sys_time][0]*COLOR_THRESHOLD)) and not \
                 SERVICE[0]:
@@ -274,7 +267,7 @@ while True:
                         """
                         comp_list[0] = str(USER_CIRCADIAN_TABLE[sys_time][0] + (USER_CIRCADIAN_TABLE[sys_time][0] -
                                                                                red2))
-                        comp_list[1] = str(2 * (USER_CIRCADIAN_TABLE[sys_time][0] - red2))+"$1"
+                        comp_list[1] = str(2 * (USER_CIRCADIAN_TABLE[sys_time][0] - red2))
                 else:
                     """
                     Turn secondary red on
@@ -285,7 +278,7 @@ while True:
                     Add primary and secondary to comp_cmd
                     """
                     comp_list[0] = str(USER_CIRCADIAN_TABLE[sys_time][0] + (USER_CIRCADIAN_TABLE[sys_time][0] - red2))
-                    comp_list[1] = str(USER_CIRCADIAN_TABLE[sys_time][0] - red2)+"$0"
+                    comp_list[1] = str(USER_CIRCADIAN_TABLE[sys_time][0] - red2)
             else:
                 """
                 Primary red has degraded
@@ -313,9 +306,6 @@ while True:
             SECONDARY_ON[0] = False
             SECONDARY_DEGRADED[0] = False
             SERVICE[0] = False
-
-            comp_list[0] = str(USER_CIRCADIAN_TABLE[sys_time][0])
-            comp_list[1] =  "0$0"
             """
             Update the database
             """
@@ -325,155 +315,7 @@ while True:
         """
         Green and blue check goes here
         """
-        if (green2 < (USER_CIRCADIAN_TABLE[sys_time][1] - USER_CIRCADIAN_TABLE[sys_time][1] * COLOR_THRESHOLD)) and \
-                not SERVICE[1]:
-            if PRIMARY_DEGRADED[1]:
-                if SECONDARY_ON[1]:
-                    if SECONDARY_DEGRADED[1]:
-                        """
-                        Set service to true
-                        """
-                        SERVICE[1] = True
 
-                        """
-                        update the database
-                        """
-                        sql = """UPDATE sensor_status SET service = 1 WHERE ip = %s"""
-                        circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
-
-                    else:
-                        """
-                        Secondaries have degraded
-                        """
-                        SECONDARY_DEGRADED[1] = True
-
-                        """
-                        Add primary and secondary to comp_cmd
-                        """
-                        comp_list[2] = str(USER_CIRCADIAN_TABLE[sys_time][1] + (USER_CIRCADIAN_TABLE[sys_time][1] -
-                                                                                green2))
-                        comp_list[3] = str(2 * (USER_CIRCADIAN_TABLE[sys_time][1] - green2)) + "$1"
-                else:
-                    """
-                    Turn secondary green on
-                    """
-                    SECONDARY_ON[1] = True
-
-                    """
-                    Add primary and secondary to comp_cmd
-                    """
-                    comp_list[2] = str(USER_CIRCADIAN_TABLE[sys_time][1] + (USER_CIRCADIAN_TABLE[sys_time][1] - green2))
-                    comp_list[3] = str(USER_CIRCADIAN_TABLE[sys_time][1] - green2) + "$0"
-            else:
-                """
-                Primary green has degraded
-                """
-                PRIMARY_DEGRADED[1] = True
-                TOO_BRIGHT_HANDLED[1] = False
-
-                """
-                Add to comp_cmd
-                """
-                comp_list[2] = str(USER_CIRCADIAN_TABLE[sys_time][1] + (USER_CIRCADIAN_TABLE[sys_time][1] - green2))
-
-                """
-                update the database
-                """
-                sql = """UPDATE sensor_status SET green_degraded = 1 WHERE ip = %s"""
-                circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
-        elif (green2 > USER_CIRCADIAN_TABLE[sys_time][1]) and not TOO_BRIGHT_HANDLED[1]:
-            """
-            sensor reading is too bright. Either from compensation or light pollution
-            then reduce back to normal and reset the service and compensation stuff
-            """
-            TOO_BRIGHT_HANDLED[1] = True
-            PRIMARY_DEGRADED[1] = False
-            SECONDARY_ON[1] = False
-            SECONDARY_DEGRADED[1] = False
-            SERVICE[1] = False
-
-            comp_list[2] = str(USER_CIRCADIAN_TABLE[sys_time][1])
-            comp_list[3] = "0$0"
-            """
-            Update the database
-            """
-            sql = """UPDATE sensor_status SET green_degraded = 0 WHERE ip = %s"""
-            circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
-
-        if (blue2 < (USER_CIRCADIAN_TABLE[sys_time][2] - USER_CIRCADIAN_TABLE[sys_time][2] * COLOR_THRESHOLD)) and not \
-                SERVICE[2]:
-            if PRIMARY_DEGRADED[2]:
-                if SECONDARY_ON[2]:
-                    if SECONDARY_DEGRADED[2]:
-                        """
-                        Set service to true
-                        """
-                        SERVICE[2] = True
-
-                        """
-                        update the database
-                        """
-                        sql = """UPDATE sensor_status SET service = 1 WHERE ip = %s"""
-                        circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
-
-                    else:
-                        """
-                        Secondaries have degraded
-                        """
-                        SECONDARY_DEGRADED[2] = True
-
-                        """
-                        Add primary and secondary to comp_cmd
-                        """
-                        comp_list[4] = str(USER_CIRCADIAN_TABLE[sys_time][2] + (USER_CIRCADIAN_TABLE[sys_time][2] -
-                                                                                blue2))
-                        comp_list[5] = str(2 * (USER_CIRCADIAN_TABLE[sys_time][2] - blue2)) + "$1"
-                else:
-                    """
-                    Turn secondary blue on
-                    """
-                    SECONDARY_ON[2] = True
-
-                    """
-                    Add primary and secondary to comp_cmd
-                    """
-                    comp_list[4] = str(USER_CIRCADIAN_TABLE[sys_time][2] + (USER_CIRCADIAN_TABLE[sys_time][2] - blue2))
-                    comp_list[5] = str(USER_CIRCADIAN_TABLE[sys_time][2] - blue2) + "$0"
-            else:
-                """
-                Primary blue has degraded
-                """
-                PRIMARY_DEGRADED[2] = True
-                TOO_BRIGHT_HANDLED[2] = False
-
-                """
-                Add to comp_cmd
-                """
-                comp_list[4] = str(USER_CIRCADIAN_TABLE[sys_time][2] + (USER_CIRCADIAN_TABLE[sys_time][2] - blue2))
-
-                """
-                update the database
-                """
-                sql = """UPDATE sensor_status SET blue_degraded = 1 WHERE ip = %s"""
-                circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
-        elif (blue2 > USER_CIRCADIAN_TABLE[sys_time][2]) and not TOO_BRIGHT_HANDLED[2]:
-            """
-            sensor reading is too bright. Either from compensation or light pollution
-            then reduce back to normal and reset the service and compensation stuff
-            """
-            TOO_BRIGHT_HANDLED[2] = True
-            PRIMARY_DEGRADED[2] = False
-            SECONDARY_ON[2] = False
-            SECONDARY_DEGRADED[2] = False
-            SERVICE[2] = False
-
-            comp_list[4] = str(USER_CIRCADIAN_TABLE[sys_time][2])
-            comp_list[5] = "0$0"
-            """
-            Update the database
-            """
-            sql = """UPDATE sensor_status SET blue_degraded = 0 WHERE ip = %s"""
-            circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
         """
         Check if a comp value needs to be sent
         """
@@ -494,53 +336,14 @@ while True:
         """
         update database with sensor readings
         """
-        if red2 > (OLD_RED + OLD_RED * 0.05) or red2 < (OLD_RED - OLD_RED * 0.05):
-            if red2 > USER_CIRCADIAN_TABLE[sys_time][0]:
-                OLD_RED = USER_CIRCADIAN_TABLE[sys_time][0]
-                sql = """UPDATE sensor_status SET red = %s WHERE ip = %s"""
-                circadian.execute_dB_query(cursor, db, sql, ([USER_CIRCADIAN_TABLE[sys_time][0], local_ip]))
-            else:
-                OLD_RED = red2
-                sql = """UPDATE sensor_status SET red = %s WHERE ip = %s"""
-                circadian.execute_dB_query(cursor, db, sql, ([red2, local_ip]))
-            """
-            Write comp_cmd to compensate file and send signal to the send_circadian_values.py process
-            """
-            sensor_cmd = str(OLD_RED) + "|" + str(OLD_GREEN) + "|" + str(OLD_BLUE) + "|"
-            file = open("sensor_data.txt", "w")
-            file.write(sensor_cmd)
-            file.close()
-        if green2 > (OLD_GREEN + OLD_GREEN * 0.05) or green2 < (OLD_GREEN - OLD_GREEN * 0.05):
-            if green2 > USER_CIRCADIAN_TABLE[sys_time][1]:
-                OLD_GREEN = USER_CIRCADIAN_TABLE[sys_time][1]
-                sql = """UPDATE sensor_status SET green = %s WHERE ip = %s"""
-                circadian.execute_dB_query(cursor, db, sql, ([USER_CIRCADIAN_TABLE[sys_time][1], local_ip]))
-            else:
-                OLD_GREEN = green2
-                sql = """UPDATE sensor_status SET green = %s WHERE ip = %s"""
-                circadian.execute_dB_query(cursor, db, sql, ([green2, local_ip]))
-            """
-            Write comp_cmd to compensate file and send signal to the send_circadian_values.py process
-            """
-            sensor_cmd = str(OLD_RED) + "|" + str(OLD_GREEN) + "|" + str(OLD_BLUE) + "|"
-            file = open("sensor_data.txt", "w")
-            file.write(sensor_cmd)
-            file.close()
-        if blue2 > (OLD_BLUE + OLD_BLUE * 0.05) or blue2 < (OLD_BLUE - OLD_BLUE * 0.05):
-            if blue2 > USER_CIRCADIAN_TABLE[sys_time][2]:
-                OLD_BLUE = USER_CIRCADIAN_TABLE[sys_time][2]
-                sql = """UPDATE sensor_status SET blue = %s WHERE ip = %s"""
-                circadian.execute_dB_query(cursor, db, sql, ([USER_CIRCADIAN_TABLE[sys_time][2], local_ip]))
-            else:
-                OLD_BLUE = blue2
-                sql = """UPDATE sensor_status SET blue = %s WHERE ip = %s"""
-                circadian.execute_dB_query(cursor, db, sql, ([blue2, local_ip]))
-            """
-            Write comp_cmd to compensate file and send signal to the send_circadian_values.py process
-            """
-            sensor_cmd = str(OLD_RED) + "|" + str(OLD_GREEN) + "|" + str(OLD_BLUE) + "|"
-            file = open("sensor_data.txt", "w")
-            file.write(sensor_cmd)
-            file.close()
+        if red2 > USER_CIRCADIAN_TABLE[sys_time][0]:
+            sql = """UPDATE sensor_status SET red = %s WHERE ip = %s"""
+            circadian.execute_dB_query(cursor, db, sql, ([USER_CIRCADIAN_TABLE[sys_time][0], local_ip]))
+        else:
+            sql = """UPDATE sensor_status SET red = %s WHERE ip = %s"""
+            circadian.execute_dB_query(cursor, db, sql, ([red2, local_ip]))
 
+        """
+        Green and blue check goes here
+        """
     time.sleep(3)

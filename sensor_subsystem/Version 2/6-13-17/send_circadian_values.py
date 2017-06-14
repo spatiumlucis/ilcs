@@ -73,7 +73,6 @@ def handle_change_cmd(signum, stack):
 def handle_sleep_mode(signum, stack):
     global SLEEP_MODE
     global PREV_PRIMARY_COLORS
-    global PREV_SECONDARY_COLORS
     global USER_CIRCADIAN_TABLE
     global lighting_ip
     global db
@@ -100,16 +99,14 @@ def handle_sleep_mode(signum, stack):
     PREV_PRIMARY_COLORS[0] = 0
     PREV_PRIMARY_COLORS[1] = 0
     PREV_PRIMARY_COLORS[2] = 0
-
-    PREV_SECONDARY_COLORS[0] = 0
-    PREV_SECONDARY_COLORS[1] = 0
-    PREV_SECONDARY_COLORS[2] = 0
     """
     Update the DB with sleep mode status as 1
     """
     sql = """UPDATE sensor_status SET sleep_mode_status = 1 WHERE ip = %s"""
     circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
     begin_timer = time.time()
+
+
 
 def handle_wake_up(signum, stack):
     global SLEEP_MODE
@@ -126,124 +123,11 @@ def handle_wake_up(signum, stack):
     begin_timer = -60
 
 def handle_send_compensation(signum, stack):
-    global USER_CIRCADIAN_TABLE
-    global IS_PRIMARY_DEG
-    global IS_SEC_DEG
-    global IS_SEC_ON
-    global PREV_PRIMARY_COLORS
-    global PREV_SECONDARY_COLORS
-    """
-    Format: 
-    (yes I know its different from the normal circadian format but the lighting code was made first)
-    current_r|new_r|current_sec_r|new_sec_r|c_g|n_g|c_s_g|n_s_g|c_b|n_b|c_s_b|n_s_b|
-    """
-
-    """
-    Get the values from rgb_sensor.py compensate.txt file
-    """
     file = open("compensate.txt", "r")
     cmd_str = file.read()
     file.close()
     cmd = cmd_str.split('|')
-    red_sec = cmd[1].split("$")
-    green_sec = cmd[3].split("$")
-    blue_sec = cmd[5].split("$")
-
     print "RGB sent compensation value", cmd
-    sys_time = circadian.get_system_time()
-
-    if cmd[0] != "N":
-        if float(cmd[0]) == USER_CIRCADIAN_TABLE[sys_time][0]:
-            IS_PRIMARY_DEG[0] = False
-        else:
-            IS_PRIMARY_DEG[0] = True
-        comp_cmd = str(PREV_PRIMARY_COLORS[0]) + "|" + cmd[0] + "|"
-        PREV_PRIMARY_COLORS[0] = float(cmd[0])
-    else:
-        comp_cmd = "N|N|"
-    if red_sec[0] != "N":
-        if float(red_sec[0]) > 0:
-            IS_SEC_ON[0] = True
-        else:
-            IS_SEC_ON[0] = False
-
-        if int(red_sec[1]):
-            """
-            Secondary red degraded
-            """
-            IS_SEC_DEG[0] = True
-        else:
-            IS_SEC_DEG[0] = False
-
-        comp_cmd += str(PREV_SECONDARY_COLORS[0]) + "|" + red_sec[0] + "|"
-        PREV_SECONDARY_COLORS[0] = float(red_sec[0])
-    else:
-        comp_cmd += "N|N|"
-    if cmd[2] != "N":
-        if float(cmd[2]) == USER_CIRCADIAN_TABLE[sys_time][1]:
-            IS_PRIMARY_DEG[1] = False
-        else:
-            IS_PRIMARY_DEG[1] = True
-        comp_cmd += str(PREV_PRIMARY_COLORS[1]) + "|" + cmd[2] + "|"
-        PREV_PRIMARY_COLORS[1] = float(cmd[2])
-    else:
-        comp_cmd += "N|N|"
-    if green_sec[0] != "N":
-        if float(green_sec[0]) > 0:
-            IS_SEC_ON[1] = True
-        else:
-            IS_SEC_ON[1] = False
-
-        if int(green_sec[1]):
-            """
-            Secondary green degraded
-            """
-            IS_SEC_DEG[1] = True
-        else:
-            IS_SEC_DEG[1] = False
-
-        comp_cmd += str(PREV_SECONDARY_COLORS[1]) + "|" + green_sec[0] + "|"
-        PREV_SECONDARY_COLORS[1] = float(green_sec[0])
-    else:
-        comp_cmd += "N|N|"
-    if cmd[4] != "N":
-        if float(cmd[4]) == USER_CIRCADIAN_TABLE[sys_time][2]:
-            IS_PRIMARY_DEG[2] = False
-        else:
-            IS_PRIMARY_DEG[2] = True
-        comp_cmd += str(PREV_PRIMARY_COLORS[2]) + "|" + cmd[4] + "|"
-        PREV_PRIMARY_COLORS[2] = float(cmd[4])
-    else:
-        comp_cmd += "N|N|"
-    if blue_sec[0] != "N":
-        if float(blue_sec[0]) > 0:
-            IS_SEC_ON[2] = True
-        else:
-            IS_SEC_ON[2] = False
-
-        if int(blue_sec[1]):
-            """
-            Secondary green degraded
-            """
-            IS_SEC_DEG[2] = True
-        else:
-            IS_SEC_DEG[2] = False
-
-        comp_cmd += str(PREV_SECONDARY_COLORS[2]) + "|" + blue_sec[0] + "|"
-        PREV_SECONDARY_COLORS[2] = float(blue_sec[0])
-    else:
-        comp_cmd += "N|N|"
-
-    """
-    create socket connection to send comp cmd
-    """
-    comp_cli_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    comp_cli_sock_host = lighting_ip.strip()
-    comp_cli_sock_port = 12356
-    comp_cli_sock.connect((comp_cli_sock_host, comp_cli_sock_port))
-    comp_cli_sock.send(comp_cmd)
-    comp_cli_sock.close()
-
     time.sleep(3)
 
 def handle_wait_for_cmd_dB_connect(signum, stack):
@@ -375,10 +259,5 @@ while True:
             PREV_PRIMARY_COLORS[0] = circadian_cmd_tuple[1][0]
             PREV_PRIMARY_COLORS[1] = circadian_cmd_tuple[1][1]
             PREV_PRIMARY_COLORS[2] = circadian_cmd_tuple[1][2]
-
-            if IS_SEC_ON[0] or IS_SEC_ON[1] or IS_SEC_ON[2]:
-                PREV_SECONDARY_COLORS[0] = circadian_cmd_tuple[2][0]
-                PREV_SECONDARY_COLORS[1] = circadian_cmd_tuple[2][1]
-                PREV_SECONDARY_COLORS[2] = circadian_cmd_tuple[2][2]
 
             begin_timer = time.time()

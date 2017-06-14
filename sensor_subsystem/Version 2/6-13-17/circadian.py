@@ -1111,76 +1111,20 @@ def execute_dB_query(cursor, db, sql, sql_args):
 def get_circadian_cmd(USER_CIRCADIAN_TABLE, PREV_PRIMARY_COLORS, PREV_SECONDARY_COLORS, IS_PRIMARY_DEG, IS_SEC_ON, IS_SEC_DEG):
     sys_time = get_system_time()
     new_prev_primary_colors = []
-    new_prev_secondary_colors = []
-
-    if IS_PRIMARY_DEG[0] or IS_PRIMARY_DEG[1] or IS_PRIMARY_DEG[2]:
-        """
-        Get the sensor values from sensor_data.txt file
-        """
-        file = open("sensor_data.txt", "r")
-        sensor_str = file.read()
-        file.close()
-        sensor_data = sensor_str.split("|")
-        red2 = float(sensor_data[0])
-        green2 = float(sensor_data[1])
-        blue2 = float(sensor_data[2])
-
+    """
+    Do the comp check later...
+    """
     """
     Format:
     EndPrRed|EndSeRed|EndPrGr|EndSeGr|EndPrBl|EndSeBl|StartPrRed|StartSeRed|StartPrGr|StartSeGr|StartPrBl|StartSeBl|
     """
-    if IS_PRIMARY_DEG[0]:
-        circadian_cmd = str(USER_CIRCADIAN_TABLE[sys_time][0] + (USER_CIRCADIAN_TABLE[sys_time][0] - red2)) + "|"
-        new_prev_primary_colors.append(USER_CIRCADIAN_TABLE[sys_time][0] + (USER_CIRCADIAN_TABLE[sys_time][0] - red2))
-    else:
-        circadian_cmd = str(USER_CIRCADIAN_TABLE[sys_time][0]) + "|"
-        new_prev_primary_colors.append(USER_CIRCADIAN_TABLE[sys_time][0])
-    if IS_SEC_ON[0]:
-        if IS_SEC_DEG[0]:
-            circadian_cmd += str(2 * (USER_CIRCADIAN_TABLE[sys_time][0] - red2)) + "|"
-            new_prev_secondary_colors.append(2 * (USER_CIRCADIAN_TABLE[sys_time][0] - red2))
-        else:
-            circadian_cmd += str(USER_CIRCADIAN_TABLE[sys_time][0] - red2) + "|"
-            new_prev_secondary_colors.append(USER_CIRCADIAN_TABLE[sys_time][0] - red2)
-    else:
-        circadian_cmd += "0|"
-        new_prev_secondary_colors.append(0)
+    circadian_cmd = str(USER_CIRCADIAN_TABLE[sys_time][0]) + "|0|" + str(USER_CIRCADIAN_TABLE[sys_time][1]) + "|0|" + str(USER_CIRCADIAN_TABLE[sys_time][2]) + "|0|"
+    circadian_cmd += str(PREV_PRIMARY_COLORS[0]) + "|0|" + str(PREV_PRIMARY_COLORS[1]) + "|0|" + str(PREV_PRIMARY_COLORS[2]) + "|0|"
 
-    if IS_PRIMARY_DEG[1]:
-        circadian_cmd += str(USER_CIRCADIAN_TABLE[sys_time][1] + (USER_CIRCADIAN_TABLE[sys_time][1] - green2)) + "|"
-        new_prev_primary_colors.append(USER_CIRCADIAN_TABLE[sys_time][1] + (USER_CIRCADIAN_TABLE[sys_time][1] - green2))
-    else:
-        circadian_cmd += str(USER_CIRCADIAN_TABLE[sys_time][1]) + "|"
-        new_prev_primary_colors.append(USER_CIRCADIAN_TABLE[sys_time][1])
-    if IS_SEC_ON[1]:
-        if IS_SEC_DEG[1]:
-            circadian_cmd += str(2 * (USER_CIRCADIAN_TABLE[sys_time][1] - green2)) + "|"
-            new_prev_secondary_colors.append(2 * (USER_CIRCADIAN_TABLE[sys_time][1] - green2))
-        else:
-            circadian_cmd += str(USER_CIRCADIAN_TABLE[sys_time][1] - green2) + "|"
-            new_prev_secondary_colors.append(USER_CIRCADIAN_TABLE[sys_time][1] - green2)
-    else:
-        circadian_cmd += "0|"
-        new_prev_secondary_colors.append(0)
-
-    if IS_PRIMARY_DEG[2]:
-        circadian_cmd += str(USER_CIRCADIAN_TABLE[sys_time][2] + (USER_CIRCADIAN_TABLE[sys_time][2] - blue2)) + "|"
-        new_prev_primary_colors.append(USER_CIRCADIAN_TABLE[sys_time][2] + (USER_CIRCADIAN_TABLE[sys_time][2] - blue2))
-    else:
-        circadian_cmd += str(USER_CIRCADIAN_TABLE[sys_time][2]) + "|"
-        new_prev_primary_colors.append(USER_CIRCADIAN_TABLE[sys_time][2])
-    if IS_SEC_ON[2]:
-        if IS_SEC_DEG[2]:
-            circadian_cmd += str(2 * (USER_CIRCADIAN_TABLE[sys_time][2] - blue2)) + "|"
-            new_prev_secondary_colors.append(2 * (USER_CIRCADIAN_TABLE[sys_time][2] - blue2))
-        else:
-            circadian_cmd += str(USER_CIRCADIAN_TABLE[sys_time][2] - blue2) + "|"
-            new_prev_secondary_colors.append(USER_CIRCADIAN_TABLE[sys_time][2] - blue2)
-    else:
-        circadian_cmd += "0|"
-        new_prev_secondary_colors.append(0)
-    circadian_cmd += str(PREV_PRIMARY_COLORS[0]) + "|" + str(PREV_SECONDARY_COLORS[0]) + "|" + \
-                     str(PREV_PRIMARY_COLORS[1]) + "|" + str(PREV_SECONDARY_COLORS[1]) + "|" + \
-                     str(PREV_PRIMARY_COLORS[2]) + "|" + str(PREV_SECONDARY_COLORS[2])
-
-    return (circadian_cmd, new_prev_primary_colors, new_prev_secondary_colors)
+    """
+    Do comp check later...
+    """
+    new_prev_primary_colors.append(USER_CIRCADIAN_TABLE[sys_time][0])
+    new_prev_primary_colors.append(USER_CIRCADIAN_TABLE[sys_time][1])
+    new_prev_primary_colors.append(USER_CIRCADIAN_TABLE[sys_time][2])
+    return (circadian_cmd, new_prev_primary_colors)
