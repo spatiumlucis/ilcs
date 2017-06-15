@@ -152,7 +152,7 @@ def handle_send_compensation(signum, stack):
     green_sec = cmd[3].split("$")
     blue_sec = cmd[5].split("$")
 
-    print "RGB sent compensation value..."
+    print "RGB sent compensation value", cmd
     sys_time = circadian.get_system_time()
 
     if cmd[0] != "N":
@@ -376,10 +376,7 @@ while True:
             circadian_cli_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             circadian_cli_sock_host = lighting_ip.strip()
             circadian_cli_sock_port = 12347
-            try:
-                circadian_cli_sock.connect((circadian_cli_sock_host, circadian_cli_sock_port))
-            except:
-                exit()
+            circadian_cli_sock.connect((circadian_cli_sock_host, circadian_cli_sock_port))
             circadian_cli_sock.send(circadian_cmd)
             circadian_cli_sock.close()
             PREV_PRIMARY_COLORS[0] = circadian_cmd_tuple[1][0]

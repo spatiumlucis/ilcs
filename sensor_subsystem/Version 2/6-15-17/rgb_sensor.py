@@ -173,7 +173,7 @@ USER_OFFSET_TABLE = user_tuple[1]
 USER_LUX_TABLE = user_tuple[2]
 
 """
-Alert other Python scripts that the RGB has connected
+Alert other Python scripts that the PIR has connected
 """
 pid_list = circadian.get_pids()
 for pid in pid_list:
@@ -222,7 +222,7 @@ if ver == 0x44:
     if red2 > USER_CIRCADIAN_TABLE[sys_time][0] and green2 > USER_CIRCADIAN_TABLE[sys_time][1] and blue2 > \
             USER_CIRCADIAN_TABLE[sys_time][2]:
         TOO_BRIGHT_HANDLED = [True, True, True]
-        #print "IT IS TOO BRIGHT IN THE BEGINNING!", TOO_BRIGHT_HANDLED
+        print "IT IS TOO BRIGHT IN THE BEGINNING!", TOO_BRIGHT_HANDLED
 
 while True:
     if not SLEEP_MODE:
@@ -247,7 +247,7 @@ while True:
         green2 = (float(green + (y - USER_OFFSET_TABLE[sys_time][1])) / 121) * 100
         blue2 = (float(blue + (z - USER_OFFSET_TABLE[sys_time][2])) / 189) * 100
 
-        #print "I'm reading from the RGB %s %s %s..."%(red2, green2, blue2)
+        print "I'm reading from the RGB %s %s %s..."%(red2, green2, blue2)
         """
         Get Lux and Lumens
         """
@@ -297,9 +297,6 @@ while True:
                         """
                         SECONDARY_DEGRADED[0] = True
 
-                        message = "Sensor Subsystem (" + local_ip + ") secondary red LEDs have degraded."
-                        circadian.create_log(cursor, db, message, "None")
-
                         """
                         Add primary and secondary to comp_cmd
                         """
@@ -312,9 +309,6 @@ while True:
                     """
                     SECONDARY_ON[0] = True
 
-                    message = "Sensor Subsystem (" + local_ip + ") secondary red LEDs have turned on."
-                    circadian.create_log(cursor, db, message, "None")
-
                     """
                     Add primary and secondary to comp_cmd
                     """
@@ -326,9 +320,6 @@ while True:
                 """
                 PRIMARY_DEGRADED[0] = True
                 TOO_BRIGHT_HANDLED[0] = False
-
-                message = "Sensor Subsystem (" + local_ip + ") primary red LEDs have degraded."
-                circadian.create_log(cursor, db, message, "None")
 
                 """
                 Add to comp_cmd
@@ -360,13 +351,6 @@ while True:
             """
             sql = """UPDATE sensor_status SET red_degraded = 0 WHERE ip = %s"""
             circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
-            sql = """SELECT * FROM sensor_status WHERE ip = %s"""
-            temp = circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
-            if not int(temp[0][5]) and not int(temp[0][6]) and not int(temp[0][7]):
-                sql = """UPDATE sensor_status SET lumens_degraded = 0 WHERE ip = %s"""
-                circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
-                sql = """UPDATE sensor_status SET service = 0 WHERE ip = %s"""
-                circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
 
         """
         Green and blue check goes here
@@ -393,9 +377,6 @@ while True:
                         """
                         SECONDARY_DEGRADED[1] = True
 
-                        message = "Sensor Subsystem (" + local_ip + ") secondary green LEDs have degraded."
-                        circadian.create_log(cursor, db, message, "None")
-
                         """
                         Add primary and secondary to comp_cmd
                         """
@@ -408,9 +389,6 @@ while True:
                     """
                     SECONDARY_ON[1] = True
 
-                    message = "Sensor Subsystem (" + local_ip + ") secondary green LEDs have turned on."
-                    circadian.create_log(cursor, db, message, "None")
-
                     """
                     Add primary and secondary to comp_cmd
                     """
@@ -422,9 +400,6 @@ while True:
                 """
                 PRIMARY_DEGRADED[1] = True
                 TOO_BRIGHT_HANDLED[1] = False
-
-                message = "Sensor Subsystem (" + local_ip + ") primary green LEDs have degraded."
-                circadian.create_log(cursor, db, message, "None")
 
                 """
                 Add to comp_cmd
@@ -456,13 +431,6 @@ while True:
             """
             sql = """UPDATE sensor_status SET green_degraded = 0 WHERE ip = %s"""
             circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
-            sql = """SELECT * FROM sensor_status WHERE ip = %s"""
-            temp = circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
-            if not int(temp[0][5]) and not int(temp[0][6]) and not int(temp[0][7]):
-                sql = """UPDATE sensor_status SET lumens_degraded = 0 WHERE ip = %s"""
-                circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
-                sql = """UPDATE sensor_status SET service = 0 WHERE ip = %s"""
-                circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
 
         if (blue2 < (USER_CIRCADIAN_TABLE[sys_time][2] - USER_CIRCADIAN_TABLE[sys_time][2] * COLOR_THRESHOLD)) and not \
                 SERVICE[2]:
@@ -486,9 +454,6 @@ while True:
                         """
                         SECONDARY_DEGRADED[2] = True
 
-                        message = "Sensor Subsystem (" + local_ip + ") secondary blue LEDs have degraded."
-                        circadian.create_log(cursor, db, message, "None")
-
                         """
                         Add primary and secondary to comp_cmd
                         """
@@ -501,9 +466,6 @@ while True:
                     """
                     SECONDARY_ON[2] = True
 
-                    message = "Sensor Subsystem (" + local_ip + ") secondary blue LEDs have turned on."
-                    circadian.create_log(cursor, db, message, "None")
-
                     """
                     Add primary and secondary to comp_cmd
                     """
@@ -515,9 +477,6 @@ while True:
                 """
                 PRIMARY_DEGRADED[2] = True
                 TOO_BRIGHT_HANDLED[2] = False
-
-                message = "Sensor Subsystem (" + local_ip + ") primary blue LEDs have degraded."
-                circadian.create_log(cursor, db, message, "None")
 
                 """
                 Add to comp_cmd
@@ -549,13 +508,6 @@ while True:
             """
             sql = """UPDATE sensor_status SET blue_degraded = 0 WHERE ip = %s"""
             circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
-            sql = """SELECT * FROM sensor_status WHERE ip = %s"""
-            temp = circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
-            if not int(temp[0][5]) and not int(temp[0][6]) and not int(temp[0][7]):
-                sql = """UPDATE sensor_status SET lumens_degraded = 0 WHERE ip = %s"""
-                circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
-                sql = """UPDATE sensor_status SET service = 0 WHERE ip = %s"""
-                circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
         """
         Check if a comp value needs to be sent
         """
@@ -592,13 +544,6 @@ while True:
             file = open("sensor_data.txt", "w")
             file.write(sensor_cmd)
             file.close()
-
-            """
-            Store lumens into DB
-            """
-            sql = """UPDATE sensor_status SET lumens = %s WHERE ip = %s"""
-            circadian.execute_dB_query(cursor, db, sql, ([lumens, local_ip]))
-
         if green2 > (OLD_GREEN + OLD_GREEN * 0.05) or green2 < (OLD_GREEN - OLD_GREEN * 0.05):
             if green2 > USER_CIRCADIAN_TABLE[sys_time][1]:
                 OLD_GREEN = USER_CIRCADIAN_TABLE[sys_time][1]
@@ -615,13 +560,6 @@ while True:
             file = open("sensor_data.txt", "w")
             file.write(sensor_cmd)
             file.close()
-
-            """
-            Store lumens into DB
-            """
-            sql = """UPDATE sensor_status SET lumens = %s WHERE ip = %s"""
-            circadian.execute_dB_query(cursor, db, sql, ([lumens, local_ip]))
-
         if blue2 > (OLD_BLUE + OLD_BLUE * 0.05) or blue2 < (OLD_BLUE - OLD_BLUE * 0.05):
             if blue2 > USER_CIRCADIAN_TABLE[sys_time][2]:
                 OLD_BLUE = USER_CIRCADIAN_TABLE[sys_time][2]
@@ -638,11 +576,10 @@ while True:
             file = open("sensor_data.txt", "w")
             file.write(sensor_cmd)
             file.close()
-
-            """
-            Store lumens into DB
-            """
-            sql = """UPDATE sensor_status SET lumens = %s WHERE ip = %s"""
-            circadian.execute_dB_query(cursor, db, sql, ([lumens, local_ip]))
+        """
+        Store lumens into DB
+        """
+        sql = """UPDATE sensor_status SET lumens = %s WHERE ip = %s"""
+        circadian.execute_dB_query(cursor, db, sql, ([lumens, local_ip]))
 
     time.sleep(3)

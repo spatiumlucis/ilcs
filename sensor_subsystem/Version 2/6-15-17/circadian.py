@@ -3,7 +3,6 @@ import socket
 import MySQLdb
 import time
 import math
-import datetime
 
 def init_circadian_table():
     """
@@ -1084,12 +1083,6 @@ def get_ip():
     finally:
         s.close()
     return IP
-
-def create_log(cursor, db, message, user_name):
-    sql = """INSERT INTO system_logs(time, message, user) VALUES(%s, %s, %s)"""
-    current_time = datetime.datetime.now()
-    current_time = current_time.strftime("%Y-%m-%d %H:%M")
-    execute_dB_query(cursor, db, sql, ([current_time, message, user_name]))
 
 def execute_dB_query(cursor, db, sql, sql_args):
     if sql[0] != 'S' and sql[0] != 's':

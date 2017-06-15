@@ -103,8 +103,6 @@ def handle_sleep_mode(signum, stack):
     PREV_SECONDARY_COLORS[0] = 0
     PREV_SECONDARY_COLORS[1] = 0
     PREV_SECONDARY_COLORS[2] = 0
-    message = "Sensor Subsystem (" + local_ip + ") has entered sleep mode."
-    circadian.create_log(cursor, db, message, "None")
     """
     Update the DB with sleep mode status as 1
     """
@@ -119,8 +117,6 @@ def handle_wake_up(signum, stack):
     global local_ip
     global begin_timer
     SLEEP_MODE = False
-    message = "Sensor Subsystem (" + local_ip + ") has exited sleep mode."
-    circadian.create_log(cursor, db, message, "None")
     """
     Update the DB with sleep mode status as 0
     """
@@ -152,7 +148,7 @@ def handle_send_compensation(signum, stack):
     green_sec = cmd[3].split("$")
     blue_sec = cmd[5].split("$")
 
-    print "RGB sent compensation value..."
+    print "RGB sent compensation value", cmd
     sys_time = circadian.get_system_time()
 
     if cmd[0] != "N":
@@ -320,6 +316,13 @@ USER_OFFSET_TABLE = user_tuple[1]
 USER_LUX_TABLE = user_tuple[2]
 
 """
+Alert other Python scripts that the PIR has connected
+"""
+pid_list = circadian.get_pids()
+for pid in pid_list:
+    os.kill(pid, 15)
+
+"""
 Wait for other sensor scripts to connect to the DB
 """
 while not WAIT_FOR_CMD_DB_CONNECTED or not PIR_DB_CONNECTED or not USR_DB_CONNECTED or not RGB_DB_CONNECTED:
@@ -348,17 +351,6 @@ PREV_PRIMARY_COLORS[1] = circadian_cmd_tuple[1][1]
 PREV_PRIMARY_COLORS[2] = circadian_cmd_tuple[1][2]
 begin_timer = time.time()
 
-"""
-Alert other Python scripts that the send_cricadian has connected
-note how this happens later than the other scripts because you
-need to have a light value on before the rgb sensor starts reading
-to prevent false positive compensation values when it is dark in the
-room.
-"""
-pid_list = circadian.get_pids()
-for pid in pid_list:
-    os.kill(pid, 15)
-
 while True:
     if not SLEEP_MODE:
         current_timer = time.time()
@@ -376,10 +368,7 @@ while True:
             circadian_cli_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             circadian_cli_sock_host = lighting_ip.strip()
             circadian_cli_sock_port = 12347
-            try:
-                circadian_cli_sock.connect((circadian_cli_sock_host, circadian_cli_sock_port))
-            except:
-                exit()
+            circadian_cli_sock.connect((circadian_cli_sock_host, circadian_cli_sock_port))
             circadian_cli_sock.send(circadian_cmd)
             circadian_cli_sock.close()
             PREV_PRIMARY_COLORS[0] = circadian_cmd_tuple[1][0]

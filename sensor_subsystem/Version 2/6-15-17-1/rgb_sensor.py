@@ -222,7 +222,7 @@ if ver == 0x44:
     if red2 > USER_CIRCADIAN_TABLE[sys_time][0] and green2 > USER_CIRCADIAN_TABLE[sys_time][1] and blue2 > \
             USER_CIRCADIAN_TABLE[sys_time][2]:
         TOO_BRIGHT_HANDLED = [True, True, True]
-        #print "IT IS TOO BRIGHT IN THE BEGINNING!", TOO_BRIGHT_HANDLED
+        print "IT IS TOO BRIGHT IN THE BEGINNING!", TOO_BRIGHT_HANDLED
 
 while True:
     if not SLEEP_MODE:
@@ -247,7 +247,7 @@ while True:
         green2 = (float(green + (y - USER_OFFSET_TABLE[sys_time][1])) / 121) * 100
         blue2 = (float(blue + (z - USER_OFFSET_TABLE[sys_time][2])) / 189) * 100
 
-        #print "I'm reading from the RGB %s %s %s..."%(red2, green2, blue2)
+        print "I'm reading from the RGB %s %s %s..."%(red2, green2, blue2)
         """
         Get Lux and Lumens
         """

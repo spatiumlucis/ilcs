@@ -117,7 +117,7 @@ num_of_less = 0
 temp = 0
 
 while True:
-    #print "reading from USR..."
+    print "reading from USR..."
     if temp == 5:
         temp = 0
         num_of_less = 0

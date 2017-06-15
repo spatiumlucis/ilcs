@@ -46,14 +46,6 @@ def handle_send_circadian_dB_connect(signum, stack):
     global SEND_CIRCADIAN_DB_CONNECTED
     SEND_CIRCADIAN_DB_CONNECTED = True
 
-def handle_sleep_mode(signum, stack):
-    global SLEEP_MODE
-    SLEEP_MODE = True
-
-def handle_wake_up(signum, stack):
-    global SLEEP_MODE
-    SLEEP_MODE = False
-
 """
 Non-Signal Handler Functions
 """
@@ -248,8 +240,8 @@ kill -12 is usr_sensor dB connection
 kill -15 is send_circadian dB connection
 """
 signal.signal(3, catch_other_signals)
-signal.signal(4, handle_sleep_mode)
-signal.signal(5, handle_wake_up)
+signal.signal(4, catch_other_signals)
+signal.signal(5, catch_other_signals)
 signal.signal(6, catch_other_signals)
 signal.signal(7, catch_other_signals)
 signal.signal(8, catch_other_signals)
@@ -271,8 +263,6 @@ BOOT UP
 """
 boot_up()
 print "Boot up successful"
-message = "Sensor Subsystem (" + local_ip + ") has booted successfully."
-circadian.create_log(cursor, db, message, "None")
 """
 Calc. user tables
 """
@@ -290,7 +280,7 @@ os.system("python send_circadian_values.py &")
 time.sleep(1)
 
 """
-Alert other Python scripts that the wait cmd has connected
+Alert other Python scripts that the PIR has connected
 """
 pid_list = circadian.get_pids()
 for pid in pid_list:
@@ -352,11 +342,7 @@ while True:
                 Get user ct values for delete cmd here.
                 """
                 sys_time = circadian.get_system_time()
-                if not SLEEP_MODE:
-                    delete_cmd = str(USER_CIRCADIAN_TABLE[sys_time][0])+"|"\
-                                 +str(USER_CIRCADIAN_TABLE[sys_time][1])+"|"+str(USER_CIRCADIAN_TABLE[sys_time][2])+"|"
-                else:
-                    delete_cmd = "0|0|0|"
+                delete_cmd = str(USER_CIRCADIAN_TABLE[sys_time][0])+"|"+str(USER_CIRCADIAN_TABLE[sys_time][1])+"|"+str(USER_CIRCADIAN_TABLE[sys_time][2])+"|"
 
                 delete_sock.send(delete_cmd)
                 delete_sock.close()

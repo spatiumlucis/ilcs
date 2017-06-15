@@ -117,7 +117,7 @@ num_of_less = 0
 temp = 0
 
 while True:
-    #print "reading from USR..."
+    print "reading from USR..."
     if temp == 5:
         temp = 0
         num_of_less = 0
@@ -168,8 +168,5 @@ while True:
         """
         sql = """UPDATE sensor_status SET distance = -1 WHERE ip = %s"""
         circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
-
-        message = "Sensor Subsystem (" + local_ip + ") has fallen below 8 Feet."
-        circadian.create_log(cursor, db, message, "None")
     temp += 1
     time.sleep(3)
