@@ -90,8 +90,6 @@ def handle_sleep_mode(signum, stack):
     circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
     sql = """UPDATE sensor_status SET blue = 0 WHERE ip = %s"""
     circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
-    sql = """UPDATE sensor_status SET lumens = 0 WHERE ip = %s"""
-    circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
 
 def handle_wake_up(signum, stack):
     global SLEEP_MODE
@@ -248,32 +246,6 @@ while True:
         blue2 = (float(blue + (z - USER_OFFSET_TABLE[sys_time][2])) / 189) * 100
 
         print "I'm reading from the RGB %s %s %s..."%(red2, green2, blue2)
-        """
-        Get Lux and Lumens
-        """
-        dist_in_meters = 8 * 0.3048
-        if red2 > USER_CIRCADIAN_TABLE[sys_time][0]:
-            red_temp = USER_CIRCADIAN_TABLE[sys_time][0]
-        else:
-            red_temp = red2
-        if green2 > USER_CIRCADIAN_TABLE[sys_time][1]:
-            green_temp = USER_CIRCADIAN_TABLE[sys_time][1]
-        else:
-            green_temp = green2
-        if blue2 > USER_CIRCADIAN_TABLE[sys_time][2]:
-            blue_temp = USER_CIRCADIAN_TABLE[sys_time][2]
-        else:
-            blue_temp = blue2
-        try:
-            lux_num = red_temp + green_temp + blue_temp
-            lux_den = USER_CIRCADIAN_TABLE[sys_time][0] + USER_CIRCADIAN_TABLE[sys_time][1] + \
-                      USER_CIRCADIAN_TABLE[sys_time][2]
-
-            lux = (lux_num / lux_den) * USER_LUX_TABLE[sys_time]
-            lumens = int(circadian.calc_Illuminance(lux, dist_in_meters, 120))
-        except:
-            lux = 0
-            lumens = 0
 
         if (red2 < (USER_CIRCADIAN_TABLE[sys_time][0] - USER_CIRCADIAN_TABLE[sys_time][0]*COLOR_THRESHOLD)) and not \
                 SERVICE[0]:
@@ -330,8 +302,6 @@ while True:
                 update the database
                 """
                 sql = """UPDATE sensor_status SET red_degraded = 1 WHERE ip = %s"""
-                circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
-                sql = """UPDATE sensor_status SET lumens_degraded = 1 WHERE ip = %s"""
                 circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
         elif (red2 > USER_CIRCADIAN_TABLE[sys_time][0]) and not TOO_BRIGHT_HANDLED[0]:
             """
@@ -411,8 +381,6 @@ while True:
                 """
                 sql = """UPDATE sensor_status SET green_degraded = 1 WHERE ip = %s"""
                 circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
-                sql = """UPDATE sensor_status SET lumens_degraded = 1 WHERE ip = %s"""
-                circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
         elif (green2 > USER_CIRCADIAN_TABLE[sys_time][1]) and not TOO_BRIGHT_HANDLED[1]:
             """
             sensor reading is too bright. Either from compensation or light pollution
@@ -487,8 +455,6 @@ while True:
                 update the database
                 """
                 sql = """UPDATE sensor_status SET blue_degraded = 1 WHERE ip = %s"""
-                circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
-                sql = """UPDATE sensor_status SET lumens_degraded = 1 WHERE ip = %s"""
                 circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
         elif (blue2 > USER_CIRCADIAN_TABLE[sys_time][2]) and not TOO_BRIGHT_HANDLED[2]:
             """
@@ -576,10 +542,5 @@ while True:
             file = open("sensor_data.txt", "w")
             file.write(sensor_cmd)
             file.close()
-        """
-        Store lumens into DB
-        """
-        sql = """UPDATE sensor_status SET lumens = %s WHERE ip = %s"""
-        circadian.execute_dB_query(cursor, db, sql, ([lumens, local_ip]))
 
     time.sleep(3)

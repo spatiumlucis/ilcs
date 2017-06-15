@@ -7,6 +7,7 @@ import MySQLdb
 import socket
 import datetime
 
+
 """
 Global variables
 """

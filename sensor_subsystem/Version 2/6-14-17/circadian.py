@@ -2,7 +2,6 @@ import subprocess
 import socket
 import MySQLdb
 import time
-import math
 
 def init_circadian_table():
     """
@@ -1026,19 +1025,6 @@ def calc_user_tables(WAKE_UP_TIME, MASTER_CIRCADIAN_TABLE, MASTER_OFFSET_TABLE, 
     Return tuple of user tables
     """
     return (USER_CIRCADIAN_TABLE, USER_OFFSET_TABLE, USER_LUX_TABLE)
-
-def calc_Illuminance(lux, distance, angle):
-    lum = lux * toArea(angle, distance)
-    return lum
-
-def toArea(angleInDeg, distance):
-    return toSr(toRad(angleInDeg)) * distance * distance
-
-def toSr(rad):
-    return 2.0 * math.pi * (1.0 - math.cos(rad / 2.0))
-
-def toRad(deg):
-    return deg * (2.0 * math.pi / 360.0)
 
 def get_pids():
     result = []

@@ -6,8 +6,7 @@ import circadian
 import MySQLdb
 import socket
 import datetime
-import math
-import RPi.GPIO as GPIO
+
 
 """
 Global variables
@@ -18,9 +17,6 @@ USR_DB_CONNECTED = False
 SEND_CIRCADIAN_DB_CONNECTED = False
 WAIT_FOR_CMD_DB_CONNECTED = False
 SLEEP_MODE = False
-DISTANCE_DEG = False
-local_ip = circadian.get_ip()
-GPIO.setwarnings(False)
 
 """
 Signal Handlers
@@ -82,12 +78,6 @@ cursor = db.cursor()
 print "USR DB connection established"
 
 """
-Set the 8 feet in DB
-"""
-sql = """UPDATE sensor_status SET distance = 8 WHERE ip = %s"""
-circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
-
-"""
 Alert other Python scripts that the PIR has connected
 """
 pid_list = circadian.get_pids()
@@ -100,73 +90,6 @@ Wait for other sensor scripts to connect to the DB
 while not WAIT_FOR_CMD_DB_CONNECTED or not RGB_DB_CONNECTED or not PIR_DB_CONNECTED or not SEND_CIRCADIAN_DB_CONNECTED:
     time.sleep(1)
 
-"""
-Initialize the USR sensor.
-Set Pin mode to physical pin mode (GPIO.BOARD)
-The TRIG pin is 36 and will be GPIO out
-The ECHO pin is 38 and will be GPIO in
-"""
-GPIO.setmode(GPIO.BOARD)
-# TRIG = 36
-# ECHO = 38
-TRIG = 7
-ECHO = 11
-GPIO.setup(TRIG, GPIO.OUT)
-GPIO.setup(ECHO, GPIO.IN)
-num_of_less = 0
-temp = 0
-
 while True:
     print "reading from USR..."
-    if temp == 5:
-        temp = 0
-        num_of_less = 0
-    """
-    Begin reading from the sensor
-    """
-    GPIO.output(TRIG, False)
-    time.sleep(2)
-
-    GPIO.output(TRIG, True)
-    time.sleep(0.00001)
-    GPIO.output(TRIG, False)
-
-    """
-    Check if ECHO is LOW
-    Save the last known time of LOW
-    """
-    while GPIO.input(ECHO) == 0:
-        pulse_start = time.time()
-    """
-    Check if ECHO is HIGH
-    Save last know time of HIGH
-    """
-    while GPIO.input(ECHO) == 1:
-        pulse_end = time.time()
-
-    """
-    Get pulse duration
-    """
-    pulse_duration = pulse_end - pulse_start
-
-    """
-    Get distance and convert to Feet from cm.
-    """
-    distance = pulse_duration * 17150
-    distance = round(distance, 2)
-    distInFt = distance / 30.48
-    distInFt = round(distInFt, 2)
-
-    if distInFt < 7:
-        num_of_less += 1
-    elif distInFt >= 8:
-        num_of_less = 0
-    if num_of_less >= 5 and not DISTANCE_DEG:
-        DISTANCE_DEG = True
-        """
-        Set the 8 feet degraded in DB
-        """
-        sql = """UPDATE sensor_status SET distance = -1 WHERE ip = %s"""
-        circadian.execute_dB_query(cursor, db, sql, ([local_ip]))
-    temp += 1
     time.sleep(3)
