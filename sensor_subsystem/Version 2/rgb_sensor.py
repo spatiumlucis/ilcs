@@ -118,11 +118,6 @@ def handle_send_circadian_dB_connect(signum, stack):
     SEND_CIRCADIAN_DB_CONNECTED = True
 
 """
-Non-Signal Handler Functions
-"""
-##
-
-"""
 Signal declarations (software interrupts)
 SIGQUIT: kill -3 is for when user changes parameter
 SIGILL: kill -4 is for when the system entered sleep mode

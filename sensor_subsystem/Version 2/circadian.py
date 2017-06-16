@@ -1129,7 +1129,8 @@ def execute_dB_query(cursor, db, sql, sql_args):
         result = cursor.fetchall()
         return result
 
-def get_circadian_cmd(USER_CIRCADIAN_TABLE, PREV_PRIMARY_COLORS, PREV_SECONDARY_COLORS, IS_PRIMARY_DEG, IS_SEC_ON, IS_SEC_DEG):
+def get_circadian_cmd(USER_CIRCADIAN_TABLE, PREV_PRIMARY_COLORS, PREV_SECONDARY_COLORS, IS_PRIMARY_DEG,
+                      IS_SEC_ON, IS_SEC_DEG):
     sys_time = get_system_time()
     new_prev_primary_colors = []
     new_prev_secondary_colors = []

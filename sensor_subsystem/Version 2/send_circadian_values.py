@@ -67,8 +67,6 @@ def handle_change_cmd(signum, stack):
             USER_LUX_TABLE = user_tuple[2]
             begin_timer = -60
 
-
-
 def handle_sleep_mode(signum, stack):
     global SLEEP_MODE
     global PREV_PRIMARY_COLORS
@@ -264,11 +262,6 @@ def handle_rgb_dB_connect(signum, stack):
 def handle_usr_dB_connect(signum, stack):
     global USR_DB_CONNECTED
     USR_DB_CONNECTED = True
-
-"""
-Non-Signal Handler Functions
-"""
-##
 
 """
 Signal declarations (software interrupts)

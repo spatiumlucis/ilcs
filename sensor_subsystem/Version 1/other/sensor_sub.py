@@ -2345,9 +2345,9 @@ def RGB_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
                 """
                 Store Lumens into the database
                 """
-                print " RED should be: %s and is reading %s" % (circadian_red, red2)
-                print " GREEN should be: %s and is reading %s" % (circadian_green, green2)
-                print " BLUE should be: %s and is reading %s" % (circadian_blue, blue2)
+                print " RED should be: %s and is reading %s" % (circadian_red, red_temp)
+                print " GREEN should be: %s and is reading %s" % (circadian_green, green_temp)
+                print " BLUE should be: %s and is reading %s" % (circadian_blue, blue_temp)
                 print "Lux: %s ; lumens: %s " % (lux, lumens)
                 color_threshold_mutex.acquire()
                 try:
@@ -3732,7 +3732,7 @@ def USR_sensor(pir_DB_Event, rgb_DB_Event, usr_DB_Event, sleep_mode_Event, chang
 
         if distInFt < 7:
             num_of_less += 1
-        elif distInFt >= 8:
+        elif distInFt >= 7:
             num_of_less = 0
         # elif distInFt < 8:
         #     distInFt = round(random.uniform(7.9, 8.01), 2)

@@ -81,11 +81,6 @@ def handle_motion_detection(PIR_PIN):
     begin_timer = time.time()
 
 """
-Non-Signal Handler Functions
-"""
-##
-
-"""
 Signal declarations (software interrupts)
 SIGQUIT: kill -3 is for when user changes parameter
 SIGILL: kill -4 is for when the system entered sleep mode

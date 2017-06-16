@@ -44,10 +44,6 @@ def handle_send_circadian_dB_connect(signum, stack):
     global SEND_CIRCADIAN_DB_CONNECTED
     SEND_CIRCADIAN_DB_CONNECTED = True
 
-"""
-Non-Signal Handler Functions
-"""
-##
 
 """
 Signal declarations (software interrupts)

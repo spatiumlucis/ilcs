@@ -219,19 +219,6 @@ def boot_up():
         COLOR_THRESHOLD = float(temp[0][2])/100
 
         print "Sensor-Light pair re-established with values: ", temp[0]
-        # sql = "SELECT * FROM sensor_status WHERE ip = " + local_ip
-        # temp = circadian.execute_dB_query(cursor, db, sql)
-        # SLEEP_MODE_STATUS = temp[0][9]
-
-    """
-    Calculate the user's circadian table for the sensor sub to use.
-    """
-    #calc_user_circadian_table(change_par_Event, finalize_change_Event)
-
-    #sql = """INSERT INTO system_logs(time, message, user) VALUES(%s, %s, %s)"""
-
-    current_time = datetime.datetime.now()
-    current_time = current_time.strftime("%Y-%m-%d %H:%M")
 
 
 """
