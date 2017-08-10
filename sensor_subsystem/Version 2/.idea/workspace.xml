@@ -11,12 +11,12 @@
   </component>
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FileEditorManager">
-    <leaf>
-      <file leaf-file-name="sensor_subsystem_README.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/sensor_subsystem_README.py">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="450">
+      <file leaf-file-name="sensor_lighting_README.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/../../sensor_lighting_README.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-8663">
-              <caret line="13" column="26" lean-forward="false" selection-start-line="13" selection-start-column="26" selection-end-line="13" selection-end-column="26" />
+            <state relative-caret-position="250">
+              <caret line="10" column="22" lean-forward="true" selection-start-line="10" selection-start-column="22" selection-end-line="10" selection-end-column="22" />
               <folding />
             </state>
           </provider>
@@ -57,7 +57,7 @@
   </component>
   <component name="ProjectFrameBounds">
     <option name="x" value="-11" />
-    <option name="y" value="49" />
+    <option name="y" value="-11" />
     <option name="width" value="1942" />
     <option name="height" value="1042" />
   </component>
@@ -76,7 +76,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -92,6 +91,7 @@
         </subPane>
       </pane>
       <pane id="Scratches" />
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -209,6 +209,12 @@
       <method />
     </configuration>
     <configuration default="true" type="js.build_tools.gulp" factoryName="Gulp.js">
+      <node-interpreter>project</node-interpreter>
+      <node-options />
+      <gulpfile />
+      <tasks />
+      <arguments />
+      <envs />
       <method />
     </configuration>
     <configuration default="true" type="js.build_tools.npm" factoryName="npm">
@@ -272,26 +278,26 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-11" y="49" width="1942" height="1042" extended-state="6" />
+    <frame x="-11" y="-11" width="1942" height="1042" extended-state="6" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
-      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
@@ -308,16 +314,18 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/sensor_subsystem_README.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/circadian.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="17500">
           <caret line="1131" column="0" lean-forward="true" selection-start-line="1131" selection-start-column="0" selection-end-line="1132" selection-end-column="45" />
-          <folding>
-            <element signature="e#0#17#0" expanded="true" />
-            <element signature="e#15561#24193#0" expanded="false" />
-            <element signature="e#24242#34047#0" expanded="false" />
-            <marker date="1497580307887" expanded="true" signature="43319:43382" ph="INSERT INTO system_logs... " />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -325,9 +333,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="537">
           <caret line="81" column="0" lean-forward="true" selection-start-line="81" selection-start-column="0" selection-end-line="81" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#11#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -335,46 +340,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2075">
           <caret line="118" column="0" lean-forward="true" selection-start-line="118" selection-start-column="0" selection-end-line="118" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#11#0" expanded="true" />
-            <element signature="e#899#2061#0" expanded="false" />
-            <marker date="1497582960514" expanded="true" signature="2261:2307" ph="UPDATE senso... " />
-            <marker date="1497582960514" expanded="true" signature="2386:2434" ph="UPDATE senso... " />
-            <marker date="1497582960514" expanded="true" signature="2513:2560" ph="UPDATE senso... " />
-            <marker date="1497582960514" expanded="true" signature="2639:2688" ph="UPDATE senso... " />
-            <marker date="1497582960514" expanded="true" signature="4608:4661" ph="SELECT * FRO... sensor_light_pairs" />
-            <marker date="1497582960514" expanded="true" signature="4822:4865" ph="SELECT * FRO... sensor_settings" />
-            <marker date="1497582960514" expanded="true" signature="9710:9760" ph="UPDATE senso... " />
-            <marker date="1497582960514" expanded="true" signature="11912:11967" ph="UPDATE senso... " />
-            <marker date="1497582960514" expanded="true" signature="12070:12128" ph="UPDATE senso... " />
-            <marker date="1497582960514" expanded="true" signature="12871:12926" ph="UPDATE senso... " />
-            <marker date="1497582960514" expanded="true" signature="13021:13062" ph="SELECT * FRO... sensor_status" />
-            <marker date="1497582960514" expanded="true" signature="13252:13310" ph="UPDATE senso... " />
-            <marker date="1497582960514" expanded="true" signature="13413:13463" ph="UPDATE senso... " />
-            <marker date="1497582960514" expanded="true" signature="14149:14199" ph="UPDATE senso... " />
-            <marker date="1497582960514" expanded="true" signature="16376:16433" ph="UPDATE senso... " />
-            <marker date="1497582960514" expanded="true" signature="16536:16594" ph="UPDATE senso... " />
-            <marker date="1497582960514" expanded="true" signature="17338:17395" ph="UPDATE senso... " />
-            <marker date="1497582960514" expanded="true" signature="17490:17531" ph="SELECT * FRO... sensor_status" />
-            <marker date="1497582960514" expanded="true" signature="17721:17779" ph="UPDATE senso... " />
-            <marker date="1497582960514" expanded="true" signature="17882:17932" ph="UPDATE senso... " />
-            <marker date="1497582960514" expanded="true" signature="18554:18604" ph="UPDATE senso... " />
-            <marker date="1497582960514" expanded="true" signature="20771:20827" ph="UPDATE senso... " />
-            <marker date="1497582960514" expanded="true" signature="20930:20988" ph="UPDATE senso... " />
-            <marker date="1497582960514" expanded="true" signature="21731:21787" ph="UPDATE senso... " />
-            <marker date="1497582960514" expanded="true" signature="21882:21923" ph="SELECT * FRO... sensor_status" />
-            <marker date="1497582960514" expanded="true" signature="22113:22171" ph="UPDATE senso... " />
-            <marker date="1497582960514" expanded="true" signature="22274:22324" ph="UPDATE senso... " />
-            <marker date="1497582960514" expanded="true" signature="23388:23435" ph="UPDATE senso... " />
-            <marker date="1497582960514" expanded="true" signature="23622:23669" ph="UPDATE senso... " />
-            <marker date="1497582960514" expanded="true" signature="24171:24221" ph="UPDATE senso... " />
-            <marker date="1497582960514" expanded="true" signature="24545:24594" ph="UPDATE senso... " />
-            <marker date="1497582960514" expanded="true" signature="24785:24834" ph="UPDATE senso... " />
-            <marker date="1497582960514" expanded="true" signature="25338:25388" ph="UPDATE senso... " />
-            <marker date="1497582960514" expanded="true" signature="25704:25752" ph="UPDATE senso... " />
-            <marker date="1497582960514" expanded="true" signature="25941:25989" ph="UPDATE senso... " />
-            <marker date="1497582960514" expanded="true" signature="26492:26542" ph="UPDATE senso... " />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -382,13 +347,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-1313">
           <caret line="261" column="0" lean-forward="false" selection-start-line="261" selection-start-column="0" selection-end-line="261" selection-end-column="41" />
-          <folding>
-            <element signature="e#0#11#0" expanded="true" />
-            <marker date="1497584421110" expanded="true" signature="3120:3180" ph="UPDATE senso... " />
-            <marker date="1497584421110" expanded="true" signature="3636:3696" ph="UPDATE senso... " />
-            <marker date="1497584421110" expanded="true" signature="9024:9077" ph="SELECT * FRO... sensor_light_pairs" />
-            <marker date="1497584421110" expanded="true" signature="9238:9281" ph="SELECT * FRO... sensor_settings" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -396,11 +354,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-2442">
           <caret line="46" column="0" lean-forward="true" selection-start-line="46" selection-start-column="0" selection-end-line="46" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#11#0" expanded="true" />
-            <marker date="1497585242595" expanded="true" signature="2173:2224" ph="UPDATE senso... " />
-            <marker date="1497585242595" expanded="true" signature="4031:4083" ph="UPDATE senso... " />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -408,39 +361,21 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-5713">
           <caret line="52" column="0" lean-forward="false" selection-start-line="52" selection-start-column="0" selection-end-line="52" selection-end-column="34" />
-          <folding>
-            <element signature="e#0#11#0" expanded="true" />
-            <marker date="1497586050522" expanded="true" signature="2507:2544" ph="SELECT * FRO... sensor_ip" />
-            <marker date="1497586050522" expanded="true" signature="2795:2845" ph="INSERT INTO sensor_ip... " />
-            <marker date="1497586050522" expanded="true" signature="3139:3180" ph="SELECT * FRO... sensor_status" />
-            <marker date="1497586050522" expanded="true" signature="3488:3539" ph="UPDATE senso... " />
-            <marker date="1497586050522" expanded="true" signature="3661:3711" ph="UPDATE senso... " />
-            <marker date="1497586050522" expanded="true" signature="3836:3893" ph="UPDATE senso... " />
-            <marker date="1497586050522" expanded="true" signature="4011:4066" ph="UPDATE senso... " />
-            <marker date="1497586050522" expanded="true" signature="4186:4243" ph="UPDATE senso... " />
-            <marker date="1497586050522" expanded="true" signature="4362:4418" ph="UPDATE senso... " />
-            <marker date="1497586050522" expanded="true" signature="4538:4596" ph="UPDATE senso... " />
-            <marker date="1497586050522" expanded="true" signature="5599:5817" ph="INSERT INTO sensor_status... " />
-            <marker date="1497586050522" expanded="true" signature="5980:6025" ph="SELECT * fro... lighting_ip" />
-            <marker date="1497586050522" expanded="true" signature="6208:6256" ph="UPDATE senso... " />
-            <marker date="1497586050522" expanded="true" signature="6344:6394" ph="UPDATE light... " />
-            <marker date="1497586050522" expanded="true" signature="6545:6614" ph="INSERT INTO sensor_light_pairs... " />
-            <marker date="1497586050522" expanded="true" signature="6766:6809" ph="SELECT * FRO... sensor_settings" />
-            <marker date="1497586050522" expanded="true" signature="7237:7290" ph="SELECT * FRO... sensor_light_pairs" />
-            <marker date="1497586050522" expanded="true" signature="7485:7528" ph="SELECT * FRO... sensor_settings" />
-            <marker date="1497586050522" expanded="true" signature="12276:12311" ph="DELETE FROM " />
-            <marker date="1497586050522" expanded="true" signature="12415:12456" ph="DELETE FROM " />
-            <marker date="1497586050522" expanded="true" signature="12560:12599" ph="DELETE FROM " />
-            <marker date="1497586050522" expanded="true" signature="12703:12754" ph="DELETE FROM " />
-            <marker date="1497586050522" expanded="true" signature="12858:12895" ph="DELETE FROM " />
-          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/sensor_subsystem_README.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-8663">
-          <caret line="13" column="26" lean-forward="false" selection-start-line="13" selection-start-column="26" selection-end-line="13" selection-end-column="26" />
+        <state relative-caret-position="225">
+          <caret line="9" column="0" lean-forward="true" selection-start-line="9" selection-start-column="0" selection-end-line="9" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../sensor_lighting_README.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="250">
+          <caret line="10" column="22" lean-forward="true" selection-start-line="10" selection-start-column="22" selection-end-line="10" selection-end-column="22" />
           <folding />
         </state>
       </provider>

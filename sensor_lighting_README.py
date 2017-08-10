@@ -383,4 +383,117 @@ Holds the sensor readings. Uses in compensation.
 
 (XII) config.txt:
 Holds the values that were sent by the user. Needed because DB was misbehaving.
+
+######################################################################################################
+Project: Lighting Subsystem
+
+Authors: Team Spatium Lucis
+
+Version: v1.0
+
+Target Device: Raspberry Pi 3
+
+Files: lighting_sub.py, pause.py
+
+Last edited: August 10, 2017
+
+Note: This code is not as polished as the sensor subsystem one. I didn't really get the time to separate
+the code into different scripts and stuff like the sensor code because of my summer class/work schedule.
+It's okay though because the bottle necks in performance came from the sensor codes various threading
+locks, delays, etc. and the lighting code doesn't really have these. Most of the thread are more or less
+independent, and the current code, although long and at points redundant, still works like a charm :)
+
+######################################################################################################
+
+(I) lighting_sub.py:
+This is the init and main script for the lighting subsystem. Usage:
+
+$ sudo python lighting_sub.py
+
+NOTE: You may get some error saying that some address is already in use. If this happens then do the
+following:
+    (1) Perform a CTRL + Z
+    (2) Type ps -al and hit enter
+    (3) Locate the 'pid' for 'sudo'
+    (4) Type sudo kill -9 <pid for 'sudo'> and hit enter
+    (5) Try to run the lighting_sub.py script again
+
+    (a) Module Imports:
+        (1) import time
+        (2) import socket
+        (3) import threading
+        (4) import RPi.GPIO as GPIO
+        (5) import MySQLdb
+        (6) import wiringpi
+        (7) import sys
+        (8) import os
+        (9) import signal
+
+    (b) Section of code after imports and before the functions:
+        There is a chunk of code after the imports and before the functions that basically setting up
+        the PWM pin information for the lights. The wiringpi python module was used because the RPi.GPIO
+        module would produce this ridiculous flickering that was comparable to a camera flash when the
+        lights were dim (like early morning/late evening values). Trust me, continue to use this module.
+        Because the Rpi3 only has really 1 hardware PWM pin, we used soft PWMs for the lights. These
+        actually look pretty good but will never beat a hardware PWM.
+        Example soft PWM python code:
+            wiringpi.wiringPiSetupGpio()
+            GPIO.setmode(GPIO.BCM) # from the Rpi.GPIO module. Needed to set pin mode and for relays.
+            wiringpi.pinMode(17, 17)
+            wiringpi.softPwmCreate(17, 0, 100)
+
+            This will create a softPWM channel on pin 17(BCM) with frequency 100Hz.
+
+        BCM Pins:
+            (1) Pin 17: Primary Red
+            (2) Pin 27: Primary Green
+            (3) Pin 22: Primary Blue
+            (4) Pin 6: Secondary Red #the code has a comment saying pin 29 for some reason. Ignore it.
+            (5) Pin 13: Secondary Green
+            (6) Pin 26: Secondary Blue
+
+        The rest of this section of code simply establishes some mutex locks for the threads and a couple
+        of global variables.
+
+    (c) Functions:
+        (1) def get_ip():
+        Gets the local IP address of the lighting subsystem and returns it as a string
+
+        (2) def boot_up():
+        Checks the database for an existing entry of the local IP address. If it exists then move on to
+        wait for the sensor subsystem to connect. If it does not exist then it will be added to the
+        database and wait to be paired.
+
+        (3) def begin_threading():
+        Creates the pir_thread (waits for sleep/wake values), delete_thread (when the system is deleted),
+        the comp_thread (waits for compensation values), and the light_cmd thread (waits for circadian
+        commands). Also creates some threading events to help with synchronization.
+
+        (4) def delete_cmd():
+        Receives a command from the sensor subsystem that the system is begin deleted. Turns the lights
+        off then ends the script.
+
+        (5) def comp_cmd():
+        Receives the compensation command from the sensor subsystem (see sensor subsystem for command format)
+        and brightens/dims the lights accordingly. There are 64 combinations depending on which lights are
+        brightening or dimming (6 lights -> 2^6 = 64). I basically made a truth table for the lights.
+
+        (6) Handler Functions:
+        These functions are used for the threads that are spawned in the comp_cmd() and light_cmd() threads.
+        They are used to change the primary or secondary lights to a certain brightness using the PWM.
+
+        (7) def PIR_cmd():
+        The function for the pir thread. Receives a command from the sensor subsystem to turn the lights
+        off for sleep mode, or wake them up.
+
+        (8) def light_cmd():
+        This function is basically identical to the comp_cmd() function except it uses a different
+        command string format. See sensor subsystem for the proper format.
+
+
+(II) pause.py:
+This script is used to suspend the lighting subsystem for whatever reason. Usage:
+
+$ sudo python pause.py
 """
+
